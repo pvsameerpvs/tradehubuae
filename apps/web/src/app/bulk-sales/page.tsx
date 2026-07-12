@@ -1,19 +1,12 @@
 import type { Metadata } from "next";
-import { Button } from "@tradehubuae/ui";
+import { Button, Input } from "@tradehubuae/ui";
+import { Check, Mail, Phone, Clock } from "@/components/icons";
+import { bulkBenefits, industries } from "@/data";
 
 export const metadata: Metadata = {
   title: "Bulk Sales & Corporate Orders",
   description: "Get special pricing for bulk IT equipment orders. Perfect for businesses, schools, and government organizations in UAE.",
 };
-
-const benefits = [
-  { title: "Competitive Pricing", desc: "Exclusive bulk discounts on all products" },
-  { title: "Dedicated Account Manager", desc: "Personal support throughout your journey" },
-  { title: "Customized Solutions", desc: "Tailored IT equipment for your needs" },
-  { title: "Flexible Payment Terms", desc: "Net 30/60 payment options for businesses" },
-  { title: "Priority Delivery", desc: "Fast-tracked shipping and installation" },
-  { title: "Warranty & Support", desc: "Extended warranties and on-site support" },
-];
 
 export default function BulkSalesPage() {
   return (
@@ -28,12 +21,10 @@ export default function BulkSalesPage() {
         </div>
 
         <div className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {benefits.map((benefit) => (
+          {bulkBenefits.map((benefit) => (
             <div key={benefit.title} className="rounded-xl border bg-card p-5">
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                </svg>
+                <Check className="h-5 w-5 text-primary" />
               </div>
               <h3 className="font-semibold">{benefit.title}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{benefit.desc}</p>
@@ -48,19 +39,19 @@ export default function BulkSalesPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="mb-1.5 block text-sm font-medium">Company Name</label>
-                  <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="Your company" />
+                  <Input placeholder="Your company" />
                 </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium">Contact Name</label>
-                  <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="Full name" />
+                  <Input placeholder="Full name" />
                 </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium">Email</label>
-                  <input type="email" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="email@company.com" />
+                  <Input type="email" placeholder="email@company.com" />
                 </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium">Phone</label>
-                  <input type="tel" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" placeholder="+971 5X XXX XXXX" />
+                  <Input type="tel" placeholder="+971 5X XXX XXXX" />
                 </div>
               </div>
               <div>
@@ -83,7 +74,7 @@ export default function BulkSalesPage() {
             <div className="rounded-xl border bg-card p-6">
               <h3 className="mb-3 font-semibold">Industries We Serve</h3>
               <div className="flex flex-wrap gap-2">
-                {["Education", "Healthcare", "Government", "Banking", "Retail", "Hospitality", "Real Estate", "Manufacturing"].map((ind) => (
+                {industries.map((ind) => (
                   <span key={ind} className="rounded-full bg-muted px-3 py-1 text-xs font-medium">
                     {ind}
                   </span>
@@ -93,9 +84,18 @@ export default function BulkSalesPage() {
             <div className="rounded-xl border bg-card p-6">
               <h3 className="mb-3 font-semibold">Contact Our Sales Team</h3>
               <div className="space-y-2 text-sm">
-                <p><a href="mailto:corporate@tradehubuae.com" className="text-primary hover:underline">corporate@tradehubuae.com</a></p>
-                <p className="text-muted-foreground">+971 4 123 4567</p>
-                <p className="text-muted-foreground">Sat - Thu, 9:00 AM - 8:00 PM</p>
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-primary" />
+                  <a href="mailto:corporate@tradehubuae.com" className="text-primary hover:underline">corporate@tradehubuae.com</a>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-primary" />
+                  <span className="text-muted-foreground">+971 4 123 4567</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-primary" />
+                  <span className="text-muted-foreground">Sat - Thu, 9:00 AM - 8:00 PM</span>
+                </div>
               </div>
             </div>
           </div>

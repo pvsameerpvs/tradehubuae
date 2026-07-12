@@ -1,0 +1,97 @@
+import { cn } from "@tradehubuae/ui";
+import type { LucideProps } from "lucide-react";
+import {
+  Search,
+  Heart,
+  ShoppingCart,
+  ShieldCheck,
+  Truck,
+  Briefcase,
+  Image as ImageIcon,
+  MapPin,
+  Mail,
+  Phone,
+  Star,
+  Check,
+  Menu,
+  X,
+  Package,
+  FileText,
+  Gift,
+  ArrowRight,
+  Clock,
+  ChevronRight,
+  Plus,
+  Minus,
+  Trash2,
+  Eye,
+  ChevronLeft,
+  User,
+  LogOut,
+  CreditCard,
+  Banknote,
+  Building2,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  Info,
+  Home,
+  Tag,
+  Newspaper,
+  MessageSquare,
+  Box,
+  type LucideIcon,
+} from "lucide-react";
+
+export type Icon = LucideIcon;
+export type { LucideProps };
+
+export {
+  Search,
+  Heart,
+  ShoppingCart,
+  ShieldCheck,
+  Truck,
+  Briefcase,
+  ImageIcon,
+  MapPin,
+  Mail,
+  Phone,
+  Star,
+  Check,
+  Menu,
+  X,
+  Package,
+  FileText,
+  Gift,
+  ArrowRight,
+  Clock,
+  ChevronRight,
+  Plus,
+  Minus,
+  Trash2,
+  Eye,
+  ChevronLeft,
+  User,
+  LogOut,
+  CreditCard,
+  Banknote,
+  Building2,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  Info,
+  Home,
+  Tag,
+  Newspaper,
+  MessageSquare,
+  Box,
+};
+
+export function IconWrapper({ icon: Icon, className }: { icon: LucideIcon; className?: string }) {
+  return (
+    <div className={cn("flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10", className)}>
+      <Icon className="h-6 w-6 text-primary" />
+    </div>
+  );
+}

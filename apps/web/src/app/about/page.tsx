@@ -1,17 +1,11 @@
 import type { Metadata } from "next";
 import { organizationSchema } from "@tradehubuae/seo";
+import { aboutStats } from "@/data";
 
 export const metadata: Metadata = {
   title: "About Us",
   description: "Learn about TradeHub UAE - Dubai's premier IT equipment company",
 };
-
-const stats = [
-  { value: "5000+", label: "Products Available" },
-  { value: "1000+", label: "Happy Customers" },
-  { value: "50+", label: "Trusted Brands" },
-  { value: "5+", label: "Years in UAE" },
-];
 
 export default function AboutPage() {
   return (
@@ -34,7 +28,7 @@ export default function AboutPage() {
         </div>
 
         <div className="my-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => (
+          {aboutStats.map((stat) => (
             <div key={stat.label} className="rounded-xl border bg-card p-6 text-center">
               <p className="text-3xl font-bold text-primary">{stat.value}</p>
               <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
