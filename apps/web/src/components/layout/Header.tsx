@@ -2,19 +2,31 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
-import { Search, Heart, ShoppingCart, Menu, X, User } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Search, Heart, ShoppingCart, Menu, X, User, Monitor, Package, Tag, Building2, Newspaper } from "lucide-react";
 
 const NAV_LINKS = [
-  { label: "Categories", href: "/categories" },
-  { label: "Brands", href: "/brands" },
-  { label: "Combo Offers", href: "/combo-offers" },
-  { label: "Bulk Sales", href: "/bulk-sales" },
-  { label: "Blog", href: "/blog" },
+  { label: "Categories", href: "/categories", icon: Monitor },
+  { label: "Brands", href: "/brands", icon: Tag },
+  { label: "Combo Offers", href: "/combo-offers", icon: Package },
+  { label: "Bulk Sales", href: "/bulk-sales", icon: Building2 },
+  { label: "Blog", href: "/blog", icon: Newspaper },
 ];
 
 export function Header() {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
 
   return (
     <header className="sticky top-0 z-50 h-20 border-b border-line bg-white">
@@ -38,33 +50,7 @@ export function Header() {
           />
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium text-ink transition-colors hover:text-ink/70"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
         <div className="flex items-center gap-1">
-          <Link
-            href="/search"
-            aria-label="Search"
-            className="flex h-10 w-10 items-center justify-center text-ink transition-colors hover:text-ink/70"
-          >
-            <Search className="h-5 w-5" strokeWidth={1.75} />
-          </Link>
-          <Link
-            href="/wishlist"
-            aria-label="Wishlist"
-            className="hidden h-10 w-10 items-center justify-center text-ink transition-colors hover:text-ink/70 md:flex"
-          >
-            <Heart className="h-5 w-5" strokeWidth={1.75} />
-          </Link>
           <Link
             href="/cart"
             aria-label="Shopping cart"
@@ -75,60 +61,65 @@ export function Header() {
               0
             </span>
           </Link>
-          <Link href="/account" aria-label="Account" className="hidden h-10 w-10 items-center justify-center text-ink transition-colors hover:text-ink/70 md:flex">
-            <User className="h-5 w-5" strokeWidth={1.75} />
-          </Link>
-          <button
-            aria-label={mobileOpen ? "Close menu" : "Open menu"}
-            className="flex h-10 w-10 items-center justify-center text-ink md:hidden"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? <X className="h-5 w-5" strokeWidth={1.75} /> : <Menu className="h-5 w-5" strokeWidth={1.75} />}
-          </button>
-        </div>
-      </div>
-
-      {mobileOpen && (
-        <div className="border-t border-line md:hidden">
-          <div className="mx-auto max-w-[1760px] space-y-1 px-6 py-4">
-            <Link
-              href="/search"
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink hover:bg-bg3"
-              onClick={() => setMobileOpen(false)}
+          <div ref={dropdownRef} className="relative">
+            <button
+              aria-label={open ? "Close menu" : "Open menu"}
+              className="flex h-10 w-10 items-center justify-center text-ink transition-colors hover:text-ink/70"
+              onClick={() => setOpen(!open)}
             >
-              <Search className="h-4 w-4" strokeWidth={1.75} />
-              Search
-            </Link>
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink hover:bg-bg3"
-                onClick={() => setMobileOpen(false)}
-              >
-                {link.label}
-              </Link>
-            ))}
-            <hr className="my-2 border-line" />
-            <Link
-              href="/account"
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink hover:bg-bg3"
-              onClick={() => setMobileOpen(false)}
-            >
-              <User className="h-4 w-4" strokeWidth={1.75} />
-              My Account
-            </Link>
-            <Link
-              href="/wishlist"
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink hover:bg-bg3"
-              onClick={() => setMobileOpen(false)}
-            >
-              <Heart className="h-4 w-4" strokeWidth={1.75} />
-              Wishlist
-            </Link>
+              {open ? <X className="h-5 w-5" strokeWidth={1.75} /> : <Menu className="h-5 w-5" strokeWidth={1.75} />}
+            </button>
+            {open && (
+              <>
+                <div className="fixed inset-0 z-40 md:hidden" onClick={() => setOpen(false)} />
+                <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-line bg-white px-1 py-2 shadow-panel">
+                  <div className="space-y-0.5">
+                    <Link
+                      href="/search"
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-bg3"
+                      onClick={() => setOpen(false)}
+                    >
+                      <Search className="h-4 w-4 text-ink-2" strokeWidth={1.5} />
+                      Search
+                    </Link>
+                    {NAV_LINKS.map((link) => {
+                      const Icon = link.icon;
+                      return (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-bg3"
+                          onClick={() => setOpen(false)}
+                        >
+                          <Icon className="h-4 w-4 text-ink-2" strokeWidth={1.5} />
+                          {link.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                  <hr className="mx-2 my-2 border-line" />
+                  <Link
+                    href="/account"
+                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-bg3"
+                    onClick={() => setOpen(false)}
+                  >
+                    <User className="h-4 w-4 text-ink-2" strokeWidth={1.5} />
+                    My Account
+                  </Link>
+                  <Link
+                    href="/wishlist"
+                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-bg3"
+                    onClick={() => setOpen(false)}
+                  >
+                    <Heart className="h-4 w-4 text-ink-2" strokeWidth={1.5} />
+                    Wishlist
+                  </Link>
+                </div>
+              </>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </header>
   );
 }
