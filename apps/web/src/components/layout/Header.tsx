@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@tradehubuae/ui";
 
@@ -18,8 +19,23 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="text-2xl font-bold text-primary">
-          TradeHub UAE
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/logo-mob.png"
+            alt="TradeHub UAE"
+            width={57}
+            height={40}
+            className="md:hidden"
+            priority
+          />
+          <Image
+            src="/logo-web.png"
+            alt="TradeHub UAE"
+            width={137}
+            height={40}
+            className="hidden md:block"
+            priority
+          />
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
@@ -35,7 +51,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link href="/search" className="hidden p-2 text-muted-foreground hover:text-primary md:block">
+          <Link href="/search" className="p-2 text-muted-foreground hover:text-primary">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
             </svg>
@@ -55,7 +71,7 @@ export function Header() {
             <Button variant="ghost" size="sm" className="hidden md:inline-flex">Account</Button>
           </Link>
           <button
-            className="p-2 text-muted-foreground md:hidden"
+            className="p-2.5 text-muted-foreground md:hidden"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">

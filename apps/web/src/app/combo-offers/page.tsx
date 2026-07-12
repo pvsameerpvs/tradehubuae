@@ -56,7 +56,7 @@ export default function ComboOffersPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="mb-10 text-center">
-        <h1 className="mb-4 text-4xl font-bold">Combo Offers</h1>
+        <h1 className="mb-4 text-3xl font-bold md:text-4xl">Combo Offers</h1>
         <p className="text-lg text-muted-foreground">
           Save more when you buy together. Curated bundles for every need.
         </p>

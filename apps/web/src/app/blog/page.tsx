@@ -62,7 +62,7 @@ export default function BlogPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="mb-10">
-        <h1 className="mb-4 text-4xl font-bold">TradeHub UAE Blog</h1>
+        <h1 className="mb-4 text-3xl font-bold md:text-4xl">TradeHub UAE Blog</h1>
         <p className="text-lg text-muted-foreground">Tech guides, buying tips, and industry insights</p>
       </div>
 

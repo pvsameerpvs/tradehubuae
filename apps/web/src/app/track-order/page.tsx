@@ -26,14 +26,14 @@ export default function TrackOrderPage() {
           </p>
         </div>
 
-        <div className="mb-8 flex gap-3">
+        <div className="mb-8 flex flex-col gap-3 sm:flex-row">
           <Input
             placeholder="Enter order ID (e.g., ORD-002)"
             value={orderId}
             onChange={(e) => setOrderId(e.target.value)}
             className="h-12 text-base"
           />
-          <Button size="lg" onClick={() => setTracked(true)} disabled={!orderId}>
+          <Button size="lg" onClick={() => setTracked(true)} disabled={!orderId} className="w-full sm:w-auto">
             Track
           </Button>
         </div>

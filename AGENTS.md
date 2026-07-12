@@ -1,9 +1,11 @@
 # Project Agent Rules
 
-## Git & Commits
-- NEVER run `git commit`, `git push`, or any git write operations automatically
-- Always ask for explicit approval before any git operation
-- Only stage/commit/push when the user explicitly instructs
+## Git & Commits (ABSOLUTE RULE)
+- ⛔ NEVER run `git add`, `git commit`, `git push`, or ANY git write operation automatically — ZERO EXCEPTIONS
+- ⛔ NEVER stage files without explicit user command
+- ⛔ NEVER commit, amend, or push without the user saying "commit" or "push" directly
+- ✅ Only stage/commit/push when the user explicitly and directly instructs you to do so
+- ✅ Always show `git status` and `git diff` for review before staging if user asks
 
 ## Component Architecture
 
@@ -49,8 +51,16 @@ apps/web/src/
 └── types/                # TypeScript types
 ```
 
+### Mobile-First Responsive Design (CRITICAL)
+- **Most users are on mobile** — every page MUST be fully responsive and tested at 320px width
+- Use mobile-first Tailwind breakpoints: `sm:`, `md:`, `lg:`, `xl:`
+- Every layout must stack vertically on mobile (no horizontal scroll)
+- Touch targets must be minimum 44x44px
+- Forms, buttons, and interactive elements must be thumb-friendly
+- No horizontal overflow at any viewport width
+- Test every page at 320px, 768px, 1024px before shipping
+
 ### Code Style
-- No comments in code
 - Named exports only (no default exports except pages)
 - TypeScript strict mode
 - Tailwind classes for styling (no CSS modules)

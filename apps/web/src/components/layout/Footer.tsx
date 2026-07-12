@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const footerSections = [
   {
@@ -36,7 +37,15 @@ export function Footer() {
       <div className="container mx-auto px-4 py-12">
         <div className="grid gap-8 md:grid-cols-4">
           <div>
-            <h3 className="mb-4 text-lg font-bold text-primary">TradeHub UAE</h3>
+            <Link href="/" className="mb-4 inline-block">
+              <Image
+                src="/logo-web.png"
+                alt="TradeHub UAE"
+                width={137}
+                height={40}
+                priority
+              />
+            </Link>
             <p className="text-sm text-muted-foreground">
               Your trusted source for premium IT equipment in the United Arab Emirates. New & refurbished laptops, desktops, gaming PCs, and networking solutions.
             </p>

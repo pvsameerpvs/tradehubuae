@@ -20,7 +20,7 @@ export default function BulkSalesPage() {
     <div className="container mx-auto px-4 py-12">
       <div className="mx-auto max-w-5xl">
         <div className="mb-12 text-center">
-          <h1 className="mb-4 text-4xl font-bold">Bulk Sales & Corporate Orders</h1>
+          <h1 className="mb-4 text-3xl font-bold md:text-4xl">Bulk Sales & Corporate Orders</h1>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
             Need IT equipment for your organization? Get competitive pricing, dedicated support,
             and customized solutions for your business needs.

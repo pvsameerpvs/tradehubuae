@@ -49,9 +49,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A1.5 1.5 0 0 0 21.75 19.5V4.5A1.5 1.5 0 0 0 20.25 3H3.75A1.5 1.5 0 0 0 2.25 4.5v15A1.5 1.5 0 0 0 3.75 21Z" />
             </svg>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 overflow-x-auto pb-1">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-20 w-20 cursor-pointer rounded-lg border-2 bg-muted transition hover:border-primary" />
+              <div key={i} className="h-20 w-20 shrink-0 cursor-pointer rounded-lg border-2 bg-muted transition hover:border-primary" />
             ))}
           </div>
         </div>
@@ -86,8 +86,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
 
           <div className="flex gap-3">
-            <Button size="xl" className="flex-1">Add to Cart</Button>
-            <Button size="xl" variant="outline">
+            <Button size="xl" className="flex-1 whitespace-nowrap">Add to Cart</Button>
+            <Button size="xl" variant="outline" className="shrink-0">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
               </svg>

@@ -11,7 +11,7 @@ export default function ContactPage() {
     <div className="container mx-auto px-4 py-12">
       <div className="mx-auto max-w-4xl">
         <div className="mb-10 text-center">
-          <h1 className="mb-4 text-4xl font-bold">Contact Us</h1>
+          <h1 className="mb-4 text-3xl font-bold md:text-4xl">Contact Us</h1>
           <p className="text-lg text-muted-foreground">
             Have a question or need assistance? We&apos;re here to help.
           </p>

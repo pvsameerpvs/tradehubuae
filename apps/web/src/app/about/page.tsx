@@ -18,7 +18,7 @@ export default function AboutPage() {
     <div className="container mx-auto px-4 py-12">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema()) }} />
       <div className="mx-auto max-w-4xl">
-        <h1 className="mb-6 text-4xl font-bold">About TradeHub UAE</h1>
+        <h1 className="mb-6 text-3xl font-bold md:text-4xl">About TradeHub UAE</h1>
 
         <div className="prose prose-gray max-w-none">
           <p className="text-lg text-muted-foreground">

@@ -15,19 +15,19 @@ export default function HomePage() {
     <>
       <section className="bg-gradient-to-b from-blue-50 to-white py-20 dark:from-blue-950/20">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="mb-4 text-5xl font-bold tracking-tight">
+          <h1 className="mb-4 text-3xl font-bold tracking-tight md:text-5xl">
             Premium IT Equipment in the UAE
           </h1>
           <p className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground">
             Discover the best deals on new and refurbished laptops, desktops, gaming PCs,
             components, and networking equipment. Trusted by businesses across the UAE.
           </p>
-          <div className="flex justify-center gap-4">
-            <Link href="/search">
-              <Button size="xl">Shop Now</Button>
+          <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
+            <Link href="/search" className="w-full sm:w-auto">
+              <Button size="xl" className="w-full sm:w-auto">Shop Now</Button>
             </Link>
-            <Link href="/bulk-sales">
-              <Button size="xl" variant="outline">Bulk Inquiry</Button>
+            <Link href="/bulk-sales" className="w-full sm:w-auto">
+              <Button size="xl" variant="outline" className="w-full sm:w-auto">Bulk Inquiry</Button>
             </Link>
           </div>
         </div>
@@ -40,7 +40,7 @@ export default function HomePage() {
               <h2 className="text-3xl font-bold">Shop by Category</h2>
               <p className="mt-2 text-muted-foreground">Find exactly what you need</p>
             </div>
-            <Link href="/categories" className="hidden text-sm font-medium text-primary hover:underline sm:block">
+            <Link href="/categories" className="text-sm font-medium text-primary hover:underline">
               View All Categories
             </Link>
           </div>
@@ -116,12 +116,12 @@ export default function HomePage() {
           <p className="mx-auto mb-8 max-w-xl text-muted-foreground">
             Browse thousands of products at competitive prices. Free delivery across Dubai and the UAE.
           </p>
-          <div className="flex justify-center gap-4">
-            <Link href="/categories">
-              <Button size="xl">Browse Products</Button>
+          <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
+            <Link href="/categories" className="w-full sm:w-auto">
+              <Button size="xl" className="w-full sm:w-auto">Browse Products</Button>
             </Link>
-            <Link href="/contact">
-              <Button size="xl" variant="outline">Contact Us</Button>
+            <Link href="/contact" className="w-full sm:w-auto">
+              <Button size="xl" variant="outline" className="w-full sm:w-auto">Contact Us</Button>
             </Link>
           </div>
         </div>

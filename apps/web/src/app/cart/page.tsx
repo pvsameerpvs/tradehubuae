@@ -67,11 +67,11 @@ export default function CartPage() {
                     </Link>
                     <p className="text-sm text-muted-foreground">AED {item.price.toFixed(2)}</p>
                   </div>
-                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3">
                     <div className="flex items-center rounded-md border">
-                      <button className="flex h-8 w-8 items-center justify-center text-muted-foreground hover:bg-accent">-</button>
-                      <span className="flex h-8 w-10 items-center justify-center text-sm font-medium">{item.quantity}</span>
-                      <button className="flex h-8 w-8 items-center justify-center text-muted-foreground hover:bg-accent">+</button>
+                      <button className="flex h-11 w-11 items-center justify-center text-muted-foreground hover:bg-accent">-</button>
+                      <span className="flex h-11 w-12 items-center justify-center text-sm font-medium">{item.quantity}</span>
+                      <button className="flex h-11 w-11 items-center justify-center text-muted-foreground hover:bg-accent">+</button>
                     </div>
                     <button className="text-sm text-muted-foreground hover:text-destructive">Remove</button>
                   </div>
