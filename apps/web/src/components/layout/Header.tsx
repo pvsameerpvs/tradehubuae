@@ -29,45 +29,45 @@ export function Header() {
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-50 h-20 border-b border-line bg-white">
+    <header className="sticky top-0 z-50 h-24 bg-white">
       <div className="mx-auto flex h-full max-w-[1760px] items-center justify-between px-6 md:px-10 lg:px-20">
         <Link href="/" className="flex items-center">
           <Image
             src="/logo-mob.png"
             alt="TradeHub UAE"
-            width={57}
-            height={40}
+            width={72}
+            height={50}
             className="md:hidden"
             priority
           />
           <Image
             src="/logo-web.png"
             alt="TradeHub UAE"
-            width={137}
-            height={40}
+            width={172}
+            height={50}
             className="hidden md:block"
             priority
           />
         </Link>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <Link
             href="/cart"
             aria-label="Shopping cart"
-            className="relative flex h-10 w-10 items-center justify-center text-ink transition-colors hover:text-ink/70"
+            className="relative flex h-12 w-12 items-center justify-center text-ink transition-colors hover:text-ink/70"
           >
-            <ShoppingCart className="h-5 w-5" strokeWidth={1.75} />
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-ink px-1 text-[10px] font-bold text-white">
+            <ShoppingCart className="h-6 w-6" strokeWidth={1.75} />
+            <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-ink px-1 text-[11px] font-bold text-white">
               0
             </span>
           </Link>
           <div ref={dropdownRef} className="relative">
             <button
               aria-label={open ? "Close menu" : "Open menu"}
-              className="flex h-10 w-10 items-center justify-center text-ink transition-colors hover:text-ink/70"
+              className="flex h-12 w-12 items-center justify-center text-ink transition-colors hover:text-ink/70"
               onClick={() => setOpen(!open)}
             >
-              {open ? <X className="h-5 w-5" strokeWidth={1.75} /> : <Menu className="h-5 w-5" strokeWidth={1.75} />}
+              {open ? <X className="h-6 w-6" strokeWidth={1.75} /> : <Menu className="h-6 w-6" strokeWidth={1.75} />}
             </button>
             {open && (
               <>
