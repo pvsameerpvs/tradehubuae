@@ -1,7 +1,6 @@
 "use client";
 
 import { Search, Monitor, Wallet, ShieldCheck } from "lucide-react";
-import { useEffect, useState } from "react";
 
 const SEGMENTS = [
   { key: "what", label: "What", placeholder: "MacBook Air, gaming PC...", icon: Monitor },
@@ -10,20 +9,8 @@ const SEGMENTS = [
 ];
 
 export function SearchBar() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 250);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
-    <div
-      className={`mx-auto w-full max-w-[1060px] transition-all duration-300 motion-reduce:transition-none ${
-        scrolled ? "pointer-events-none opacity-0" : "opacity-100"
-      }`}
-    >
+    <div className="mx-auto w-full max-w-[1060px]">
       <div className="hidden items-center rounded-full border border-line/80 bg-white shadow-search transition-shadow duration-200 focus-within:shadow-search-active sm:flex">
         {SEGMENTS.map((seg, i) => (
           <button
@@ -61,7 +48,7 @@ export function SearchBar() {
           <input
             type="search"
             placeholder="Search laptops, PCs, accessories..."
-            className="h-14 w-full rounded-full border border-line/80 bg-white pl-12 pr-4 text-base text-ink placeholder:text-ink-3 outline-none shadow-search transition-shadow duration-300 focus:shadow-search-active"
+            className="h-14 w-full rounded-full border border-line/80 bg-white pl-12 pr-4 text-base text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-ink/10"
           />
         </div>
       </div>

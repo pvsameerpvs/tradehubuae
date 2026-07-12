@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { Search, Heart, ShoppingCart, Menu, X, User, Monitor, Package, Tag, Building2, Newspaper, ChevronDown } from "lucide-react";
+import { Search, Heart, ShoppingCart, Menu, X, User, Monitor, Package, Tag, Building2, Newspaper } from "lucide-react";
 
 const NAV_LINKS = [
   { label: "Categories", href: "/categories", icon: Monitor },
@@ -15,14 +15,7 @@ const NAV_LINKS = [
 
 export function Header() {
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 250);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -36,47 +29,26 @@ export function Header() {
   }, [open]);
 
   return (
-    <header
-      className="sticky top-0 z-50 bg-white transition-all duration-500 ease-out"
-      style={{ height: scrolled ? 84 : 96 }}
-    >
+    <header className="sticky top-0 z-50 h-24 bg-white">
       <div className="mx-auto flex h-full max-w-[1760px] items-center justify-between px-6 md:px-10 lg:px-20">
         <Link href="/" className="flex items-center">
           <Image
             src="/logo-mob.png"
             alt="TradeHub UAE"
-            width={scrolled ? 72 : 72}
-            height={scrolled ? 50 : 50}
-            className="md:hidden transition-all duration-500 ease-out"
+            width={72}
+            height={50}
+            className="md:hidden"
             priority
           />
           <Image
             src="/logo-web.png"
             alt="TradeHub UAE"
-            width={scrolled ? 172 : 172}
-            height={scrolled ? 50 : 50}
-            className="hidden md:block transition-all duration-500 ease-out"
+            width={172}
+            height={50}
+            className="hidden md:block"
             priority
           />
         </Link>
-
-        {scrolled && (
-          <div className="hidden animate-fade-in items-center rounded-full border border-line/80 bg-bg2 px-6 py-2.5 transition-all duration-500 ease-out md:flex">
-            {["What", "Budget", "Condition"].map((label, i) => (
-              <span key={label} className={`flex items-center gap-1.5 px-5 py-1.5 text-[15px] text-ink/80 ${i > 0 ? "border-l border-line/60" : ""}`}>
-                {label}
-                <ChevronDown className="h-4 w-4 text-ink-3" strokeWidth={2} />
-              </span>
-            ))}
-            <button
-              type="button"
-              aria-label="Search"
-              className="ml-3 flex h-10 w-10 items-center justify-center rounded-full bg-brand text-white transition-all duration-200 hover:bg-brand-dark active:scale-90"
-            >
-              <Search className="h-[18px] w-[18px]" strokeWidth={2.5} />
-            </button>
-          </div>
-        )}
 
         <div className="flex items-center gap-2">
           <Link

@@ -1,16 +1,11 @@
 # Project Agent Rules
 
-## 🔴 Git & Commits — ABSOLUTE RULE — DO NOT VIOLATE
-I WILL NEVER:
-- ❌ Run `git add`, `git commit`, `git push`, or ANY git write operation automatically
-- ❌ Stage, commit, amend, push, or create PRs without explicit user command
-- ❌ Touch git in any way unless the user says "commit" or "push" directly
-
-I WILL:
-- ✅ Only stage/commit/push when the user explicitly and directly instructs me
+## Git & Commits (ABSOLUTE RULE)
+- ⛔ NEVER run `git add`, `git commit`, `git push`, or ANY git write operation automatically — ZERO EXCEPTIONS
+- ⛔ NEVER stage files without explicit user command
+- ⛔ NEVER commit, amend, or push without the user saying "commit" or "push" directly
+- ✅ Only stage/commit/push when the user explicitly and directly instructs you to do so
 - ✅ Always show `git status` and `git diff` for review before staging if user asks
-
-**The user should NEVER have to repeat this rule. It is burned into my instructions.**
 
 ## Component Architecture
 
