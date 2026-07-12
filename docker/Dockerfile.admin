@@ -1,0 +1,21 @@
+FROM node:20-alpine AS base
+RUN corepack enable && corepack prepare pnpm@9 --activate
+
+FROM base AS builder
+WORKDIR /app
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml turbo.json ./
+COPY apps/admin ./apps/admin
+COPY packages ./packages
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @tradehubuae/database db:generate
+RUN pnpm --filter @tradehubuae/admin build
+
+FROM base AS runner
+WORKDIR /app
+COPY --from=builder /app/apps/admin/.next ./.next
+COPY --from=builder /app/apps/admin/public ./public
+COPY --from=builder /app/apps/admin/package.json ./
+COPY --from=builder /app/apps/admin/next.config.ts ./
+COPY --from=builder /app/node_modules ./node_modules
+EXPOSE 3001
+CMD ["node_modules/.bin/next", "start"]
