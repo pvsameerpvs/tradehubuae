@@ -1,0 +1,177 @@
+export const ROLES = {
+  SUPER_ADMIN: "SUPER_ADMIN",
+  ADMIN: "ADMIN",
+  INVENTORY_MANAGER: "INVENTORY_MANAGER",
+  SALES_MANAGER: "SALES_MANAGER",
+  CONTENT_MANAGER: "CONTENT_MANAGER",
+  SEO_MANAGER: "SEO_MANAGER",
+  CUSTOMER: "CUSTOMER",
+} as const;
+
+export type Role = (typeof ROLES)[keyof typeof ROLES];
+
+export const PERMISSIONS = {
+  PRODUCTS_CREATE: "products:create",
+  PRODUCTS_READ: "products:read",
+  PRODUCTS_UPDATE: "products:update",
+  PRODUCTS_DELETE: "products:delete",
+  PRODUCTS_AI_GENERATE: "products:ai:generate",
+  INVENTORY_READ: "inventory:read",
+  INVENTORY_UPDATE: "inventory:update",
+  INVENTORY_TRANSFER: "inventory:transfer",
+  ORDERS_READ: "orders:read",
+  ORDERS_UPDATE: "orders:update",
+  ORDERS_CANCEL: "orders:cancel",
+  CUSTOMERS_READ: "customers:read",
+  CUSTOMERS_UPDATE: "customers:update",
+  REVIEWS_MODERATE: "reviews:moderate",
+  BULK_SALES_MANAGE: "bulk-sales:manage",
+  COMBO_OFFERS_MANAGE: "combo-offers:manage",
+  BLOG_CREATE: "blog:create",
+  BLOG_READ: "blog:read",
+  BLOG_UPDATE: "blog:update",
+  BLOG_DELETE: "blog:delete",
+  SEO_MANAGE: "seo:manage",
+  ANALYTICS_READ: "analytics:read",
+  USERS_MANAGE: "users:manage",
+  ROLES_MANAGE: "roles:manage",
+  SETTINGS_MANAGE: "settings:manage",
+  MEDIA_UPLOAD: "media:upload",
+  MEDIA_DELETE: "media:delete",
+  REPORTS_VIEW: "reports:view",
+  NOTIFICATIONS_SEND: "notifications:send",
+} as const;
+
+export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
+
+export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
+  SUPER_ADMIN: Object.values(PERMISSIONS),
+  ADMIN: [
+    PERMISSIONS.PRODUCTS_CREATE,
+    PERMISSIONS.PRODUCTS_READ,
+    PERMISSIONS.PRODUCTS_UPDATE,
+    PERMISSIONS.PRODUCTS_AI_GENERATE,
+    PERMISSIONS.INVENTORY_READ,
+    PERMISSIONS.INVENTORY_UPDATE,
+    PERMISSIONS.INVENTORY_TRANSFER,
+    PERMISSIONS.ORDERS_READ,
+    PERMISSIONS.ORDERS_UPDATE,
+    PERMISSIONS.ORDERS_CANCEL,
+    PERMISSIONS.CUSTOMERS_READ,
+    PERMISSIONS.CUSTOMERS_UPDATE,
+    PERMISSIONS.REVIEWS_MODERATE,
+    PERMISSIONS.BULK_SALES_MANAGE,
+    PERMISSIONS.COMBO_OFFERS_MANAGE,
+    PERMISSIONS.BLOG_CREATE,
+    PERMISSIONS.BLOG_UPDATE,
+    PERMISSIONS.BLOG_DELETE,
+    PERMISSIONS.SEO_MANAGE,
+    PERMISSIONS.ANALYTICS_READ,
+    PERMISSIONS.MEDIA_UPLOAD,
+    PERMISSIONS.MEDIA_DELETE,
+    PERMISSIONS.REPORTS_VIEW,
+    PERMISSIONS.NOTIFICATIONS_SEND,
+  ],
+  INVENTORY_MANAGER: [
+    PERMISSIONS.PRODUCTS_READ,
+    PERMISSIONS.INVENTORY_READ,
+    PERMISSIONS.INVENTORY_UPDATE,
+    PERMISSIONS.INVENTORY_TRANSFER,
+    PERMISSIONS.REPORTS_VIEW,
+  ],
+  SALES_MANAGER: [
+    PERMISSIONS.PRODUCTS_READ,
+    PERMISSIONS.ORDERS_READ,
+    PERMISSIONS.ORDERS_UPDATE,
+    PERMISSIONS.ORDERS_CANCEL,
+    PERMISSIONS.CUSTOMERS_READ,
+    PERMISSIONS.CUSTOMERS_UPDATE,
+    PERMISSIONS.BULK_SALES_MANAGE,
+    PERMISSIONS.COMBO_OFFERS_MANAGE,
+    PERMISSIONS.ANALYTICS_READ,
+    PERMISSIONS.REPORTS_VIEW,
+  ],
+  CONTENT_MANAGER: [
+    PERMISSIONS.PRODUCTS_READ,
+    PERMISSIONS.PRODUCTS_CREATE,
+    PERMISSIONS.PRODUCTS_UPDATE,
+    PERMISSIONS.PRODUCTS_AI_GENERATE,
+    PERMISSIONS.BLOG_CREATE,
+    PERMISSIONS.BLOG_UPDATE,
+    PERMISSIONS.BLOG_DELETE,
+    PERMISSIONS.MEDIA_UPLOAD,
+    PERMISSIONS.MEDIA_DELETE,
+  ],
+  SEO_MANAGER: [
+    PERMISSIONS.PRODUCTS_READ,
+    PERMISSIONS.SEO_MANAGE,
+    PERMISSIONS.ANALYTICS_READ,
+    PERMISSIONS.BLOG_READ,
+    PERMISSIONS.BLOG_UPDATE,
+  ],
+  CUSTOMER: [
+    PERMISSIONS.PRODUCTS_READ,
+    PERMISSIONS.ORDERS_READ,
+  ],
+};
+
+export const RETAIL_CATEGORIES = [
+  "Laptops",
+  "Desktop PCs",
+  "Gaming PCs",
+  "Monitors",
+  "Components",
+  "Accessories",
+  "Networking",
+  "Storage",
+  "Printers",
+  "Software",
+] as const;
+
+export const PRODUCT_CONDITIONS = ["New", "Like New", "Excellent", "Good", "Fair"] as const;
+
+export const CURRENCY = {
+  AED: { code: "AED", symbol: "د.إ", name: "UAE Dirham" },
+  USD: { code: "USD", symbol: "$", name: "US Dollar" },
+} as const;
+
+export const ORDER_STATUS = {
+  PENDING: "PENDING",
+  CONFIRMED: "CONFIRMED",
+  PROCESSING: "PROCESSING",
+  SHIPPED: "SHIPPED",
+  DELIVERED: "DELIVERED",
+  CANCELLED: "CANCELLED",
+  RETURNED: "RETURNED",
+  REFUNDED: "REFUNDED",
+} as const;
+
+export type OrderStatus = (typeof ORDER_STATUS)[keyof typeof ORDER_STATUS];
+
+export const PAYMENT_STATUS = {
+  PENDING: "PENDING",
+  PAID: "PAID",
+  FAILED: "FAILED",
+  REFUNDED: "REFUNDED",
+  PARTIALLY_REFUNDED: "PARTIALLY_REFUNDED",
+} as const;
+
+export const SHIPPING_METHODS = ["standard", "express", "next_day"] as const;
+
+export const UAE_EMIRATES = [
+  "Abu Dhabi",
+  "Dubai",
+  "Sharjah",
+  "Ajman",
+  "Ras Al Khaimah",
+  "Fujairah",
+  "Umm Al Quwain",
+] as const;
+
+export const VAT_RATE = 0.05;
+
+export const PAGINATION = {
+  DEFAULT_PAGE: 1,
+  DEFAULT_LIMIT: 20,
+  MAX_LIMIT: 100,
+} as const;
