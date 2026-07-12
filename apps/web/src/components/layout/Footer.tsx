@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 
-const footerSections = [
+const footerColumns = [
   {
     title: "Shop",
     links: [
@@ -33,9 +33,9 @@ const footerSections = [
 
 export function Footer() {
   return (
-    <footer className="border-t bg-background">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid gap-8 md:grid-cols-4">
+    <footer className="border-t border-line bg-bg2">
+      <div className="mx-auto max-w-[1760px] px-6 py-12 md:px-10 lg:px-20">
+        <div className="grid gap-10 md:grid-cols-4">
           <div>
             <Link href="/" className="mb-4 inline-block">
               <Image
@@ -46,17 +46,20 @@ export function Footer() {
                 priority
               />
             </Link>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-ink-2 leading-relaxed">
               Your trusted source for premium IT equipment in the United Arab Emirates. New & refurbished laptops, desktops, gaming PCs, and networking solutions.
             </p>
           </div>
-          {footerSections.map((section) => (
-            <div key={section.title}>
-              <h4 className="mb-3 font-semibold">{section.title}</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                {section.links.map((link) => (
+          {footerColumns.map((column) => (
+            <div key={column.title}>
+              <h4 className="mb-4 text-sm font-semibold text-ink">{column.title}</h4>
+              <ul className="space-y-3">
+                {column.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="transition-colors hover:text-primary">
+                    <Link
+                      href={link.href}
+                      className="text-sm text-ink-2 transition-colors hover:text-ink"
+                    >
                       {link.label}
                     </Link>
                   </li>
@@ -65,13 +68,16 @@ export function Footer() {
             </div>
           ))}
         </div>
-        <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t pt-8 md:flex-row">
-          <p className="text-sm text-muted-foreground">
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-line pt-8 md:flex-row">
+          <p className="text-sm text-ink-2">
             &copy; {new Date().getFullYear()} TradeHub UAE. All rights reserved.
           </p>
-          <div className="flex gap-6 text-sm text-muted-foreground">
+          <div className="flex items-center gap-4 text-sm text-ink-2">
             <span>Dubai, UAE</span>
-            <a href="mailto:sales@tradehubuae.com" className="hover:text-primary">sales@tradehubuae.com</a>
+            <span className="text-line">|</span>
+            <a href="mailto:sales@tradehubuae.com" className="hover:text-ink transition-colors">
+              sales@tradehubuae.com
+            </a>
           </div>
         </div>
       </div>

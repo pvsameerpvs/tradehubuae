@@ -1,4 +1,3 @@
-export { HeroSection } from "./HeroSection";
-export { CategoryGrid } from "./CategoryGrid";
-export { WhyUsSection } from "./WhyUsSection";
-export { CTASection } from "./CTASection";
+export { SearchBar } from "./SearchBar";
+export { ProductRow, ProductRowScroll } from "./ProductRow";
+export { DiscoveryGrid } from "./DiscoveryGrid";

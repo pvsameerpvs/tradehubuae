@@ -13,17 +13,6 @@ export const tailwindConfig: Partial<Config> = {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
-          50: "#edf4fb",
-          100: "#d0e2f5",
-          200: "#a1c4ea",
-          300: "#6da3dd",
-          400: "#3d82cf",
-          500: "#2b6ab3",
-          600: "#1f5493",
-          700: "#134a7c",
-          800: "#103a61",
-          900: "#0e2d4c",
-          950: "#091e34",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -49,6 +38,22 @@ export const tailwindConfig: Partial<Config> = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        brand: {
+          DEFAULT: "hsl(var(--brand))",
+          dark: "hsl(var(--brand-dark))",
+        },
+        ink: {
+          DEFAULT: "hsl(var(--ink))",
+          2: "hsl(var(--ink-2))",
+          3: "hsl(var(--ink-3))",
+        },
+        line: {
+          DEFAULT: "hsl(var(--line))",
+          soft: "hsl(var(--line-soft))",
+        },
+        bg2: "hsl(var(--bg-2))",
+        bg3: "hsl(var(--bg-3))",
+        sale: "hsl(var(--sale))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -59,19 +64,6 @@ export const tailwindConfig: Partial<Config> = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        tradehub: {
-          50: "#edf4fb",
-          100: "#d0e2f5",
-          200: "#a1c4ea",
-          300: "#6da3dd",
-          400: "#3d82cf",
-          500: "#2b6ab3",
-          600: "#1f5493",
-          700: "#134a7c",
-          800: "#103a61",
-          900: "#0e2d4c",
-          950: "#091e34",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -81,6 +73,13 @@ export const tailwindConfig: Partial<Config> = {
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         heading: ["var(--font-heading)", "system-ui", "sans-serif"],
+      },
+      boxShadow: {
+        card: "0 6px 16px rgba(0,0,0,0.12)",
+        search: "0 1px 2px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05)",
+        "search-active": "0 6px 20px rgba(0,0,0,0.20)",
+        panel: "0 6px 16px rgba(0,0,0,0.12)",
+        chip: "0 1px 2px rgba(0,0,0,0.18)",
       },
       keyframes: {
         "accordion-down": {

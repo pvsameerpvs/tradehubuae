@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Button } from "@tradehubuae/ui";
-import { Heart } from "@/components/icons";
+import { Heart } from "lucide-react";
 import { wishlistItems } from "@/data";
 import { WishlistCard } from "@/components/shared/ProductCard";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -13,10 +12,12 @@ export const metadata: Metadata = {
 
 export default function WishlistPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="mx-auto max-w-[1760px] px-6 py-8 md:px-10 lg:px-20">
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">My Wishlist</h1>
-        <span className="text-sm text-muted-foreground">{wishlistItems.length} items</span>
+        <h1 className="text-[26px] font-semibold leading-[30px] text-ink" style={{ letterSpacing: "-0.01em" }}>
+          My Wishlist
+        </h1>
+        <span className="text-sm text-ink-2">{wishlistItems.length} items</span>
       </div>
 
       {wishlistItems.length === 0 ? (
@@ -27,9 +28,9 @@ export default function WishlistPage() {
           action={{ label: "Browse Products", href: "/categories" }}
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {wishlistItems.map((item) => (
-            <WishlistCard key={item.slug} item={item} />
+            <WishlistCard key={item.slug} product={item} />
           ))}
         </div>
       )}

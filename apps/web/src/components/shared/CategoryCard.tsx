@@ -5,14 +5,18 @@ export function CategoryCard({ category, href }: { category: Category; href?: st
   return (
     <Link
       href={href ?? `/categories/${category.slug}`}
-      className="group rounded-xl border bg-card p-6 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
+      className="group block"
     >
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-xl text-primary">
-        {category.name.charAt(0)}
+      <div className="flex items-center gap-4 rounded-xl border border-line bg-white p-5 transition-shadow hover:shadow-card">
+        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-bg2 text-base font-semibold text-ink">
+          {category.name.charAt(0)}
+        </div>
+        <div className="min-w-0">
+          <h3 className="text-[15px] font-semibold leading-[19px] text-ink">{category.name}</h3>
+          <p className="mt-0.5 text-sm leading-[18px] text-ink-2">{category.desc}</p>
+          <p className="mt-0.5 text-xs text-ink-3">{category.count}</p>
+        </div>
       </div>
-      <h3 className="text-lg font-semibold group-hover:text-primary">{category.name}</h3>
-      <p className="mt-1 text-sm text-muted-foreground">{category.desc}</p>
-      <p className="mt-2 text-xs text-muted-foreground">{category.count}</p>
     </Link>
   );
 }

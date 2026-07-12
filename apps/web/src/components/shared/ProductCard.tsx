@@ -1,61 +1,99 @@
+"use client";
+
 import Link from "next/link";
-import { Badge, Button } from "@tradehubuae/ui";
-import { ImageIcon } from "@/components/icons";
+import { Heart, Star } from "lucide-react";
 import type { Product } from "@/data";
 
-const badgeVariant: Record<string, "default" | "warning" | "success" | "destructive"> = {
-  "Best Seller": "success",
-  New: "default",
-  Popular: "warning",
-  "Out of Stock": "destructive",
-};
+const BADGE_VALUES = ["Certified", "Great deal", "Like new", "Low stock", "Staff pick"] as const;
 
 export function ProductCard({ product }: { product: Product }) {
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="group rounded-xl border bg-card shadow-sm transition hover:shadow-md"
+      className="group block"
     >
-      <div className="relative flex aspect-square items-center justify-center bg-muted">
-        {product.badge && (
-          <Badge variant={badgeVariant[product.badge] ?? "default"} className="absolute left-3 top-3">
+      <div className="relative aspect-square overflow-hidden rounded-xl bg-bg2">
+        <div className="flex h-full w-full items-center justify-center text-ink-3">
+          <svg className="h-16 w-16" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.41a2.25 2.25 0 0 1 3.182 0l2.909 2.91m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+          </svg>
+        </div>
+        <div className="absolute inset-0 transition-transform duration-200 group-hover:scale-105" />
+        {product.badge && BADGE_VALUES.includes(product.badge as typeof BADGE_VALUES[number]) && (
+          <span className="absolute left-3 top-3 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-ink shadow-chip">
             {product.badge}
-          </Badge>
+          </span>
         )}
-        <ImageIcon className="h-16 w-16 text-muted-foreground" strokeWidth={1} />
+        <button
+          type="button"
+          aria-label="Save to wishlist"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center"
+        >
+          <Heart className="h-5 w-5 stroke-white drop-shadow-lg" strokeWidth={2} fill="rgba(0,0,0,0.35)" />
+        </button>
       </div>
-      <div className="p-4">
-        <p className="text-xs text-muted-foreground">{product.category}</p>
-        <h3 className="mt-1 font-medium group-hover:text-primary">{product.name}</h3>
-        <p className="mt-2 font-semibold text-primary">AED {product.price.toLocaleString()}</p>
+      <div className="mt-2 space-y-0.5">
+        <p className="truncate text-[15px] font-semibold leading-[19px] text-ink">
+          {product.name}
+        </p>
+        {product.specs && (
+          <p className="truncate text-sm leading-[18px] text-ink-2">
+            {product.specs}
+          </p>
+        )}
+        <div className="flex items-baseline gap-1.5 text-sm">
+          <span className="font-semibold text-ink">{product.price.toLocaleString()} AED</span>
+          {product.originalPrice && product.originalPrice > product.price && (
+            <span className="text-ink-2 line-through">{product.originalPrice.toLocaleString()} AED</span>
+          )}
+          {product.rating && (
+            <>
+              <span className="text-ink-3">·</span>
+              <Star className="h-3.5 w-3.5 fill-ink text-ink" strokeWidth={0} />
+              <span className="font-medium text-ink">{product.rating}</span>
+              {product.reviewCount && (
+                <span className="text-ink-2">({product.reviewCount})</span>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </Link>
   );
 }
 
-export function WishlistCard({ item, onToggle }: { item: Product; onToggle?: () => void }) {
+export function WishlistCard({ product, onToggle }: { product: Product; onToggle?: () => void }) {
   return (
-    <div className="group relative rounded-xl border bg-card shadow-sm transition hover:shadow-md">
-      <div className="flex aspect-square items-center justify-center bg-muted">
-        <ImageIcon className="h-16 w-16 text-muted-foreground" strokeWidth={1} />
+    <div className="group">
+      <div className="relative aspect-square overflow-hidden rounded-xl bg-bg2">
+        <div className="flex h-full w-full items-center justify-center text-ink-3">
+          <svg className="h-16 w-16" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.41a2.25 2.25 0 0 1 3.182 0l2.909 2.91m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+          </svg>
+        </div>
+        <button
+          type="button"
+          aria-label="Remove from wishlist"
+          onClick={(e) => {
+            e.preventDefault();
+            onToggle?.();
+          }}
+          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-sm"
+        >
+          <Heart className="h-4 w-4 fill-brand text-brand" strokeWidth={2} />
+        </button>
       </div>
-      <button
-        onClick={onToggle}
-        className="absolute right-3 top-3 rounded-full bg-background p-1.5 shadow-sm"
-      >
-        <svg className="h-4 w-4 fill-destructive text-destructive" viewBox="0 0 24 24">
-          <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-        </svg>
-      </button>
-      <div className="p-4">
-        {!item.inStock && <Badge variant="destructive" className="mb-2">Out of Stock</Badge>}
-        <Link href={`/products/${item.slug}`}>
-          <h3 className="font-medium transition-colors hover:text-primary">{item.name}</h3>
+      <div className="mt-2 space-y-0.5">
+        <Link href={`/products/${product.slug}`}>
+          <p className="truncate text-[15px] font-semibold leading-[19px] text-ink transition-colors hover:text-ink/70">
+            {product.name}
+          </p>
         </Link>
-        <p className="mt-1 font-semibold text-primary">AED {item.price.toLocaleString()}</p>
-        <Button className="mt-3 w-full" size="sm" disabled={!item.inStock}>
-          {item.inStock ? "Add to Cart" : "Notify Me"}
-        </Button>
+        <p className="text-sm font-semibold text-ink">{product.price.toLocaleString()} AED</p>
       </div>
     </div>
   );
