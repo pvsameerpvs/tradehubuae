@@ -61,7 +61,7 @@ export function Header() {
   }, []);
 
   return (
-    <header className={`sticky top-0 z-50 h-24 bg-white transition-shadow duration-200 ${scrolled ? "shadow-sm" : ""}`}>
+    <header className={`sticky top-0 z-50 h-24 transition-all duration-200 ${scrolled ? "bg-white shadow-sm" : "bg-white/70 backdrop-blur-md"}`}>
       <div className="mx-auto flex h-full max-w-[1760px] items-center justify-between px-6 md:px-10 lg:px-20">
         <Link href="/" className="flex-shrink-0">
           <Image

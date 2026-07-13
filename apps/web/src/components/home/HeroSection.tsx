@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { SearchBar } from "./SearchBar";
 
 export function HeroSection() {
@@ -34,26 +35,37 @@ export function HeroSection() {
 
   return (
     <div
-      className="relative"
+      className="relative overflow-hidden"
       style={{ paddingTop: `${topPad}px`, paddingBottom: `${botPad}px` }}
     >
+      <div className="absolute inset-0 -top-24 h-[calc(100%+96px)]">
+        <Image
+          src="/images/hero-bg.jpg"
+          alt=""
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-black/20" />
+      </div>
+
       <div
-        className="mb-8 text-center transition-all duration-200"
+        className="relative z-10 mb-8 text-center transition-all duration-200"
         style={{ opacity: headingOpacity, transform: `translateY(${headingTranslateY}px)` }}
       >
         <h1
-          className="mb-3 text-[26px] font-semibold leading-[30px] text-ink"
+          className="mb-3 text-[26px] font-semibold leading-[30px] text-white"
           style={{ letterSpacing: "-0.01em" }}
         >
           Find your next laptop in the UAE
         </h1>
-        <p className="text-sm leading-[18px] text-ink-2">
+        <p className="text-sm leading-[18px] text-white/80">
           New, certified refurbished, and like-new — from top brands
         </p>
       </div>
 
       <div
-        className="transition-all duration-200"
+        className="relative z-10 transition-all duration-200"
         style={{
           transform: `scale(${searchScale})`,
           opacity: searchOpacity,

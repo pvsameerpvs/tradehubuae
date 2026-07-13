@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="600" viewBox="0 0 1440 600">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#134A7C"/>
+      <stop offset="50%" stop-color="#1A5F9E"/>
+      <stop offset="100%" stop-color="#0F3D66"/>
+    </linearGradient>
+    <linearGradient id="overlay" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="rgba(19,74,124,0.15)"/>
+      <stop offset="100%" stop-color="rgba(19,74,124,0.6)"/>
+    </linearGradient>
+  </defs>
+  <rect width="1440" height="600" fill="url(#g)"/>
+  <circle cx="1200" cy="100" r="250" fill="rgba(255,255,255,0.04)"/>
+  <circle cx="200" cy="450" r="300" fill="rgba(255,255,255,0.03)"/>
+  <circle cx="800" cy="300" r="180" fill="rgba(255,255,255,0.04)"/>
+  <rect width="1440" height="600" fill="url(#overlay)"/>
+</svg>
