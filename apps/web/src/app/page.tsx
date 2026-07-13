@@ -1,7 +1,6 @@
-import { HeroSection, ProductRow, ProductRowScroll, DiscoveryGrid } from "@/components/home";
+import { HeroSection, ProductRow, ProductRowScroll, DiscoveryGrid, LatestArrivalsRow } from "@/components/home";
 import { searchProducts, categories } from "@/data";
 import { CategoryCard } from "@/components/shared/CategoryCard";
-import { LatestArrivalsCard } from "@/components/shared/LatestArrivalsCard";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
@@ -18,27 +17,7 @@ export default function HomePage() {
       <div className="space-y-16 pb-16">
         <CategoryRow />
 
-        <section>
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-[22px] font-semibold leading-[26px] text-ink" style={{ letterSpacing: "-0.01em" }}>
-              Latest arrivals
-            </h2>
-            <Link
-              href="/search?sort=newest"
-              className="flex items-center gap-1 text-sm font-semibold text-ink underline underline-offset-2"
-            >
-              Show more
-              <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
-            </Link>
-          </div>
-          <div className="-mx-6 overflow-x-auto px-6 md:-mx-10 md:px-10 lg:-mx-20 lg:px-20">
-            <div className="flex gap-4" style={{ minWidth: "max-content" }}>
-              {laptops.slice(0, 7).map((product) => (
-                <LatestArrivalsCard key={product.slug} product={product} />
-              ))}
-            </div>
-          </div>
-        </section>
+        <LatestArrivalsRow products={laptops.slice(0, 7)} />
 
         <ProductRow
           title="All laptops"
@@ -74,7 +53,7 @@ export default function HomePage() {
 
 function CategoryRow() {
   return (
-    <section>
+    <section className="group/section">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-[22px] font-semibold leading-[26px] text-ink" style={{ letterSpacing: "-0.01em" }}>
           Browse by category
@@ -87,10 +66,15 @@ function CategoryRow() {
           <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
         </Link>
       </div>
-      <div className="flex gap-4 overflow-x-auto md:flex-nowrap [&::-webkit-scrollbar]:hidden">
-        {categories.map((cat) => (
-          <CategoryCard key={cat.slug} category={cat} />
-        ))}
+      <div className="relative">
+        <div
+          className="flex gap-4 overflow-x-auto md:flex-nowrap [&::-webkit-scrollbar]:hidden"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {categories.map((cat) => (
+            <CategoryCard key={cat.slug} category={cat} />
+          ))}
+        </div>
       </div>
     </section>
   );

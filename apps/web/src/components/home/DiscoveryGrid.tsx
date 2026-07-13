@@ -43,15 +43,15 @@ export function DiscoveryGrid() {
       <h2 className="mb-6 text-[22px] font-semibold leading-[26px] text-ink" style={{ letterSpacing: "-0.01em" }}>
         Discover
       </h2>
-      <div className="flex gap-2 border-b border-line">
+      <div className="flex gap-1 rounded-xl bg-bg2 p-1">
         {TABS.map((tab) => (
           <button
             key={tab.key}
             type="button"
             onClick={() => setActiveTab(tab.key)}
-            className={`px-4 pb-3 text-sm font-medium transition-colors ${
+            className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-all ${
               activeTab === tab.key
-                ? "border-b-2 border-ink text-ink"
+                ? "bg-white text-ink shadow-sm"
                 : "text-ink-2 hover:text-ink"
             }`}
           >
@@ -59,12 +59,12 @@ export function DiscoveryGrid() {
           </button>
         ))}
       </div>
-      <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
         {(LINKS[activeTab] ?? []).map((link) => (
           <Link
             key={link.href}
             href={link.href}
-            className="text-sm text-ink-2 transition-colors hover:text-ink"
+            className="rounded-lg border border-line px-4 py-3 text-sm text-ink-2 transition-all hover:border-ink hover:text-ink hover:shadow-sm"
           >
             {link.label}
           </Link>
