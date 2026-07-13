@@ -5,6 +5,7 @@ import { organizationSchema } from "@tradehubuae/seo";
 import { cn } from "@tradehubuae/ui";
 import { CartProvider } from "@/lib/cart-context";
 import { CartFlyProvider } from "@/lib/cart-fly-context";
+import { LiveChatWidget } from "@/components/chat/LiveChatWidget";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
@@ -55,6 +56,7 @@ export default function RootLayout({
             <Header />
             <main className="flex-1">{children}</main>
             <Footer />
+            <LiveChatWidget />
           </CartFlyProvider>
         </CartProvider>
       </body>

@@ -6,6 +6,7 @@ export interface Product {
   slug: string;
   badge?: string;
   inStock?: boolean;
+  stock?: number;
   rating?: number;
   reviewCount?: number;
   specs?: string;
@@ -13,21 +14,21 @@ export interface Product {
 }
 
 export const searchProducts: Product[] = [
-  { name: "MacBook Air M2, 2022", price: 2450, originalPrice: 2899, rating: 4.9, reviewCount: 21, specs: "16GB RAM · 512GB SSD · 94% battery", category: "Laptops", slug: "macbook-air-m2-2022", badge: "Certified" },
-  { name: "Dell XPS 15", price: 5499, rating: 4.7, reviewCount: 15, specs: "32GB RAM · 1TB SSD · RTX 4060", category: "Laptops", slug: "dell-xps-15", badge: "Best Seller" },
-  { name: "MacBook Pro 16 M3", price: 7899, rating: 4.8, reviewCount: 8, specs: "36GB RAM · 1TB SSD · M3 Pro", category: "Laptops", slug: "macbook-pro-16", badge: "New" },
-  { name: "HP Pavilion Desktop", price: 3299, originalPrice: 3799, rating: 4.5, reviewCount: 32, specs: "16GB RAM · 512GB SSD · Intel UHD", category: "Desktop PCs", slug: "hp-pavilion-desktop", badge: "Great deal" },
-  { name: "Custom Gaming RTX 4070", price: 6999, rating: 4.9, reviewCount: 11, specs: "32GB RAM · 1TB SSD · RTX 4070", category: "Gaming PCs", slug: "custom-gaming-pc-rtx-4070", badge: "Staff pick" },
-  { name: "Logitech MX Master 3S", price: 349, rating: 4.6, reviewCount: 45, specs: "Wireless · 8000 DPI · USB-C", category: "Accessories", slug: "logitech-mx-master-3s" },
-  { name: "Samsung 27\" Monitor", price: 1299, originalPrice: 1599, rating: 4.4, reviewCount: 27, specs: "4K UHD · IPS · USB-C Hub", category: "Accessories", slug: "samsung-27-monitor", badge: "Great deal" },
-  { name: "Intel Core i7-14700K", price: 1899, rating: 4.7, reviewCount: 19, specs: "20 cores · 5.6GHz · LGA 1700", category: "Components", slug: "intel-core-i7-14700k" },
-  { name: "TP-Link WiFi 6 Router", price: 449, rating: 4.3, reviewCount: 52, specs: "AX5400 · 4× Gigabit · Mesh", category: "Networking", slug: "tp-link-wifi-6-router" },
-  { name: "ThinkPad X1 Carbon Gen 11", price: 3899, originalPrice: 4599, rating: 4.8, reviewCount: 14, specs: "16GB RAM · 512GB SSD · 14\" OLED", category: "Laptops", slug: "thinkpad-x1-carbon-gen-11", badge: "Like new" },
-  { name: "ASUS ROG Zephyrus G14", price: 5499, rating: 4.6, reviewCount: 23, specs: "32GB RAM · 1TB SSD · RTX 4060", category: "Gaming PCs", slug: "asus-rog-zephyrus-g14", badge: "Staff pick" },
-  { name: "LG UltraFine 32\" 4K", price: 2199, originalPrice: 2799, rating: 4.5, reviewCount: 18, specs: "32\" 4K · USB-C 96W · P3", category: "Accessories", slug: "lg-ultrafine-32-4k" },
-  { name: "Samsung 49\" UltraWide", price: 3299, rating: 4.7, reviewCount: 9, specs: "49\" DQHD · 240Hz · OLED", category: "Accessories", slug: "samsung-49-ultrawide" },
-  { name: "Logitech G Pro X", price: 549, rating: 4.4, reviewCount: 31, specs: "Wireless · Lightspeed · 25K DPI", category: "Accessories", slug: "logitech-g-pro-x" },
-  { name: "Dell Precision 7780", price: 8299, rating: 4.2, reviewCount: 6, specs: "64GB RAM · 2TB SSD · RTX 5000", category: "Laptops", slug: "dell-precision-7780", badge: "Low stock" },
+  { name: "MacBook Air M2, 2022", price: 2450, originalPrice: 2899, rating: 4.9, reviewCount: 21, specs: "16GB RAM · 512GB SSD · 94% battery", category: "Laptops", slug: "macbook-air-m2-2022", badge: "Certified", stock: 3 },
+  { name: "Dell XPS 15", price: 5499, rating: 4.7, reviewCount: 15, specs: "32GB RAM · 1TB SSD · RTX 4060", category: "Laptops", slug: "dell-xps-15", badge: "Best Seller", stock: 12 },
+  { name: "MacBook Pro 16 M3", price: 7899, rating: 4.8, reviewCount: 8, specs: "36GB RAM · 1TB SSD · M3 Pro", category: "Laptops", slug: "macbook-pro-16", badge: "New", stock: 5 },
+  { name: "HP Pavilion Desktop", price: 3299, originalPrice: 3799, rating: 4.5, reviewCount: 32, specs: "16GB RAM · 512GB SSD · Intel UHD", category: "Desktop PCs", slug: "hp-pavilion-desktop", badge: "Great deal", stock: 8 },
+  { name: "Custom Gaming RTX 4070", price: 6999, rating: 4.9, reviewCount: 11, specs: "32GB RAM · 1TB SSD · RTX 4070", category: "Gaming PCs", slug: "custom-gaming-pc-rtx-4070", badge: "Staff pick", stock: 2 },
+  { name: "Logitech MX Master 3S", price: 349, rating: 4.6, reviewCount: 45, specs: "Wireless · 8000 DPI · USB-C", category: "Accessories", slug: "logitech-mx-master-3s", stock: 45 },
+  { name: "Samsung 27\" Monitor", price: 1299, originalPrice: 1599, rating: 4.4, reviewCount: 27, specs: "4K UHD · IPS · USB-C Hub", category: "Accessories", slug: "samsung-27-monitor", badge: "Great deal", stock: 18 },
+  { name: "Intel Core i7-14700K", price: 1899, rating: 4.7, reviewCount: 19, specs: "20 cores · 5.6GHz · LGA 1700", category: "Components", slug: "intel-core-i7-14700k", stock: 24 },
+  { name: "TP-Link WiFi 6 Router", price: 449, rating: 4.3, reviewCount: 52, specs: "AX5400 · 4× Gigabit · Mesh", category: "Networking", slug: "tp-link-wifi-6-router", stock: 36 },
+  { name: "ThinkPad X1 Carbon Gen 11", price: 3899, originalPrice: 4599, rating: 4.8, reviewCount: 14, specs: "16GB RAM · 512GB SSD · 14\" OLED", category: "Laptops", slug: "thinkpad-x1-carbon-gen-11", badge: "Like new", stock: 2 },
+  { name: "ASUS ROG Zephyrus G14", price: 5499, rating: 4.6, reviewCount: 23, specs: "32GB RAM · 1TB SSD · RTX 4060", category: "Gaming PCs", slug: "asus-rog-zephyrus-g14", badge: "Staff pick", stock: 6 },
+  { name: "LG UltraFine 32\" 4K", price: 2199, originalPrice: 2799, rating: 4.5, reviewCount: 18, specs: "32\" 4K · USB-C 96W · P3", category: "Accessories", slug: "lg-ultrafine-32-4k", stock: 9 },
+  { name: "Samsung 49\" UltraWide", price: 3299, rating: 4.7, reviewCount: 9, specs: "49\" DQHD · 240Hz · OLED", category: "Accessories", slug: "samsung-49-ultrawide", stock: 4 },
+  { name: "Logitech G Pro X", price: 549, rating: 4.4, reviewCount: 31, specs: "Wireless · Lightspeed · 25K DPI", category: "Accessories", slug: "logitech-g-pro-x", stock: 52 },
+  { name: "Dell Precision 7780", price: 8299, rating: 4.2, reviewCount: 6, specs: "64GB RAM · 2TB SSD · RTX 5000", category: "Laptops", slug: "dell-precision-7780", badge: "Low stock", stock: 1 },
 ];
 
 export const searchCategories = ["All", "Laptops", "Desktop PCs", "Gaming PCs", "Components", "Accessories", "Networking"];
@@ -73,9 +74,9 @@ export const compareSpecs: CompareSpec[] = [
 ];
 
 export const wishlistItems: Product[] = [
-  { name: "Dell XPS 15", price: 5499, slug: "dell-xps-15", category: "Laptops", inStock: true, rating: 4.7, specs: "32GB RAM · 1TB SSD · RTX 4060" },
-  { name: "MacBook Pro 16", price: 7899, slug: "macbook-pro-16", category: "Laptops", inStock: true, rating: 4.8, specs: "36GB RAM · 1TB SSD · M3 Pro" },
-  { name: "Custom Gaming PC RTX 4070", price: 6999, slug: "custom-gaming-pc-rtx-4070", category: "Gaming PCs", inStock: false, rating: 4.9, specs: "32GB RAM · 1TB SSD · RTX 4070" },
-  { name: 'Samsung 49" UltraWide', price: 3299, slug: "samsung-49-ultrawide", category: "Accessories", inStock: true, rating: 4.7, specs: "49\" DQHD · 240Hz · OLED" },
-  { name: "Logitech G Pro X", price: 549, slug: "logitech-g-pro-x", category: "Accessories", inStock: true, rating: 4.4, specs: "Wireless · Lightspeed · 25K DPI" },
+  { name: "Dell XPS 15", price: 5499, slug: "dell-xps-15", category: "Laptops", inStock: true, stock: 12, rating: 4.7, specs: "32GB RAM · 1TB SSD · RTX 4060" },
+  { name: "MacBook Pro 16", price: 7899, slug: "macbook-pro-16", category: "Laptops", inStock: true, stock: 5, rating: 4.8, specs: "36GB RAM · 1TB SSD · M3 Pro" },
+  { name: "Custom Gaming PC RTX 4070", price: 6999, slug: "custom-gaming-pc-rtx-4070", category: "Gaming PCs", inStock: false, stock: 0, rating: 4.9, specs: "32GB RAM · 1TB SSD · RTX 4070" },
+  { name: 'Samsung 49" UltraWide', price: 3299, slug: "samsung-49-ultrawide", category: "Accessories", inStock: true, stock: 4, rating: 4.7, specs: "49\" DQHD · 240Hz · OLED" },
+  { name: "Logitech G Pro X", price: 549, slug: "logitech-g-pro-x", category: "Accessories", inStock: true, stock: 52, rating: 4.4, specs: "Wireless · Lightspeed · 25K DPI" },
 ];

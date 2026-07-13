@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 const sidebarItems = [
   { label: "Dashboard", href: "/dashboard", icon: "LayoutDashboard" },
+  { label: "Live Chat", href: "/dashboard/chats", icon: "MessageCircle" },
   { label: "Products", href: "/products", icon: "Package" },
   { label: "Inventory", href: "/inventory", icon: "Warehouse" },
   { label: "Orders", href: "/orders", icon: "ShoppingCart" },

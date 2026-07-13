@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Heart, Share2, Truck, RotateCcw, CheckCircle2, ShieldCheck, MapPin } from "lucide-react";
-import { searchProducts, defaultSpecs } from "@/data";
+import Link from "next/link";
+import { Heart, Share2, Truck, RotateCcw, CheckCircle2, ShieldCheck, MapPin, Gift, TrendingDown, ChevronRight } from "lucide-react";
+import { ChatProductButton } from "@/components/chat/ChatProductButton";
+import { searchProducts, defaultSpecs, comboOffers, defaultBulkTiers } from "@/data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { ProductRow } from "@/components/home";
 import { BuyButtons } from "@/components/products/BuyButtons";
@@ -31,6 +33,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
     (p) => p.category === product.category && p.slug !== slug,
   ).slice(0, 6);
 
+  const matchingCombos = comboOffers.filter((c) =>
+    c.items.some((i) => i.slug === slug),
+  );
+
   return (
     <div className="mx-auto max-w-[1280px] px-4 pb-28 md:px-6 md:pb-28">
       <div className="py-3 md:py-4">
@@ -49,6 +55,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           {productName}
         </h1>
         <div className="flex items-center gap-0.5 flex-shrink-0">
+          <ChatProductButton product={product} variant="icon" />
           <button type="button" aria-label="Share" className="flex h-9 w-9 items-center justify-center rounded-lg text-ink transition-colors hover:bg-bg3">
             <Share2 className="h-4 w-4" strokeWidth={1.75} />
           </button>
@@ -106,12 +113,33 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         <div className="md:sticky md:top-24 md:self-start">
           <div className="rounded-xl border border-line bg-white p-5 shadow-panel">
-            <div className="flex items-center gap-1.5">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
-              </span>
-              <span className="text-xs font-medium text-green-700">In stock</span>
+            <div className="rounded-lg bg-bg2 p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className={`flex h-2.5 w-2.5 rounded-full ${!product.stock || product.stock === 0 ? "bg-sale" : product.stock <= 3 ? "bg-amber-500" : "bg-green-500"}`} />
+                  <span className="text-sm font-medium text-ink">
+                    {!product.stock || product.stock === 0
+                      ? "Out of stock"
+                      : product.stock <= 3
+                        ? `Only ${product.stock} left`
+                        : "In stock"}
+                  </span>
+                </div>
+                {product.stock !== undefined && product.stock > 0 && (
+                  <span className="text-base font-bold text-ink">
+                    {product.stock.toLocaleString()}
+                  </span>
+                )}
+              </div>
+              {product.stock !== undefined && product.stock > 0 && (
+                <p className="mt-0.5 text-[11px] text-ink-2">
+                  {product.stock >= 10
+                    ? "Bulk quantity available — volume pricing eligible"
+                    : product.stock === 1
+                      ? "Last item in stock"
+                      : `${product.stock} units ready to ship`}
+                </p>
+              )}
             </div>
 
             <div className="mt-2">
@@ -148,11 +176,79 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <div className="mt-3">
               <BuyButtons product={product} />
             </div>
+
+            {product.stock !== undefined && product.stock >= 10 ? (
+              <div className="mt-3 rounded-xl border-2 border-brand/30 bg-brand/[0.03] p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand/10">
+                    <TrendingDown className="h-4 w-4 text-brand" strokeWidth={1.75} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-ink">Bulk quantity available</p>
+                    <p className="text-[11px] text-ink-2">{product.stock} units in stock · Volume pricing eligible</p>
+                  </div>
+                </div>
+                <div className="flex gap-1.5">
+                  {defaultBulkTiers.slice(0, 4).map((tier) => (
+                    <div key={tier.minQty} className="flex-1 rounded-lg bg-white px-2 py-1.5 text-center border border-line">
+                      <p className="text-[11px] font-semibold text-ink">{tier.minQty}{tier.maxQty ? `–${tier.maxQty}` : "+"}</p>
+                      <p className="text-[10px] text-brand font-semibold">{tier.discountPercent}% off</p>
+                    </div>
+                  ))}
+                </div>
+                <Link
+                  href="/bulk-sales"
+                  className="mt-3 flex items-center justify-center gap-1 rounded-lg border border-ink py-2 text-xs font-semibold text-ink transition-colors hover:bg-bg3"
+                >
+                  Learn about bulk pricing
+                  <ChevronRight className="h-3.5 w-3.5" strokeWidth={2} />
+                </Link>
+              </div>
+            ) : (
+              <div className="mt-3 rounded-xl border border-line p-3">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <TrendingDown className="h-3.5 w-3.5 text-brand" strokeWidth={1.75} />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.04em] text-ink-2">Bulk pricing</span>
+                </div>
+                <div className="flex gap-1.5">
+                  {defaultBulkTiers.slice(0, 4).map((tier) => (
+                    <div key={tier.minQty} className="flex-1 rounded-lg bg-bg2 px-2 py-1.5 text-center">
+                      <p className="text-[11px] font-semibold text-ink">{tier.minQty}{tier.maxQty ? `–${tier.maxQty}` : "+"}</p>
+                      <p className="text-[10px] text-brand font-semibold">{tier.discountPercent}% off</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="mt-4">
-            <SellerCard />
+            <SellerCard product={product} />
           </div>
+
+          {matchingCombos.length > 0 && (
+            <div className="mt-4 rounded-xl border border-line p-4">
+              <div className="flex items-center gap-1.5 mb-3">
+                <Gift className="h-4 w-4 text-brand" strokeWidth={1.75} />
+                <span className="text-[10px] font-bold uppercase tracking-[0.04em] text-ink-2">Available in combos</span>
+              </div>
+              <div className="space-y-2">
+                {matchingCombos.map((combo) => (
+                  <Link
+                    key={combo.id}
+                    href="/combo-offers"
+                    className="flex items-center justify-between rounded-lg bg-bg2 px-3 py-2 transition-colors hover:bg-bg3"
+                  >
+                    <div>
+                      <p className="text-xs font-semibold text-ink">{combo.name}</p>
+                      <p className="text-[11px] text-ink-2">AED {combo.price.toLocaleString()}</p>
+                    </div>
+                    <span className="text-[11px] font-semibold text-brand">-{combo.savingsPercent}%</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="mt-4 flex items-start gap-3 rounded-xl border border-line p-4">
             <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand" strokeWidth={1.75} />

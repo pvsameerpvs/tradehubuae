@@ -10,10 +10,16 @@ export type { Brand } from "./brands";
 export { orders, orderStatusColor } from "./orders";
 export type { Order, OrderItem } from "./orders";
 
-
-
-export { comboOffers } from "./comboOffers";
+export { comboOffers, getComboSavings } from "./comboOffers";
+export type { ComboOffer, ComboOfferItem } from "./comboOffers";
 
 export { blogPosts } from "./blog";
 
 export { bulkBenefits, industries, aboutStats } from "./benefits";
+export type { Benefit } from "./benefits";
+
+export { promoCodes, validatePromoCode, calculatePromoDiscount } from "./promoCodes";
+export type { PromoCode } from "./promoCodes";
+
+export { defaultBulkTiers, getBulkDiscountPercent, getBulkTierForQuantity } from "./bulkPricing";
+export type { BulkTier } from "./bulkPricing";

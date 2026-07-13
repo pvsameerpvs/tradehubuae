@@ -8,6 +8,7 @@ const laptops = searchProducts.filter((p) => p.category === "Laptops");
 const gaming = searchProducts.filter((p) => p.category === "Gaming PCs");
 const accessories = searchProducts.filter((p) => p.category === "Accessories");
 const desktops = searchProducts.filter((p) => p.category === "Desktop PCs");
+const bulkEligible = searchProducts.filter((p) => p.stock !== undefined && p.stock >= 10);
 
 export default function HomePage() {
   return (
@@ -31,6 +32,14 @@ export default function HomePage() {
             products={gaming}
             href="/categories/gaming-pcs"
           />
+
+          {bulkEligible.length > 0 && (
+            <ProductRowScroll
+              title="Wholesale &amp; bulk deals"
+              products={bulkEligible}
+              href="/bulk-sales"
+            />
+          )}
 
           <DiscoveryGrid />
 

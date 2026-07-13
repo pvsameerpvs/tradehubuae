@@ -9,3 +9,4 @@ export {
   Package,
   Phone,
 } from "./Icons";
+export { ChatBubble, ChatBubbleFilled } from "./ChatBubble";

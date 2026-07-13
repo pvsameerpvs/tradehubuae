@@ -1,47 +1,106 @@
-import type { Metadata } from "next";
-import { Button, Badge } from "@tradehubuae/ui";
-import { Gift, Check } from "@/components/icons";
-import { comboOffers } from "@/data";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Combo Offers",
-  description: "Save big with exclusive combo deals on IT equipment at TradeHub UAE",
-};
+import Link from "next/link";
+import { Gift, Check, ShoppingCart, Star } from "lucide-react";
+import { Badge } from "@tradehubuae/ui";
+import { comboOffers } from "@/data";
+import { useCart } from "@/lib/cart-context";
 
 export default function ComboOffersPage() {
+  const { addComboToCart } = useCart();
+
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
       <div className="mb-10 text-center">
-        <h1 className="mb-4 text-3xl font-bold md:text-4xl">Combo Offers</h1>
-        <p className="text-lg text-ink-2">
+        <h1
+          className="text-[26px] font-semibold leading-[30px] text-ink"
+          style={{ letterSpacing: "-0.01em" }}
+        >
+          Combo Offers
+        </h1>
+        <p className="mt-1 text-sm text-ink-2">
           Save more when you buy together. Curated bundles for every need.
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {comboOffers.map((combo) => (
-          <div key={combo.name} className="group relative rounded-xl border bg-white shadow-panel transition hover:shadow-panel">
-            <Badge className="absolute left-4 top-4" variant="warning">
+          <div
+            key={combo.id}
+            className="group relative overflow-hidden rounded-xl border border-line bg-white transition-shadow hover:shadow-card"
+          >
+            <Badge
+              className="absolute left-3 top-3 z-10 rounded-full px-3 py-1 text-xs font-semibold"
+              variant={
+                combo.badge === "Best Value"
+                  ? "success"
+                  : combo.badge === "Popular" || combo.badge === "Staff Pick"
+                    ? "default"
+                    : "warning"
+              }
+            >
               {combo.badge}
             </Badge>
-            <div className="flex aspect-video items-center justify-center bg-gradient-to-br from-brand/5 to-brand/10">
-              <Gift className="h-16 w-16 text-brand/40" strokeWidth={1} />
+
+            <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-bg2">
+              <Gift
+                className="h-20 w-20 text-brand/20"
+                strokeWidth={1}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent" />
             </div>
+
             <div className="p-5">
-              <h3 className="mb-3 text-lg font-semibold">{combo.name}</h3>
-              <ul className="mb-4 space-y-1.5">
+              <h3 className="text-[15px] font-semibold leading-[19px] text-ink">
+                {combo.name}
+              </h3>
+              <p className="mt-1 text-sm text-ink-2">{combo.description}</p>
+
+              <ul className="mt-4 space-y-1.5">
                 {combo.items.map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm text-ink-2">
-                    <Check className="h-4 w-4 shrink-0 text-green-500" />
-                    {item}
+                  <li
+                    key={item.slug}
+                    className="flex items-center gap-2 text-sm text-ink-2"
+                  >
+                    <Check className="h-3.5 w-3.5 shrink-0 text-brand" strokeWidth={2.5} />
+                    <Link
+                      href={`/products/${item.slug}`}
+                      className="hover:text-ink transition-colors"
+                    >
+                      {item.name}
+                    </Link>
+                    <span className="ml-auto text-xs text-ink-3">
+                      &times;{item.quantity}
+                    </span>
                   </li>
                 ))}
               </ul>
-              <div className="mb-4 flex items-center gap-2">
-                <span className="text-2xl font-bold text-brand">AED {combo.price.toLocaleString()}</span>
-                <span className="text-sm text-ink-2 line-through">AED {combo.original.toLocaleString()}</span>
+
+              <div className="mt-4 flex items-baseline gap-2">
+                <span className="text-xl font-bold text-ink">
+                  AED {combo.price.toLocaleString()}
+                </span>
+                <span className="text-sm text-ink-3 line-through">
+                  AED {combo.original.toLocaleString()}
+                </span>
+                <span className="ml-auto text-xs font-semibold text-brand">
+                  -{combo.savingsPercent}%
+                </span>
               </div>
-              <Button className="w-full">Add Bundle to Cart</Button>
+
+              <div className="mt-1 flex items-center gap-1 text-xs text-ink-2">
+                <Star className="h-3 w-3 text-brand" fill="currentColor" />
+                Save AED {combo.savings.toLocaleString()}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => addComboToCart(combo)}
+                className="btn-brand mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-lg text-base font-semibold text-white"
+              >
+                <ShoppingCart className="h-4 w-4" strokeWidth={2} />
+                Add Bundle to Cart
+              </button>
             </div>
           </div>
         ))}
