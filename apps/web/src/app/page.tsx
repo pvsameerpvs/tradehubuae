@@ -1,6 +1,7 @@
-import { SearchBar, ProductRow, ProductRowScroll, DiscoveryGrid } from "@/components/home";
+import { HeroSection, ProductRow, ProductRowScroll, DiscoveryGrid } from "@/components/home";
 import { searchProducts, categories } from "@/data";
 import { CategoryCard } from "@/components/shared/CategoryCard";
+import { LatestArrivalsCard } from "@/components/shared/LatestArrivalsCard";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
@@ -12,24 +13,32 @@ const desktops = searchProducts.filter((p) => p.category === "Desktop PCs");
 export default function HomePage() {
   return (
     <div className="mx-auto max-w-[1760px] px-6 md:px-10 lg:px-20">
-      <div className="py-12 md:py-16 lg:py-20">
-        <h1 className="mb-3 text-center text-[26px] font-semibold leading-[30px] text-ink" style={{ letterSpacing: "-0.01em" }}>
-          Find your next laptop in the UAE
-        </h1>
-        <p className="mb-8 text-center text-sm leading-[18px] text-ink-2">
-          New, certified refurbished, and like-new — from top brands
-        </p>
-        <SearchBar />
-      </div>
+      <HeroSection />
 
       <div className="space-y-16 pb-16">
         <CategoryRow />
 
-        <ProductRowScroll
-          title="Latest arrivals"
-          products={laptops.slice(0, 7)}
-          href="/search?sort=newest"
-        />
+        <section>
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-[22px] font-semibold leading-[26px] text-ink" style={{ letterSpacing: "-0.01em" }}>
+              Latest arrivals
+            </h2>
+            <Link
+              href="/search?sort=newest"
+              className="flex items-center gap-1 text-sm font-semibold text-ink underline underline-offset-2"
+            >
+              Show more
+              <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
+            </Link>
+          </div>
+          <div className="-mx-6 overflow-x-auto px-6 md:-mx-10 md:px-10 lg:-mx-20 lg:px-20">
+            <div className="flex gap-4" style={{ minWidth: "max-content" }}>
+              {laptops.slice(0, 7).map((product) => (
+                <LatestArrivalsCard key={product.slug} product={product} />
+              ))}
+            </div>
+          </div>
+        </section>
 
         <ProductRow
           title="All laptops"
@@ -78,7 +87,7 @@ function CategoryRow() {
           <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
         </Link>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="flex gap-4 overflow-x-auto md:flex-nowrap [&::-webkit-scrollbar]:hidden">
         {categories.map((cat) => (
           <CategoryCard key={cat.slug} category={cat} />
         ))}
