@@ -23,3 +23,6 @@ export type { PromoCode } from "./promoCodes";
 
 export { defaultBulkTiers, getBulkDiscountPercent, getBulkTierForQuantity } from "./bulkPricing";
 export type { BulkTier } from "./bulkPricing";
+
+export { offers } from "./offers";
+export type { Offer, OfferType } from "./offers";

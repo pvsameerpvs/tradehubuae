@@ -1,4 +1,4 @@
-import { HeroSection, ProductRow, ProductRowScroll, DiscoveryGrid, LatestArrivalsRow } from "@/components/home";
+import { HeroSection, ProductRow, ProductRowScroll, DiscoveryGrid, LatestArrivalsRow, OfferSection } from "@/components/home";
 import { searchProducts, categories } from "@/data";
 import { CategoryCard } from "@/components/shared/CategoryCard";
 import Link from "next/link";
@@ -19,8 +19,10 @@ export default function HomePage() {
         <div className="space-y-16 pb-16">
           <CategoryRow />
 
-          <LatestArrivalsRow products={laptops.slice(0, 7)} />
+          
 
+          <LatestArrivalsRow products={laptops.slice(0, 7)} />
+<OfferSection />
           <ProductRow
             title="All laptops"
             products={laptops.slice(0, 6)}
