@@ -18,6 +18,7 @@ import {
   Wallet,
   ShieldCheck,
 } from "lucide-react";
+import { useCart } from "@/lib/cart-context";
 
 const NAV_LINKS = [
   { label: "Categories", href: "/categories", icon: Monitor },
@@ -37,6 +38,7 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { count } = useCart();
 
   useEffect(() => {
     if (!open) return;
@@ -136,9 +138,14 @@ export function Header() {
             className="relative flex h-12 w-12 items-center justify-center text-ink transition-colors hover:text-ink/70"
           >
             <ShoppingCart className="h-6 w-6" strokeWidth={1.75} />
-            <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-ink px-1 text-[11px] font-bold text-white">
-              0
-            </span>
+            {count > 0 && (
+              <span
+                key={count}
+                className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[20px] animate-bounce items-center justify-center rounded-full bg-ink px-1 text-[11px] font-bold text-white"
+              >
+                {count}
+              </span>
+            )}
           </Link>
           <div ref={dropdownRef} className="relative">
             <button

@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { organizationSchema } from "@tradehubuae/seo";
 import { cn } from "@tradehubuae/ui";
+import { CartProvider } from "@/lib/cart-context";
+import { CartFlyProvider } from "@/lib/cart-fly-context";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
@@ -48,9 +50,13 @@ export default function RootLayout({
         />
       </head>
       <body className={cn("min-h-screen bg-white antialiased", inter.variable)}>
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <CartProvider>
+          <CartFlyProvider>
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </CartFlyProvider>
+        </CartProvider>
       </body>
     </html>
   );
