@@ -26,14 +26,14 @@ export default function AccountPage() {
 
       <div className="grid gap-8 lg:grid-cols-4">
         <div className="lg:col-span-1">
-          <div className="rounded-xl border bg-card p-4">
+          <div className="rounded-xl border bg-white p-4">
             <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand text-lg font-bold text-white">
                 A
               </div>
               <div>
                 <p className="font-medium">Ahmed Al Maktoum</p>
-                <p className="text-sm text-muted-foreground">ahmed@example.com</p>
+                <p className="text-sm text-ink-2">ahmed@example.com</p>
               </div>
             </div>
             <nav className="space-y-1">
@@ -43,8 +43,8 @@ export default function AccountPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`w-full rounded-md px-3 py-2 text-left text-sm font-medium transition ${
                     activeTab === tab.id
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                      ? "bg-brand text-white"
+                      : "text-ink-2 hover:bg-bg3 hover:text-ink"
                   }`}
                 >
                   {tab.label}
@@ -62,21 +62,21 @@ export default function AccountPage() {
           {activeTab === "overview" && (
             <div className="space-y-6">
               <div className="grid gap-4 sm:grid-cols-3">
-                <div className="rounded-xl border bg-card p-4">
-                  <p className="text-sm text-muted-foreground">Total Orders</p>
+                <div className="rounded-xl border bg-white p-4">
+                  <p className="text-sm text-ink-2">Total Orders</p>
                   <p className="mt-1 text-2xl font-bold">12</p>
                 </div>
-                <div className="rounded-xl border bg-card p-4">
-                  <p className="text-sm text-muted-foreground">Active Orders</p>
+                <div className="rounded-xl border bg-white p-4">
+                  <p className="text-sm text-ink-2">Active Orders</p>
                   <p className="mt-1 text-2xl font-bold">2</p>
                 </div>
-                <div className="rounded-xl border bg-card p-4">
-                  <p className="text-sm text-muted-foreground">Wishlist Items</p>
+                <div className="rounded-xl border bg-white p-4">
+                  <p className="text-sm text-ink-2">Wishlist Items</p>
                   <p className="mt-1 text-2xl font-bold">5</p>
                 </div>
               </div>
 
-              <div className="rounded-xl border bg-card">
+              <div className="rounded-xl border bg-white">
                 <div className="border-b p-4">
                   <h2 className="font-semibold">Recent Orders</h2>
                 </div>
@@ -85,7 +85,7 @@ export default function AccountPage() {
                     <div key={order.id} className="flex items-center justify-between p-4">
                       <div>
                         <p className="font-medium">{order.id}</p>
-                        <p className="text-sm text-muted-foreground">{order.date} &middot; {order.items} item(s)</p>
+                        <p className="text-sm text-ink-2">{order.date} &middot; {order.items} item(s)</p>
                       </div>
                       <div className="text-right">
                         <Badge variant={order.status === "Delivered" ? "success" : order.status === "Shipped" ? "default" : "warning"}>
@@ -106,7 +106,7 @@ export default function AccountPage() {
           )}
 
           {activeTab === "orders" && (
-            <div className="rounded-xl border bg-card">
+            <div className="rounded-xl border bg-white">
               <div className="border-b p-4">
                 <h2 className="font-semibold">Order History</h2>
               </div>
@@ -115,7 +115,7 @@ export default function AccountPage() {
                   <div key={order.id} className="flex items-center justify-between p-4">
                     <div>
                       <p className="font-medium">{order.id}</p>
-                      <p className="text-sm text-muted-foreground">{order.date} &middot; {order.items} item(s) &middot; AED {order.total}</p>
+                      <p className="text-sm text-ink-2">{order.date} &middot; {order.items} item(s) &middot; AED {order.total}</p>
                     </div>
                     <div className="flex items-center gap-3">
                       <Badge variant={order.status === "Delivered" ? "success" : order.status === "Shipped" ? "default" : "warning"}>
@@ -132,25 +132,25 @@ export default function AccountPage() {
           )}
 
           {activeTab === "details" && (
-            <div className="rounded-xl border bg-card p-6">
+            <div className="rounded-xl border bg-white p-6">
               <h2 className="mb-6 font-semibold">Account Details</h2>
               <form className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className="mb-1.5 block text-sm font-medium">First Name</label>
-                    <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" defaultValue="Ahmed" />
+                    <input className="flex h-10 w-full rounded-md border border-line bg-white px-3 py-2 text-sm" defaultValue="Ahmed" />
                   </div>
                   <div>
                     <label className="mb-1.5 block text-sm font-medium">Last Name</label>
-                    <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" defaultValue="Al Maktoum" />
+                    <input className="flex h-10 w-full rounded-md border border-line bg-white px-3 py-2 text-sm" defaultValue="Al Maktoum" />
                   </div>
                   <div>
                     <label className="mb-1.5 block text-sm font-medium">Email</label>
-                    <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" defaultValue="ahmed@example.com" type="email" />
+                    <input className="flex h-10 w-full rounded-md border border-line bg-white px-3 py-2 text-sm" defaultValue="ahmed@example.com" type="email" />
                   </div>
                   <div>
                     <label className="mb-1.5 block text-sm font-medium">Phone</label>
-                    <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" defaultValue="+971 50 123 4567" type="tel" />
+                    <input className="flex h-10 w-full rounded-md border border-line bg-white px-3 py-2 text-sm" defaultValue="+971 50 123 4567" type="tel" />
                   </div>
                 </div>
                 <Button>Save Changes</Button>
@@ -160,15 +160,15 @@ export default function AccountPage() {
 
           {activeTab === "addresses" && (
             <div className="space-y-4">
-              <div className="rounded-xl border bg-card p-6">
+              <div className="rounded-xl border bg-white p-6">
                 <div className="mb-4 flex items-center justify-between">
                   <h2 className="font-semibold">Saved Addresses</h2>
                   <Button size="sm">Add New</Button>
                 </div>
-                <div className="rounded-lg border bg-muted/30 p-4">
+                <div className="rounded-lg border bg-bg2/30 p-4">
                   <p className="font-medium">Home</p>
-                  <p className="text-sm text-muted-foreground">Sheikh Zayed Road, Downtown Dubai<br />Dubai, UAE</p>
-                  <p className="mt-1 text-sm text-muted-foreground">+971 50 123 4567</p>
+                  <p className="text-sm text-ink-2">Sheikh Zayed Road, Downtown Dubai<br />Dubai, UAE</p>
+                  <p className="mt-1 text-sm text-ink-2">+971 50 123 4567</p>
                 </div>
               </div>
             </div>

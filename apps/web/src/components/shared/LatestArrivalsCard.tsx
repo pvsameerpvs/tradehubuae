@@ -48,7 +48,7 @@ export function LatestArrivalsCard({ product }: { product: Product }) {
               className="h-[18px] w-[18px] transition-colors"
               strokeWidth={2}
               fill={wishlisted ? "currentColor" : "none"}
-              color={wishlisted ? "#0B8A5B" : "#222222"}
+              color={wishlisted ? "#134A7C" : "rgba(0,0,0,0.35)"}
             />
           </button>
 

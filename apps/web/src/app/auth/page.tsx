@@ -11,12 +11,12 @@ export default function AuthPage() {
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <h1 className="mb-2 text-3xl font-bold">{mode === "login" ? "Welcome Back" : "Create Account"}</h1>
-          <p className="text-muted-foreground">
+          <p className="text-ink-2">
             {mode === "login" ? "Sign in to your TradeHub UAE account" : "Register for a new account"}
           </p>
         </div>
 
-        <div className="rounded-xl border bg-card p-6 shadow-sm">
+        <div className="rounded-xl border bg-white p-6 shadow-panel">
           <form className="space-y-4">
             {mode === "register" && (
               <div>
@@ -40,7 +40,7 @@ export default function AuthPage() {
             )}
             {mode === "login" && (
               <div className="flex justify-end">
-                <button className="text-sm text-primary hover:underline" type="button">Forgot password?</button>
+                <button className="text-sm text-brand hover:underline" type="button">Forgot password?</button>
               </div>
             )}
             <Button className="w-full" size="lg">
@@ -53,7 +53,7 @@ export default function AuthPage() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+              <span className="bg-white px-2 text-ink-2">Or continue with</span>
             </div>
           </div>
 
@@ -68,11 +68,11 @@ export default function AuthPage() {
             </Button>
           </div>
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
+          <p className="mt-6 text-center text-sm text-ink-2">
             {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
             <button
               onClick={() => setMode(mode === "login" ? "register" : "login")}
-              className="font-medium text-primary hover:underline"
+              className="font-medium text-brand hover:underline"
               type="button"
             >
               {mode === "login" ? "Sign up" : "Sign in"}

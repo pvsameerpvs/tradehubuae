@@ -82,22 +82,21 @@ The layout works because of **restraint**, not because of any single element. Th
 Colors (all in `globals.css`, every component must use tokens, never raw hex):
 
 ```
---brand:          #0B8A5B   /* primary action, price accent */
---brand-dark:     #086B47   /* hover */
---brand-grad:     linear-gradient(90deg, #0FA06B 0%, #0B8A5B 50%, #086B47 100%);
+--brand:          #134A7C   /* primary action, buttons, links, icons */
+--brand-dark:     #103E68   /* hover */
 
---ink:            #222222   /* primary text, icons, active states */
---ink-2:          #717171   /* secondary text, meta, captions */
---ink-3:          #B0B0B0   /* disabled, placeholder */
+--ink:            #0F172A   /* titles, primary text */
+--ink-2:          #475569   /* body text, meta, captions */
+--ink-3:          #94A3B8   /* disabled, placeholder */
 
---line:           #DDDDDD   /* 1px borders and dividers */
---line-soft:      #EBEBEB   /* subtle inner dividers */
+--line:           #E2E8F0   /* 1px borders and dividers */
+--line-soft:      #F1F5F9   /* subtle inner dividers */
 
---bg:             #FFFFFF   /* page background, always white */
---bg-2:           #F7F7F7   /* footer, image placeholder fill */
---bg-3:           #F0F0F0   /* hover fill on ghost buttons */
+--bg:             #FFFFFF   /* page background, cards, always white */
+--bg-2:           #F8FAFC   /* section background, image placeholder fill */
+--bg-3:           #F1F5F9   /* hover fill on ghost buttons */
 
---star:           #222222   /* star glyph is black, not gold */
+--star:           #134A7C   /* star glyph is brand color */
 --sale:           #C13515   /* strikethrough / discount label only */
 ```
 

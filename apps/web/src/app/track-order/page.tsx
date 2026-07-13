@@ -21,7 +21,7 @@ export default function TrackOrderPage() {
       <div className="mx-auto max-w-2xl">
         <div className="mb-10 text-center">
           <h1 className="mb-4 text-4xl font-bold">Track Your Order</h1>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-ink-2">
             Enter your order ID to track the status of your shipment.
           </p>
         </div>
@@ -39,11 +39,11 @@ export default function TrackOrderPage() {
         </div>
 
         {tracked && (
-          <div className="rounded-xl border bg-card p-6">
+          <div className="rounded-xl border bg-white p-6">
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-semibold">Order ORD-002</h2>
-                <p className="text-sm text-muted-foreground">Placed on July 5, 2026</p>
+                <p className="text-sm text-ink-2">Placed on July 5, 2026</p>
               </div>
               <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-100">
                 In Transit
@@ -57,8 +57,8 @@ export default function TrackOrderPage() {
                     <div
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-sm font-medium ${
                         step.completed
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-muted-foreground/30 bg-background text-muted-foreground"
+                          ? "border-brand bg-brand text-white"
+                          : "border-ink-2/30 bg-white text-ink-2"
                       }`}
                     >
                       {step.completed ? (
@@ -70,12 +70,12 @@ export default function TrackOrderPage() {
                       )}
                     </div>
                     {i < trackingSteps.length - 1 && (
-                      <div className={`h-full w-0.5 ${step.completed ? "bg-primary" : "bg-muted-foreground/20"}`} />
+                      <div className={`h-full w-0.5 ${step.completed ? "bg-brand" : "bg-ink-2/20"}`} />
                     )}
                   </div>
                   <div className={`pt-1 ${step.completed ? "" : "opacity-50"}`}>
                     <p className="font-medium">{step.label}</p>
-                    {step.date && <p className="text-sm text-muted-foreground">{step.date}</p>}
+                    {step.date && <p className="text-sm text-ink-2">{step.date}</p>}
                   </div>
                 </div>
               ))}

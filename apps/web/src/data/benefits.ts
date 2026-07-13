@@ -4,24 +4,6 @@ export interface Benefit {
   icon: "shield" | "truck" | "briefcase";
 }
 
-export const whyUsBenefits: Benefit[] = [
-  {
-    title: "100% Genuine Products",
-    desc: "All products are verified and quality-checked. We source directly from authorized distributors.",
-    icon: "shield",
-  },
-  {
-    title: "Fast Delivery Across UAE",
-    desc: "Free shipping on orders over AED 500. Same-day delivery in Dubai, next-day across the UAE.",
-    icon: "truck",
-  },
-  {
-    title: "Corporate Bulk Pricing",
-    desc: "Special pricing for businesses, schools, and government organizations. Dedicated account managers.",
-    icon: "briefcase",
-  },
-];
-
 export const bulkBenefits: Benefit[] = [
   { title: "Competitive Pricing", desc: "Exclusive bulk discounts on all products", icon: "shield" },
   { title: "Dedicated Account Manager", desc: "Personal support throughout your journey", icon: "briefcase" },

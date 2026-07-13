@@ -5,6 +5,7 @@ import { searchProducts, defaultSpecs, productReviews } from "@/data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { StarRating } from "@/components/shared/StarRating";
 import { ProductRow } from "@/components/home";
+import { BuyButtons } from "@/components/products/BuyButtons";
 import Link from "next/link";
 
 interface ProductPageProps {
@@ -195,21 +196,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </div>
             </div>
 
-            <div className="space-y-3">
-              <button
-                type="button"
-                className="flex h-12 w-full items-center justify-center rounded-lg text-base font-semibold text-white"
-                style={{ background: "linear-gradient(90deg, #0FA06B 0%, #0B8A5B 50%, #086B47 100%)" }}
-              >
-                Buy now
-              </button>
-              <button
-                type="button"
-                className="flex h-12 w-full items-center justify-center rounded-lg border border-ink text-base font-semibold text-ink transition-colors hover:bg-bg3"
-              >
-                Make an offer
-              </button>
-            </div>
+            <BuyButtons product={product} />
           </div>
         </div>
       </div>
@@ -224,21 +211,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-line bg-white p-4 md:hidden">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-ink-2">Total</p>
-            <p className="text-lg font-semibold text-ink">{product.price.toLocaleString()} AED</p>
-          </div>
-          <button
-            type="button"
-            className="flex h-12 items-center justify-center rounded-lg px-8 text-base font-semibold text-white"
-            style={{ background: "linear-gradient(90deg, #0FA06B 0%, #0B8A5B 50%, #086B47 100%)" }}
-          >
-            Buy now
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

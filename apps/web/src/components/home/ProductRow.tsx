@@ -89,7 +89,7 @@ export function ProductRowScroll({
           type="button"
           onClick={() => scroll("left")}
           aria-label="Scroll left"
-          className="absolute left-0 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white p-3 shadow-lg opacity-0 transition-all duration-300 ease-out group-hover/section:opacity-100 hover:scale-110 hover:shadow-xl md:flex"
+          className="absolute left-0 top-1/2 z-10 hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white p-3 shadow-panel opacity-0 transition-all duration-300 ease-out group-hover/section:opacity-100 hover:scale-110 hover:shadow-panel md:flex"
         >
           <ChevronLeft className="h-5 w-5 text-ink" strokeWidth={2} />
         </button>
@@ -108,7 +108,7 @@ export function ProductRowScroll({
           type="button"
           onClick={() => scroll("right")}
           aria-label="Scroll right"
-          className="absolute right-0 top-1/2 z-10 hidden -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full bg-white p-3 shadow-lg opacity-0 transition-all duration-300 ease-out group-hover/section:opacity-100 hover:scale-110 hover:shadow-xl md:flex"
+          className="absolute right-0 top-1/2 z-10 hidden -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full bg-white p-3 shadow-panel opacity-0 transition-all duration-300 ease-out group-hover/section:opacity-100 hover:scale-110 hover:shadow-panel md:flex"
         >
           <ChevronRight className="h-5 w-5 text-ink" strokeWidth={2} />
         </button>

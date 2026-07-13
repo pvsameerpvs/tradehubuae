@@ -12,14 +12,14 @@ export const metadata: Metadata = {
 
 function OrderCard({ order }: { order: Order }) {
   return (
-    <div className="rounded-xl border bg-card p-4">
+    <div className="rounded-xl border bg-white p-4">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
             <span className="font-semibold">{order.id}</span>
             <Badge variant={orderStatusColor[order.status]}>{order.status}</Badge>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-sm text-ink-2">
             {order.date} &middot; {order.items.reduce((s, i) => s + i.qty, 0)} item(s)
           </p>
         </div>
@@ -33,7 +33,7 @@ function OrderCard({ order }: { order: Order }) {
       <div className="mt-3 border-t pt-3">
         <div className="flex flex-wrap gap-2">
           {order.items.map((item, i) => (
-            <span key={i} className="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">
+            <span key={i} className="rounded-md bg-bg2 px-2 py-1 text-xs text-ink-2">
               {item.name} × {item.qty}
             </span>
           ))}
@@ -50,9 +50,9 @@ export default function OrdersPage() {
 
       {orders.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20">
-          <Package className="mb-4 h-16 w-16 text-muted-foreground" strokeWidth={1} />
+          <Package className="mb-4 h-16 w-16 text-ink-2" strokeWidth={1} />
           <h2 className="mb-2 text-xl font-semibold">No orders yet</h2>
-          <p className="mb-6 text-muted-foreground">Your order history will appear here.</p>
+          <p className="mb-6 text-ink-2">Your order history will appear here.</p>
           <Link href="/categories">
             <Button size="lg">Start Shopping</Button>
           </Link>

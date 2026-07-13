@@ -12,7 +12,10 @@ interface CartContextType {
   count: number;
   addItem: (product: Product) => void;
   removeItem: (slug: string) => void;
+  updateQuantity: (slug: string, quantity: number) => void;
+  clearCart: () => void;
   total: number;
+  shipping: number;
 }
 
 const CartContext = createContext<CartContextType>({
@@ -20,7 +23,10 @@ const CartContext = createContext<CartContextType>({
   count: 0,
   addItem: () => {},
   removeItem: () => {},
+  updateQuantity: () => {},
+  clearCart: () => {},
   total: 0,
+  shipping: 0,
 });
 
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -44,15 +50,39 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => prev.filter((item) => item.slug !== slug));
   }, []);
 
+  const updateQuantity = useCallback((slug: string, quantity: number) => {
+    if (quantity <= 0) {
+      setItems((prev) => prev.filter((item) => item.slug !== slug));
+      return;
+    }
+    setItems((prev) =>
+      prev.map((item) =>
+        item.slug === slug ? { ...item, quantity } : item,
+      ),
+    );
+  }, []);
+
+  const clearCart = useCallback(() => {
+    setItems([]);
+  }, []);
+
+  const shipping = useMemo(
+    () => (items.reduce((sum, item) => sum + item.price * item.quantity, 0) >= 500 ? 0 : 25),
+    [items],
+  );
+
   const value = useMemo(
     () => ({
       items,
       count: items.length,
       addItem,
       removeItem,
+      updateQuantity,
+      clearCart,
       total: items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+      shipping,
     }),
-    [items, addItem, removeItem],
+    [items, addItem, removeItem, updateQuantity, clearCart, shipping],
   );
 
   return (

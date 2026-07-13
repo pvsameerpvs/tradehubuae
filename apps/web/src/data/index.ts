@@ -10,17 +10,10 @@ export type { Brand } from "./brands";
 export { orders, orderStatusColor } from "./orders";
 export type { Order, OrderItem } from "./orders";
 
-export { cartItems, FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from "./cart";
-export type { CartItem } from "./cart";
-
 export { productReviews } from "./reviews";
-export type { Review } from "./reviews";
 
 export { comboOffers } from "./comboOffers";
-export type { ComboOffer } from "./comboOffers";
 
 export { blogPosts } from "./blog";
-export type { BlogPost } from "./blog";
 
-export { whyUsBenefits, bulkBenefits, industries, aboutStats } from "./benefits";
-export type { Benefit } from "./benefits";
+export { bulkBenefits, industries, aboutStats } from "./benefits";

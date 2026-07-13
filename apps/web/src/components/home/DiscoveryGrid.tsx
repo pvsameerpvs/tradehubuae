@@ -51,7 +51,7 @@ export function DiscoveryGrid() {
             onClick={() => setActiveTab(tab.key)}
             className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-all ${
               activeTab === tab.key
-                ? "bg-white text-ink shadow-sm"
+                ? "bg-white text-ink shadow-panel"
                 : "text-ink-2 hover:text-ink"
             }`}
           >
@@ -64,7 +64,7 @@ export function DiscoveryGrid() {
           <Link
             key={link.href}
             href={link.href}
-            className="rounded-lg border border-line px-4 py-3 text-sm text-ink-2 transition-all hover:border-ink hover:text-ink hover:shadow-sm"
+            className="rounded-lg border border-line px-4 py-3 text-sm text-ink-2 transition-all hover:border-ink hover:text-ink hover:shadow-panel"
           >
             {link.label}
           </Link>

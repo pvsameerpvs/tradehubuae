@@ -33,7 +33,7 @@ const footerColumns = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-line bg-bg2">
+    <footer className="bg-[#0A2D4B]">
       <div className="mx-auto max-w-[1760px] px-6 py-12 md:px-10 lg:px-20">
         <div className="grid gap-10 md:grid-cols-4">
           <div>
@@ -46,19 +46,19 @@ export function Footer() {
                 priority
               />
             </Link>
-            <p className="text-sm text-ink-2 leading-relaxed">
+            <p className="text-sm leading-relaxed text-white/60">
               Your trusted source for premium IT equipment in the United Arab Emirates. New & refurbished laptops, desktops, gaming PCs, and networking solutions.
             </p>
           </div>
           {footerColumns.map((column) => (
             <div key={column.title}>
-              <h4 className="mb-4 text-sm font-semibold text-ink">{column.title}</h4>
+              <h4 className="mb-4 text-sm font-semibold text-white">{column.title}</h4>
               <ul className="space-y-3">
                 {column.links.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-ink-2 transition-colors hover:text-ink"
+                      className="text-sm text-white/60 transition-colors hover:text-white"
                     >
                       {link.label}
                     </Link>
@@ -68,14 +68,14 @@ export function Footer() {
             </div>
           ))}
         </div>
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-line pt-8 md:flex-row">
-          <p className="text-sm text-ink-2">
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 md:flex-row">
+          <p className="text-sm text-white/60">
             &copy; {new Date().getFullYear()} TradeHub UAE. All rights reserved.
           </p>
-          <div className="flex items-center gap-4 text-sm text-ink-2">
+          <div className="flex items-center gap-4 text-sm text-white/60">
             <span>Dubai, UAE</span>
-            <span className="text-line">|</span>
-            <a href="mailto:sales@tradehubuae.com" className="hover:text-ink transition-colors">
+            <span className="text-white/20">|</span>
+            <a href="mailto:sales@tradehubuae.com" className="transition-colors hover:text-white">
               sales@tradehubuae.com
             </a>
           </div>

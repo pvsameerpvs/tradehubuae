@@ -1,104 +1,375 @@
-import type { Metadata } from "next";
-import { Button } from "@tradehubuae/ui";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Checkout",
-  description: "Complete your purchase at TradeHub UAE",
-};
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { CheckCircle2, CreditCard, Banknote, ChevronRight, ChevronLeft, Truck, ShoppingCart, Lock } from "lucide-react";
+import { useCart } from "@/lib/cart-context";
+
+type PaymentMethod = "cod" | "card";
+const STEPS = ["address", "payment", "confirm"] as const;
+
+function formatCardNumber(v: string) {
+  const digits = v.replace(/\D/g, "").slice(0, 16);
+  return digits.replace(/(\d{4})(?=\d)/g, "$1 ");
+}
+
+function formatExpiry(v: string) {
+  const digits = v.replace(/\D/g, "").slice(0, 4);
+  return digits.length > 2 ? digits.slice(0, 2) + "/" + digits.slice(2) : digits;
+}
 
 export default function CheckoutPage() {
+  const router = useRouter();
+  const { items, total, shipping, clearCart } = useCart();
+  const [step, setStep] = useState<(typeof STEPS)[number]>("address");
+  const [payment, setPayment] = useState<PaymentMethod | null>(null);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
+  const [agreed, setAgreed] = useState(false);
+  const [placed, setPlaced] = useState(false);
+  const [orderNumber, setOrderNumber] = useState("");
+
+  const handlePlaceOrder = () => {
+    if (!payment || !name || !phone || !address || !agreed || items.length === 0) return;
+    if (payment === "card" && (!cardNumber || !cardExpiry || !cardCvv)) return;
+    const num = "TH" + Date.now().toString(36).toUpperCase();
+    setOrderNumber(num);
+    setPlaced(true);
+    clearCart();
+  };
+
+  const grandTotal = total + shipping;
+
+  if (placed) {
+    return (
+      <div className="mx-auto max-w-lg px-4 py-20 text-center animate-fade-in">
+        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-brand/10">
+          <CheckCircle2 className="h-10 w-10 text-brand" strokeWidth={1.5} />
+        </div>
+        <h1 className="text-[26px] font-semibold leading-[30px] text-ink" style={{ letterSpacing: "-0.01em" }}>Order Placed!</h1>
+        <p className="mt-2 text-sm text-ink-2">Your order is confirmed.</p>
+        <p className="mt-1 text-[22px] font-semibold text-ink">#{orderNumber}</p>
+        <p className="mt-6 text-sm text-ink-2">
+          {payment === "cod"
+            ? "Pay when you receive your order."
+            : "Payment successful."}
+          {" We'll notify you once it ships."}
+        </p>
+        <div className="mx-auto mt-10 max-w-xs space-y-3">
+          <button
+            type="button"
+            onClick={() => router.push("/orders")}
+            className="btn-brand flex h-12 w-full items-center justify-center rounded-lg text-base font-semibold text-white"
+          >
+            View Orders
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className="flex h-12 w-full items-center justify-center rounded-lg border border-ink bg-white text-base font-semibold text-ink transition-colors hover:bg-bg3"
+          >
+            Continue Shopping
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="mx-auto max-w-lg px-4 py-20 text-center">
+        <ShoppingCart className="mx-auto mb-4 h-16 w-16 text-ink-3" strokeWidth={1} />
+        <h2 className="mb-2 text-xl font-semibold text-ink">Your cart is empty</h2>
+        <p className="mb-6 text-sm text-ink-2">Add some items before checking out.</p>
+        <Link
+          href="/"
+          className="btn-brand mx-auto flex h-12 w-48 items-center justify-center rounded-lg text-base font-semibold text-white"
+        >
+          Browse Products
+        </Link>
+      </div>
+    );
+  }
+
+  const currentIdx = STEPS.indexOf(step);
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 text-3xl font-bold">Checkout</h1>
+    <div className="mx-auto max-w-[1120px] px-4 py-8 md:px-6">
+      <div className="mb-10 flex items-center justify-center gap-0">
+        {STEPS.map((s, i) => (
+          <div key={s} className="flex items-center">
+            <div
+              className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
+                i === currentIdx ? "bg-ink text-white" : i < currentIdx ? "bg-brand text-white" : "bg-bg2 text-ink-3"
+              }`}
+            >
+              {i < currentIdx ? <CheckCircle2 className="h-4 w-4" strokeWidth={2.5} /> : i + 1}
+            </div>
+            <span
+              className={`ml-2 mr-4 hidden text-sm sm:inline ${
+                i === currentIdx ? "font-semibold text-ink" : i < currentIdx ? "text-brand" : "text-ink-3"
+              }`}
+            >
+              {s === "address" ? "Address" : s === "payment" ? "Payment" : "Confirm"}
+            </span>
+            {i < STEPS.length - 1 && (
+              <div className={`mr-4 h-px w-8 sm:w-12 ${i < currentIdx ? "bg-brand" : "bg-line"}`} />
+            )}
+          </div>
+        ))}
+      </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
-        <div className="space-y-8 lg:col-span-2">
-          <div className="rounded-xl border bg-card p-6">
-            <h2 className="mb-4 text-lg font-semibold">Shipping Information</h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-1.5 block text-sm font-medium">Full Name</label>
-                <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Ahmed Al Maktoum" />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium">Phone Number</label>
-                <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="+971 50 XXX XXXX" />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="mb-1.5 block text-sm font-medium">Email</label>
-                <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="ahmed@example.com" type="email" />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="mb-1.5 block text-sm font-medium">Address</label>
-                <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Street address, building, apartment" />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium">City</label>
-                <input className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="Dubai" />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium">Emirate</label>
-                <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                  <option>Dubai</option>
-                  <option>Abu Dhabi</option>
-                  <option>Sharjah</option>
-                  <option>Ajman</option>
-                  <option>Ras Al Khaimah</option>
-                  <option>Fujairah</option>
-                  <option>Umm Al Quwain</option>
-                </select>
+      <div className="grid gap-10 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          {step === "address" && (
+            <div className="animate-fade-in">
+              <h2 className="text-[22px] font-semibold leading-[26px] text-ink" style={{ letterSpacing: "-0.01em" }}>Delivery address</h2>
+              <p className="mt-1 mb-8 text-sm text-ink-2">Where should we deliver your order?</p>
+              <div className="space-y-5">
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-[0.04em] text-ink-2">Full Name</label>
+                  <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="mt-1.5 flex h-12 w-full rounded-lg border border-line bg-white px-4 text-base text-ink placeholder:text-ink-3 focus-visible:outline-2 focus-visible:outline-ink/40 focus-visible:outline-offset-2"
+                    placeholder="Ahmed Al Maktoum"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-[0.04em] text-ink-2">Phone Number</label>
+                  <input
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="mt-1.5 flex h-12 w-full rounded-lg border border-line bg-white px-4 text-base text-ink placeholder:text-ink-3 focus-visible:outline-2 focus-visible:outline-ink/40 focus-visible:outline-offset-2"
+                    placeholder="+971 50 XXX XXXX"
+                    type="tel"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold uppercase tracking-[0.04em] text-ink-2">Delivery Address</label>
+                  <input
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="mt-1.5 flex h-12 w-full rounded-lg border border-line bg-white px-4 text-base text-ink placeholder:text-ink-3 focus-visible:outline-2 focus-visible:outline-ink/40 focus-visible:outline-offset-2"
+                    placeholder="Street, building, apartment, city"
+                  />
+                </div>
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setStep("payment")}
+                    disabled={!name || !phone || !address}
+                    className="btn-brand flex h-12 items-center justify-center gap-1.5 rounded-lg px-8 text-base font-semibold text-white transition-opacity disabled:opacity-40"
+                  >
+                    Continue
+                    <ChevronRight className="h-4 w-4" strokeWidth={2.5} />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          <div className="rounded-xl border bg-card p-6">
-            <h2 className="mb-4 text-lg font-semibold">Payment Method</h2>
-            <div className="space-y-3">
-              {[
-                { value: "card", label: "Credit / Debit Card", desc: "Pay securely with your card" },
-                { value: "cod", label: "Cash on Delivery", desc: "Pay when you receive your order" },
-                { value: "bank", label: "Bank Transfer", desc: "Transfer to our UAE bank account" },
-              ].map((method) => (
-                <label key={method.value} className="flex cursor-pointer items-center gap-3 rounded-lg border p-4 has-[:checked]:border-primary has-[:checked]:bg-primary/5">
-                  <input type="radio" name="payment" value={method.value} defaultChecked={method.value === "card"} className="h-4 w-4 accent-primary" />
-                  <div>
-                    <p className="font-medium">{method.label}</p>
-                    <p className="text-sm text-muted-foreground">{method.desc}</p>
+          {step === "payment" && (
+            <div className="animate-fade-in">
+              <h2 className="text-[22px] font-semibold leading-[26px] text-ink" style={{ letterSpacing: "-0.01em" }}>Payment method</h2>
+              <p className="mt-1 mb-8 text-sm text-ink-2">How would you like to pay?</p>
+
+              <div className="space-y-5">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() => setPayment("card")}
+                    className={`flex flex-col items-center gap-3 rounded-xl border-2 p-6 text-center transition-all ${
+                      payment === "card" ? "border-brand bg-brand/5" : "border-line hover:border-ink/30"
+                    }`}
+                  >
+                    <CreditCard className="h-8 w-8 text-ink" strokeWidth={1.5} />
+                    <div>
+                      <p className="text-base font-semibold text-ink">Credit / Debit Card</p>
+                      <p className="mt-0.5 text-sm text-ink-2">Pay securely with your card</p>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPayment("cod")}
+                    className={`flex flex-col items-center gap-3 rounded-xl border-2 p-6 text-center transition-all ${
+                      payment === "cod" ? "border-brand bg-brand/5" : "border-line hover:border-ink/30"
+                    }`}
+                  >
+                    <Banknote className="h-8 w-8 text-ink" strokeWidth={1.5} />
+                    <div>
+                      <p className="text-base font-semibold text-ink">Cash on Delivery</p>
+                      <p className="mt-0.5 text-sm text-ink-2">Pay when you receive your order</p>
+                    </div>
+                  </button>
+                </div>
+
+                {payment === "card" && (
+                  <div className="rounded-xl border border-line p-5 space-y-4">
+                    <div className="flex items-center gap-2 text-sm font-medium text-ink">
+                      <Lock className="h-4 w-4 text-brand" strokeWidth={1.75} />
+                      Secure payment
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-[0.04em] text-ink-2">Card Number</label>
+                      <input
+                        value={cardNumber}
+                        onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+                        className="mt-1.5 flex h-12 w-full rounded-lg border border-line bg-white px-4 text-base text-ink placeholder:text-ink-3 focus-visible:outline-2 focus-visible:outline-ink/40 focus-visible:outline-offset-2"
+                        placeholder="1234 5678 9012 3456"
+                        inputMode="numeric"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-[0.04em] text-ink-2">Expiry</label>
+                        <input
+                          value={cardExpiry}
+                          onChange={(e) => setCardExpiry(formatExpiry(e.target.value))}
+                          className="mt-1.5 flex h-12 w-full rounded-lg border border-line bg-white px-4 text-base text-ink placeholder:text-ink-3 focus-visible:outline-2 focus-visible:outline-ink/40 focus-visible:outline-offset-2"
+                          placeholder="MM/YY"
+                          inputMode="numeric"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-[0.04em] text-ink-2">CVV</label>
+                        <input
+                          value={cardCvv}
+                          onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                          className="mt-1.5 flex h-12 w-full rounded-lg border border-line bg-white px-4 text-base text-ink placeholder:text-ink-3 focus-visible:outline-2 focus-visible:outline-ink/40 focus-visible:outline-offset-2"
+                          placeholder="123"
+                          inputMode="numeric"
+                          type="password"
+                        />
+                      </div>
+                    </div>
                   </div>
-                </label>
-              ))}
+                )}
+
+                <div className="flex gap-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setStep("address")}
+                    className="flex h-12 items-center gap-1.5 rounded-lg border border-ink bg-white px-6 text-base font-semibold text-ink transition-colors hover:bg-bg3"
+                  >
+                    <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStep("confirm")}
+                    disabled={!payment || (payment === "card" && (!cardNumber || !cardExpiry || !cardCvv))}
+                    className="btn-brand flex h-12 flex-1 items-center justify-center gap-1.5 rounded-lg text-base font-semibold text-white transition-opacity disabled:opacity-40"
+                  >
+                    Continue
+                    <ChevronRight className="h-4 w-4" strokeWidth={2.5} />
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {step === "confirm" && (
+            <div className="animate-fade-in">
+              <h2 className="text-[22px] font-semibold leading-[26px] text-ink" style={{ letterSpacing: "-0.01em" }}>Review your order</h2>
+              <p className="mt-1 mb-8 text-sm text-ink-2">Please confirm everything looks right.</p>
+
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 rounded-xl border border-line p-4">
+                  <Truck className="h-5 w-5 flex-shrink-0 text-ink" strokeWidth={1.75} />
+                  <div>
+                    <p className="text-base font-semibold text-ink">{name}</p>
+                    <p className="text-sm text-ink-2">{phone}</p>
+                    <p className="text-sm text-ink-2">{address}</p>
+                  </div>
+                </div>
+
+                {payment === "cod" ? (
+                  <div className="flex items-center gap-3 rounded-xl border border-line p-4">
+                    <Banknote className="h-5 w-5 flex-shrink-0 text-ink" strokeWidth={1.75} />
+                    <span className="text-base font-semibold text-ink">Cash on Delivery</span>
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-line p-4">
+                    <div className="flex items-center gap-3">
+                      <CreditCard className="h-5 w-5 flex-shrink-0 text-ink" strokeWidth={1.75} />
+                      <span className="text-base font-semibold text-ink">Credit / Debit Card</span>
+                    </div>
+                    <div className="mt-2 flex items-center gap-2 text-sm text-ink-2">
+                      <Lock className="h-3.5 w-3.5 text-brand" strokeWidth={2} />
+                      Card ending in {cardNumber.replace(/\D/g, "").slice(-4) || "****"}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <label className="mt-6 flex cursor-pointer items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={agreed}
+                  onChange={(e) => setAgreed(e.target.checked)}
+                  className="mt-0.5 h-5 w-5 rounded border-line text-ink focus-visible:outline-2 focus-visible:outline-ink/40 focus-visible:outline-offset-2"
+                />
+                <span className="text-sm text-ink-2">
+                  I agree to the{" "}
+                  <Link href="#" className="font-medium text-ink underline underline-offset-2">Terms of Service</Link>{" "}
+                  and{" "}
+                  <Link href="#" className="font-medium text-ink underline underline-offset-2">Privacy Policy</Link>
+                </span>
+              </label>
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setStep("payment")}
+                  className="flex h-12 items-center gap-1.5 rounded-lg border border-ink bg-white px-6 text-base font-semibold text-ink transition-colors hover:bg-bg3"
+                >
+                  <ChevronLeft className="h-4 w-4" strokeWidth={1.75} />
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePlaceOrder}
+                  disabled={!agreed}
+                  className="btn-brand flex h-12 flex-1 items-center justify-center gap-1.5 rounded-lg text-base font-semibold text-white transition-opacity disabled:opacity-40"
+                >
+                  Place Order
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="lg:col-span-1">
-          <div className="rounded-xl border bg-card p-6">
-            <h2 className="mb-4 text-lg font-semibold">Order Summary</h2>
-            <div className="space-y-3 border-b pb-4">
-              <div className="flex justify-between text-sm">
-                <span>Dell XPS 15 Laptop × 1</span>
-                <span>AED 5,499</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Logitech MX Master 3S × 2</span>
-                <span>AED 698</span>
-              </div>
+          <div className="rounded-xl border border-line bg-white p-6 shadow-panel">
+            <h2 className="mb-4 text-lg font-semibold text-ink">Order Summary</h2>
+            <div className="space-y-3 border-b border-line pb-4">
+              {items.map((item) => (
+                <div key={item.slug} className="flex justify-between text-sm">
+                  <span className="truncate pr-2 text-ink-2">{item.name} × {item.quantity}</span>
+                  <span className="whitespace-nowrap font-medium text-ink">AED {(item.price * item.quantity).toLocaleString()}</span>
+                </div>
+              ))}
             </div>
             <div className="mt-4 space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span>AED 6,197</span>
+                <span className="text-ink-2">Subtotal</span>
+                <span className="text-ink">AED {total.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Shipping</span>
-                <span className="text-green-600">Free</span>
+                <span className="text-ink-2">Shipping</span>
+                <span className={shipping === 0 ? "font-medium text-brand" : "text-ink"}>{shipping === 0 ? "Free" : `AED ${shipping}`}</span>
               </div>
-              <div className="flex justify-between border-t pt-2 text-base font-semibold">
-                <span>Total</span>
-                <span>AED 6,197</span>
+              <div className="flex justify-between border-t border-line pt-2 text-base font-semibold">
+                <span className="text-ink">Total</span>
+                <span className="text-ink">AED {grandTotal.toLocaleString()}</span>
               </div>
             </div>
-            <Button className="mt-6 w-full" size="lg">Place Order</Button>
           </div>
         </div>
       </div>

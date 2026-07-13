@@ -15,9 +15,9 @@ Define these as CSS variables in `globals.css` and map them in `tailwind.config.
 ### Color
 
 ```
---brand:          #0B8A5B   /* primary action, price accent */
---brand-dark:     #086B47   /* hover */
---brand-grad:     linear-gradient(90deg, #0FA06B 0%, #0B8A5B 50%, #086B47 100%);
+--brand:          #134A7C   /* primary action, buttons, links, icons */
+--brand-dark:     #103E68   /* hover */
+--brand-grad:     linear-gradient(90deg, #1A5A8C 0%, #134A7C 50%, #103E68 100%);
 
 --ink:            #222222   /* primary text, icons, active states */
 --ink-2:          #717171   /* secondary text, meta, captions */

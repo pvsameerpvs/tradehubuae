@@ -4,20 +4,20 @@
 
 @layer base {
   :root {
-    --brand: 208.6 73.4% 28%;
-    --brand-dark: 208.6 73% 22%;
+    --brand: 208 73% 28%;
+    --brand-dark: 207 73% 24%;
 
-    --ink: 0 0% 13%;
-    --ink-2: 0 0% 44%;
-    --ink-3: 0 0% 69%;
+    --ink: 221 47% 11%;
+    --ink-2: 215 19% 35%;
+    --ink-3: 215 14% 65%;
 
-    --line: 0 0% 87%;
-    --line-soft: 0 0% 92%;
+    --line: 214 32% 91%;
+    --line-soft: 210 40% 96%;
 
-    --bg-2: 0 0% 97%;
-    --bg-3: 0 0% 94%;
+    --bg-2: 210 40% 98%;
+    --bg-3: 210 40% 96%;
 
-    --star: 0 0% 13%;
+    --star: 208 73% 28%;
     --sale: 11 80% 42%;
 
     --sh-card: 0 6px 16px rgba(0,0,0,0.12);
@@ -27,24 +27,24 @@
     --sh-chip: 0 1px 2px rgba(0,0,0,0.18);
 
     --background: 0 0% 100%;
-    --foreground: 0 0% 13%;
+    --foreground: 221 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 13%;
+    --card-foreground: 221 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 13%;
-    --primary: 208.6 73.4% 28%;
+    --popover-foreground: 221 47% 11%;
+    --primary: 208 73% 28%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 97%;
-    --secondary-foreground: 0 0% 13%;
-    --muted: 0 0% 97%;
-    --muted-foreground: 0 0% 44%;
-    --accent: 0 0% 94%;
-    --accent-foreground: 0 0% 13%;
+    --secondary: 210 40% 98%;
+    --secondary-foreground: 221 47% 11%;
+    --muted: 210 40% 98%;
+    --muted-foreground: 215 19% 35%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 221 47% 11%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 87%;
-    --input: 0 0% 87%;
-    --ring: 208.6 73.4% 28%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 208 73% 28%;
     --radius: 0.5rem;
     --font-sans: "Inter", system-ui, sans-serif;
     --font-heading: "Inter", system-ui, sans-serif;
@@ -53,11 +53,23 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-line;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-white text-ink antialiased;
     font-family: var(--font-sans);
+  }
+}
+
+@layer utilities {
+  .btn-brand {
+    background: linear-gradient(90deg, #1A5A8C 0%, #134A7C 50%, #103E68 100%);
+  }
+  .btn-brand:hover {
+    opacity: 0.9;
+  }
+  .btn-brand:active {
+    opacity: 1;
   }
 }
 
