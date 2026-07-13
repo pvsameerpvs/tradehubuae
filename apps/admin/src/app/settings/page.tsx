@@ -1,16 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Settings2, CreditCard, Truck, Mail, Shield, Palette } from "lucide-react";
+import { Settings2, CreditCard, Truck, Palette, Link2 } from "lucide-react";
 import { Card, CardContent } from "@tradehubuae/ui";
 
 const sections = [
   { title: "General", desc: "Store name, currency, timezone, tax rates", icon: Settings2, color: "text-brand", bg: "bg-brand/5", href: "/settings/general" },
-  { title: "Payments", desc: "Payment gateway configuration and methods", icon: CreditCard, color: "text-emerald-600", bg: "bg-emerald-50", href: "/settings/payments" },
+  { title: "Payments", desc: "Cash on Delivery configuration", icon: CreditCard, color: "text-emerald-600", bg: "bg-emerald-50", href: "/settings/payments" },
   { title: "Shipping", desc: "Shipping zones, methods, and rates", icon: Truck, color: "text-violet-600", bg: "bg-violet-50", href: "/settings/shipping" },
-  { title: "Email", desc: "SMTP settings, email templates, notifications", icon: Mail, color: "text-amber-600", bg: "bg-amber-50", href: "/settings/email" },
-  { title: "Security", desc: "Login, permissions, API keys, GDPR", icon: Shield, color: "text-rose-600", bg: "bg-rose-50", href: "/settings/security" },
-  { title: "Appearance", desc: "Logo, favicon, theme, custom CSS", icon: Palette, color: "text-cyan-600", bg: "bg-cyan-50", href: "/settings/appearance" },
+  { title: "Appearance", desc: "Logo, favicon, theme colors", icon: Palette, color: "text-cyan-600", bg: "bg-cyan-50", href: "/settings/appearance" },
+  { title: "Integrations", desc: "API keys for Resend, Gemini, Meta Ads, Google Ads", icon: Link2, color: "text-brand", bg: "bg-brand/5", href: "/settings/integrations" },
 ];
 
 export default function SettingsPage() {
@@ -18,7 +17,7 @@ export default function SettingsPage() {
     <div>
       <div className="mb-6 sm:mb-8">
         <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>Settings</h1>
-        <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Configure your store settings</p>
+        <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Configure your store</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {sections.map((s) => {

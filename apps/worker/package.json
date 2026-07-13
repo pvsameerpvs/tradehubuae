@@ -9,6 +9,7 @@
     "lint": "eslint \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "cron:seo-generation": "tsx src/main.ts cron:seo-generation",
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
