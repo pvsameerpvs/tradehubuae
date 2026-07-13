@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Heart, Share2, ShieldCheck, Truck, RotateCcw, Star, ChevronRight, MapPin, Building2, MessageSquare, CheckCircle2 } from "lucide-react";
-import { searchProducts, defaultSpecs, productReviews } from "@/data";
+import { Heart, Share2, Truck, RotateCcw, CheckCircle2, ShieldCheck, MapPin } from "lucide-react";
+import { searchProducts, defaultSpecs } from "@/data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
-import { StarRating } from "@/components/shared/StarRating";
 import { ProductRow } from "@/components/home";
 import { BuyButtons } from "@/components/products/BuyButtons";
-import Link from "next/link";
+import { ProductGallery } from "@/components/products/ProductGallery";
+import { SellerCard } from "@/components/products/SellerCard";
+import { SpecsTable } from "@/components/products/SpecsTable";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -26,11 +27,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
   if (!product) notFound();
 
   const productName = product.name;
-  const relatedProducts = searchProducts.filter((p) => p.category === product.category && p.slug !== slug).slice(0, 6);
+  const relatedProducts = searchProducts.filter(
+    (p) => p.category === product.category && p.slug !== slug,
+  ).slice(0, 6);
 
   return (
-    <div className="mx-auto max-w-[1120px] px-6 pb-24 md:pb-16">
-      <div className="py-6">
+    <div className="mx-auto max-w-[1280px] px-4 pb-28 md:px-6 md:pb-28">
+      <div className="py-3 md:py-4">
         <Breadcrumb
           items={[
             { label: "Home", href: "/" },
@@ -41,168 +44,162 @@ export default async function ProductPage({ params }: ProductPageProps) {
         />
       </div>
 
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="text-[26px] font-semibold leading-[30px] text-ink" style={{ letterSpacing: "-0.01em" }}>
-            {productName}
-          </h1>
-          <div className="mt-2 flex items-center gap-2 text-sm text-ink-2">
-            <StarRating rating={Math.floor(product.rating ?? 4)} />
-            <span className="font-medium text-ink">{product.rating}</span>
-            <span>({product.reviewCount ?? 0} reviews)</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-1">
-          <button type="button" aria-label="Share" className="flex h-10 w-10 items-center justify-center text-ink hover:text-ink/70">
-            <Share2 className="h-5 w-5" strokeWidth={1.75} />
+      <div className="flex items-start justify-between gap-3">
+        <h1 className="text-xl font-semibold leading-6 text-ink md:text-2xl md:leading-7" style={{ letterSpacing: "-0.01em" }}>
+          {productName}
+        </h1>
+        <div className="flex items-center gap-0.5 flex-shrink-0">
+          <button type="button" aria-label="Share" className="flex h-9 w-9 items-center justify-center rounded-lg text-ink transition-colors hover:bg-bg3">
+            <Share2 className="h-4 w-4" strokeWidth={1.75} />
           </button>
-          <button type="button" aria-label="Save" className="flex h-10 w-10 items-center justify-center text-ink hover:text-ink/70">
-            <Heart className="h-5 w-5" strokeWidth={1.75} />
+          <button type="button" aria-label="Save" className="flex h-9 w-9 items-center justify-center rounded-lg text-ink transition-colors hover:bg-bg3">
+            <Heart className="h-4 w-4" strokeWidth={1.75} />
           </button>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-[62%_1fr] md:gap-10">
+      <div className="mt-4 grid md:grid-cols-[1fr_360px] md:gap-4">
         <div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="col-span-2 aspect-[4/3] rounded-xl bg-bg2" />
-            <div className="aspect-square rounded-xl bg-bg2" />
-            <div className="aspect-square rounded-xl bg-bg2" />
-            <div className="aspect-square rounded-xl bg-bg2" />
-            <div className="aspect-square rounded-xl bg-bg2" />
-          </div>
+          <ProductGallery badge={product.badge} />
 
-          <div className="mt-10 space-y-10">
-            <section>
-              <h2 className="mb-4 text-[22px] font-semibold leading-[26px] text-ink" style={{ letterSpacing: "-0.01em" }}>
-                Description
-              </h2>
-              <p className="text-base leading-6 text-ink-2">
-                Experience unparalleled performance with the {productName}. Perfect for professionals, creators, and power users who demand the best. This expertly crafted machine delivers exceptional speed, stunning visuals, and all-day battery life.
-              </p>
-            </section>
+          {product.specs && (
+            <div className="mt-6 flex flex-wrap gap-2">
+              {product.specs.split(" · ").map((item) => (
+                <span key={item} className="rounded-lg bg-bg2 px-3 py-1.5 text-xs font-medium text-ink-2">
+                  {item}
+                </span>
+              ))}
+            </div>
+          )}
 
-            <section>
-              <h2 className="mb-4 text-[22px] font-semibold leading-[26px] text-ink" style={{ letterSpacing: "-0.01em" }}>
-                Meet your seller
-              </h2>
-              <div className="flex items-center gap-4 rounded-xl border border-line p-5">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-bg2 text-lg font-semibold text-ink">
-                  TH
-                </div>
-                <div>
-                  <p className="font-semibold text-ink">TradeHub UAE</p>
-                  <p className="mt-0.5 text-sm text-ink-2">Dubai, UAE · 1,200+ sales</p>
-                  <div className="mt-1 flex items-center gap-1 text-sm text-ink">
-                    <Star className="h-3.5 w-3.5 fill-ink text-ink" strokeWidth={0} />
-                    4.9 average · 327 reviews
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="mb-4 text-[22px] font-semibold leading-[26px] text-ink" style={{ letterSpacing: "-0.01em" }}>
-                What we love
-              </h2>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {[
-                  { icon: ShieldCheck, text: "Certified refurbished — tested and guaranteed" },
-                  { icon: Truck, text: "Free delivery across Dubai & UAE" },
-                  { icon: RotateCcw, text: "14-day return policy, no questions asked" },
-                  { icon: MapPin, text: "Visit our showroom in Dubai Silicon Oasis" },
-                ].map((item) => (
-                  <div key={item.text} className="flex items-start gap-3">
-                    <item.icon className="mt-0.5 h-5 w-5 flex-shrink-0 text-ink" strokeWidth={1.75} />
-                    <span className="text-sm text-ink-2">{item.text}</span>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section>
-              <h2 className="mb-4 text-[22px] font-semibold leading-[26px] text-ink" style={{ letterSpacing: "-0.01em" }}>
-                Key specifications
-              </h2>
-              <div className="rounded-xl border border-line divide-y divide-line">
-                {defaultSpecs.map((spec) => (
-                  <div key={spec.label} className="flex justify-between px-5 py-3 text-sm">
-                    <span className="text-ink-2">{spec.label}</span>
-                    <span className="font-medium text-ink">{spec.value}</span>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section>
-              <h2 className="mb-4 text-[22px] font-semibold leading-[26px] text-ink" style={{ letterSpacing: "-0.01em" }}>
-                Condition
-              </h2>
-              <div className="space-y-4">
-                <div className="flex items-start gap-4 rounded-xl border border-line p-5">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand" strokeWidth={1.75} />
-                  <div>
-                    <p className="font-semibold text-ink">Certified Refurbished</p>
-                    <p className="mt-0.5 text-sm text-ink-2">Professionally inspected, cleaned, and tested. Includes 2-year warranty. Battery replaced if below 85% capacity.</p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-[22px] font-semibold leading-[26px] text-ink" style={{ letterSpacing: "-0.01em" }}>
-                  Reviews
-                </h2>
-                <Link href="#" className="flex items-center gap-1 text-sm font-semibold text-ink underline underline-offset-2">
-                  All reviews
-                  <ChevronRight className="h-4 w-4" strokeWidth={1.75} />
-                </Link>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {productReviews.map((review) => (
-                  <div key={review.name} className="rounded-xl border border-line p-5">
-                    <div className="mb-2 flex items-center gap-2">
-                      <StarRating rating={review.rating} />
-                      <span className="text-sm font-semibold text-ink">{review.name}</span>
-                    </div>
-                    <p className="text-sm text-ink-2">{review.text}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          </div>
-        </div>
-
-        <div className="md:sticky md:top-28 md:self-start">
-          <div className="rounded-xl border border-line bg-white p-6 shadow-panel">
-            <div className="mb-4">
-              {product.originalPrice && product.originalPrice > product.price && (
-                <p className="text-sm text-ink-3 line-through">{product.originalPrice.toLocaleString()} AED</p>
-              )}
-              <p className="text-[26px] font-semibold leading-[30px] text-ink">
-                {product.price.toLocaleString()} AED
+          <div className="mt-6 space-y-6">
+            <div>
+              <h2 className="text-base font-semibold text-ink">Description</h2>
+              <p className="mt-1.5 text-sm leading-6 text-ink-2">
+                Experience unparalleled performance with the {productName}. Perfect for professionals, creators, and power users who demand the best. This expertly crafted machine delivers exceptional speed, stunning visuals, and all-day battery life. Every unit undergoes rigorous testing to ensure it meets the highest standards of quality and reliability.
               </p>
             </div>
 
-            <div className="mb-6 space-y-2 text-sm text-ink-2">
+            <div>
+              <h2 className="text-base font-semibold text-ink">Key specifications</h2>
+              <div className="mt-2">
+                <SpecsTable specs={defaultSpecs} />
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-base font-semibold text-ink">Condition</h2>
+              <div className="mt-2 rounded-xl border border-line p-4">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand" strokeWidth={2} />
+                  <div>
+                    <p className="text-sm font-semibold text-ink">Second-hand · Good condition</p>
+                    <p className="mt-0.5 text-xs leading-5 text-ink-2">
+                      Pre-owned item in good working condition. May show minor signs of use. Fully tested before listing.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="md:sticky md:top-24 md:self-start">
+          <div className="rounded-xl border border-line bg-white p-5 shadow-panel">
+            <div className="flex items-center gap-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+              </span>
+              <span className="text-xs font-medium text-green-700">In stock</span>
+            </div>
+
+            <div className="mt-2">
+              {product.originalPrice && product.originalPrice > product.price && (
+                <p className="text-xs text-ink-3 line-through">AED {product.originalPrice.toLocaleString()}</p>
+              )}
+              <div className="flex items-baseline gap-2">
+                <p className="text-2xl font-semibold text-ink">AED {product.price.toLocaleString()}</p>
+                {product.originalPrice && product.originalPrice > product.price && (
+                  <span className="rounded bg-sale/10 px-1.5 py-0.5 text-[10px] font-semibold text-sale">
+                    -{Math.round((1 - product.price / product.originalPrice) * 100)}%
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-3 space-y-1.5 border-t border-line pt-3 text-xs text-ink-2">
               <div className="flex items-center gap-2">
-                <Truck className="h-4 w-4" strokeWidth={1.75} />
-                Free delivery in Dubai
+                <Truck className="h-3.5 w-3.5 text-ink" strokeWidth={1.75} />
+                Free delivery by Thu, Jul 16
               </div>
               <div className="flex items-center gap-2">
-                <RotateCcw className="h-4 w-4" strokeWidth={1.75} />
+                <RotateCcw className="h-3.5 w-3.5 text-ink" strokeWidth={1.75} />
                 14-day returns
               </div>
             </div>
 
-            <BuyButtons product={product} />
+            <div className="mt-3 rounded-lg bg-bg2 px-3 py-2 text-center">
+              <p className="text-[11px] text-ink-2">
+                4 interest-free payments of <span className="font-semibold text-ink">AED {(product.price / 4).toLocaleString()}</span>
+              </p>
+            </div>
+
+            <div className="mt-3">
+              <BuyButtons product={product} />
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <SellerCard />
+          </div>
+
+          <div className="mt-4 flex items-start gap-3 rounded-xl border border-line p-4">
+            <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand" strokeWidth={1.75} />
+            <div>
+              <p className="text-xs font-semibold text-ink">Secure checkout</p>
+              <p className="mt-0.5 text-xs text-ink-2">SSL encrypted · PayPal & card accepted</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-xl border border-line p-4 md:hidden">
+        <div className="flex items-start gap-3">
+          <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand" strokeWidth={1.75} />
+          <div>
+            <p className="text-xs font-semibold text-ink">Secure checkout</p>
+            <p className="mt-0.5 text-xs text-ink-2">SSL encrypted · PayPal & card accepted</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 md:mt-10 md:grid-cols-3">
+        <div className="flex items-start gap-3">
+          <Truck className="mt-0.5 h-4 w-4 flex-shrink-0 text-ink" strokeWidth={1.75} />
+          <div>
+            <p className="text-xs font-semibold text-ink">Free shipping</p>
+            <p className="text-xs text-ink-2">On orders over 500 AED</p>
+          </div>
+        </div>
+        <div className="flex items-start gap-3">
+          <RotateCcw className="mt-0.5 h-4 w-4 flex-shrink-0 text-ink" strokeWidth={1.75} />
+          <div>
+            <p className="text-xs font-semibold text-ink">Easy returns</p>
+            <p className="text-xs text-ink-2">14-day return policy</p>
+          </div>
+        </div>
+        <div className="flex items-start gap-3">
+          <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-ink" strokeWidth={1.75} />
+          <div>
+            <p className="text-xs font-semibold text-ink">Dubai showroom</p>
+            <p className="text-xs text-ink-2">Visit us in Silicon Oasis</p>
           </div>
         </div>
       </div>
 
       {relatedProducts.length > 0 && (
-        <div className="mt-16 border-t border-line pt-16">
+        <div className="mt-12 border-t border-line pt-12">
           <ProductRow
             title={`More in ${product.category}`}
             products={relatedProducts}
@@ -210,7 +207,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
           />
         </div>
       )}
-
     </div>
   );
 }

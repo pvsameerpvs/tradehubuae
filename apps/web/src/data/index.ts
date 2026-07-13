@@ -10,7 +10,7 @@ export type { Brand } from "./brands";
 export { orders, orderStatusColor } from "./orders";
 export type { Order, OrderItem } from "./orders";
 
-export { productReviews } from "./reviews";
+
 
 export { comboOffers } from "./comboOffers";
 
