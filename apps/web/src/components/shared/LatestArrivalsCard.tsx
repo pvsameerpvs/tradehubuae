@@ -62,10 +62,10 @@ export function LatestArrivalsCard({ product }: { product: Product }) {
           </button>
         </div>
         <CardContent className="px-4 pb-4 pt-3">
-          <h3 className="text-[17px] font-semibold leading-[22px] text-ink">
+          <h3 className="truncate text-[15px] font-semibold leading-[19px] text-ink">
             {product.name}
           </h3>
-          <p className="mt-1 text-[15px] font-semibold leading-[19px] text-brand">
+          <p className="mt-0.5 text-[14px] font-semibold leading-[18px] text-brand">
             AED {product.price.toLocaleString()}
           </p>
         </CardContent>

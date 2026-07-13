@@ -68,11 +68,13 @@ function CategoryRow() {
       </div>
       <div className="relative">
         <div
-          className="flex gap-4 overflow-x-auto md:flex-nowrap [&::-webkit-scrollbar]:hidden"
+          className="flex flex-nowrap gap-4 overflow-x-auto [&::-webkit-scrollbar]:hidden"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {categories.map((cat) => (
-            <CategoryCard key={cat.slug} category={cat} />
+            <div key={cat.slug} className="min-w-[90px] flex-shrink-0 md:min-w-0 md:flex-1">
+              <CategoryCard category={cat} />
+            </div>
           ))}
         </div>
       </div>
