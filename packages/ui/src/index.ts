@@ -4,7 +4,6 @@ export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
 export { Badge, badgeVariants } from "./components/ui/badge";
 export type { BadgeProps } from "./components/ui/badge";
 export { Input } from "./components/ui/input";
-export type { InputProps } from "./components/ui/input";
 export {
   Dialog,
   DialogPortal,
