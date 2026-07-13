@@ -13,77 +13,50 @@ export interface Offer {
   cta: string;
 }
 
-export const offers: Offer[] = [
-  {
-    id: "offer-1",
-    title: "Work From Home Bundle",
-    description: "Save big on complete home office setups",
-    type: "bundle",
-    badge: "Bundle Deal",
-    href: "/combo-offers",
-    coverGradient: "from-[#1A5A8C] to-[#103E68]",
-    coverIcon: "briefcase",
-    details: "Save up to 16% on curated bundles",
-    cta: "Shop bundles",
-  },
-  {
-    id: "offer-2",
-    title: "20% Off Gaming PCs",
-    description: "Limited time offer on selected gaming rigs",
-    type: "percentage",
-    badge: "-20%",
-    href: "/categories/gaming-pcs?offer=20off",
-    coverGradient: "from-[#C13515] to-[#8B1A0A]",
-    coverIcon: "gamepad",
-    details: "Use code: GAMER20",
-    cta: "Shop now",
-  },
-  {
-    id: "offer-3",
-    title: "Buy 1 Monitor, Get 1 Free",
-    description: "On selected 27-inch and ultrawide displays",
-    type: "bogo",
-    badge: "BOGO",
-    href: "/categories/monitors?offer=bogo",
-    coverGradient: "from-[#0F766E] to-[#0D5E57]",
-    coverIcon: "monitor",
-    details: "Free monitor of equal or lesser value",
-    cta: "View offer",
-  },
-  {
-    id: "offer-4",
-    title: "15% Off Accessories",
-    description: "Keyboards, mice, headsets and more",
-    type: "percentage",
-    badge: "-15%",
-    href: "/categories/accessories?offer=15off",
-    coverGradient: "from-[#6D28D9] to-[#4C1D95]",
-    coverIcon: "keyboard",
-    details: "Use code: ACCESS15",
-    cta: "Shop accessories",
-  },
-  {
-    id: "offer-5",
-    title: "Buy a Laptop, Get a Mouse Free",
-    description: "Free Logitech mouse with any laptop purchase",
-    type: "bogo",
-    badge: "BOGO",
-    href: "/categories/laptops?offer=freemouse",
-    coverGradient: "from-[#0369A1] to-[#075985]",
-    coverIcon: "laptop",
-    details: "Auto-applied at checkout",
-    cta: "Browse laptops",
-  },
-  {
-    id: "offer-6",
-    title: "Networking Bundle",
-    description: "Router + WiFi adapter at a special price",
-    type: "bundle",
-    badge: "Bundle Deal",
-    href: "/combo-offers",
-    coverGradient: "from-[#4F46E5] to-[#3730A3]",
-    coverIcon: "wifi",
-    details: "Save AED 349 on the bundle",
-    cta: "Shop bundles",
-  },
-];
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
+
+export async function fetchOffers(): Promise<Offer[]> {
+  try {
+    const res = await fetch(`${API_BASE}/combo-offers/active`, { next: { revalidate: 60 } });
+    if (!res.ok) return [];
+    const data = await res.json();
+
+    const gradients = [
+      "from-[#1A5A8C] to-[#103E68]",
+      "from-[#C13515] to-[#8B1A0A]",
+      "from-[#0F766E] to-[#0D5E57]",
+      "from-[#6D28D9] to-[#4C1D95]",
+      "from-[#0369A1] to-[#075985]",
+      "from-[#4F46E5] to-[#3730A3]",
+    ];
+
+    const icons = ["briefcase", "gamepad", "monitor", "keyboard", "laptop", "wifi"];
+
+    return data.map((offer: any, idx: number) => {
+      const totalOriginal = offer.items.reduce((sum: number, item: any) => {
+        return sum + Number(item.product?.price ?? 0) * item.quantity;
+      }, 0);
+
+      const savings = offer.discountType === "PERCENTAGE"
+        ? totalOriginal * Number(offer.discountValue) / 100
+        : Number(offer.discountValue);
+
+      return {
+        id: offer.id,
+        title: offer.name,
+        description: offer.description ?? "Curated bundle for every need",
+        type: "bundle" as OfferType,
+        badge: offer.discountType === "PERCENTAGE" ? `-${offer.discountValue}%` : "Bundle Deal",
+        href: "/combo-offers",
+        coverGradient: gradients[idx % gradients.length],
+        coverIcon: icons[idx % icons.length],
+        details: savings > 0 ? `Save up to AED ${Math.round(savings).toLocaleString()}` : "Great value bundle",
+        cta: "Shop bundles",
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
+export const offers: Offer[] = [];

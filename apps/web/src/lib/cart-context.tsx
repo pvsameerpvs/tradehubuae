@@ -6,6 +6,7 @@ import {
   useState,
   useCallback,
   useMemo,
+  useEffect,
   type ReactNode,
 } from "react";
 import type { Product } from "@/data";
@@ -17,7 +18,7 @@ import {
   calculatePromoDiscount,
 } from "@/data/promoCodes";
 import { getBulkDiscountPercent } from "@/data/bulkPricing";
-import { getComboSavings } from "@/data/comboOffers";
+import { fetchComboOffers } from "@/data/comboOffers";
 
 export interface CartItem extends Product {
   quantity: number;
@@ -76,6 +77,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [activePromo, setActivePromo] = useState<PromoCode | null>(null);
   const [promoError, setPromoError] = useState("");
+  const [comboOffersList, setComboOffersList] = useState<ComboOffer[]>([]);
+
+  useEffect(() => {
+    fetchComboOffers().then(setComboOffersList);
+  }, []);
 
   function getAvailableStock(slug: string): number {
     const product = searchProducts.find((p) => p.slug === slug);
@@ -189,11 +195,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const subtotalAfterBulk = subtotal - bulkSavings;
 
-  const { comboDiscount } = useMemo(() => {
+  const comboDiscount = useMemo(() => {
     const slugs = items.map((i) => i.slug);
-    const result = getComboSavings(slugs);
-    return { comboDiscount: result.savings };
-  }, [items]);
+    const slugSet = new Set(slugs);
+    for (const combo of comboOffersList) {
+      const comboSlugs = combo.items.map((i) => i.slug);
+      if (comboSlugs.every((s) => slugSet.has(s))) {
+        return combo.original - combo.price;
+      }
+    }
+    return 0;
+  }, [items, comboOffersList]);
 
   const promoDiscount = useMemo(() => {
     if (!activePromo) return 0;

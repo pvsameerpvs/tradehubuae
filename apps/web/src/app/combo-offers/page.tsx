@@ -1,13 +1,49 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Gift, Check, ShoppingCart, Star } from "lucide-react";
 import { Badge } from "@tradehubuae/ui";
-import { comboOffers } from "@/data";
+import { fetchComboOffers, type ComboOffer } from "@/data";
 import { useCart } from "@/lib/cart-context";
 
 export default function ComboOffersPage() {
+  const [offers, setOffers] = useState<ComboOffer[]>([]);
+  const [loading, setLoading] = useState(true);
   const { addComboToCart } = useCart();
+
+  useEffect(() => {
+    fetchComboOffers().then((data) => {
+      setOffers(data);
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
+        <div className="mb-10 text-center">
+          <h1 className="text-[26px] font-semibold leading-[30px] text-ink" style={{ letterSpacing: "-0.01em" }}>
+            Combo Offers
+          </h1>
+          <p className="mt-1 text-sm text-ink-2">Loading offers...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (offers.length === 0) {
+    return (
+      <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
+        <div className="mb-10 text-center">
+          <h1 className="text-[26px] font-semibold leading-[30px] text-ink" style={{ letterSpacing: "-0.01em" }}>
+            Combo Offers
+          </h1>
+          <p className="mt-1 text-sm text-ink-2">No active offers right now. Check back soon!</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
@@ -24,29 +60,24 @@ export default function ComboOffersPage() {
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {comboOffers.map((combo) => (
+        {offers.map((combo) => (
           <div
             key={combo.id}
             className="group relative overflow-hidden rounded-xl border border-line bg-white transition-shadow hover:shadow-card"
           >
             <Badge
               className="absolute left-3 top-3 z-10 rounded-full px-3 py-1 text-xs font-semibold"
-              variant={
-                combo.badge === "Best Value"
-                  ? "success"
-                  : combo.badge === "Popular" || combo.badge === "Staff Pick"
-                    ? "default"
-                    : "warning"
-              }
+              variant="default"
             >
               {combo.badge}
             </Badge>
 
             <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-bg2">
-              <Gift
-                className="h-20 w-20 text-brand/20"
-                strokeWidth={1}
-              />
+              {combo.image ? (
+                <img src={combo.image} alt="" className="h-full w-full object-cover" loading="lazy" />
+              ) : (
+                <Gift className="h-20 w-20 text-brand/20" strokeWidth={1} />
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent" />
             </div>
 

@@ -29,6 +29,12 @@ export class ProductsController {
   }
 
   @Roles("ADMIN", "SUPER_ADMIN", "CONTENT_MANAGER")
+  @Get(":id")
+  async findById(@Param("id") id: string) {
+    return this.productsService.findById(id);
+  }
+
+  @Roles("ADMIN", "SUPER_ADMIN", "CONTENT_MANAGER")
   @Post()
   async create(@Body() dto: CreateProductDto) {
     return this.productsService.create(dto);

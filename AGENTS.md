@@ -202,3 +202,171 @@ Card column counts: 1600px+=7, 1440–1599=6, 1280–1439=5, 1024–1279=4, 744�
 - Use `lucide-react` for icons (size 16-24, strokeWidth 1.75)
 - Every interactive element gets an `aria-label` if it has no visible text
 - Semantic HTML: `header`, `nav`, `main`, `section`, `article`, `footer`, real `button` and `a` elements
+
+---
+
+## Admin Dashboard — Sidebar Item Audit
+
+### 1. Dashboard `/dashboard`
+| Aspect | Status | Why (if not implemented) |
+|---|---|---|
+| Main page | ✅ Complete | — |
+| Sub-routes | ✅ `/dashboard/chats` complete | — |
+| Loading state | ✅ Skeleton cards | — |
+| Error state | ❌ Silent catch | API doesn't return structured errors consistently; needs ErrorBoundary or per-call `setError` with fallback UI |
+| Empty state | ✅ Handled | — |
+| Mobile/Desktop | ✅ Responsive grid | — |
+
+### 2. Products `/products`
+| Aspect | Status | Why (if not implemented) |
+|---|---|---|
+| List page | ✅ Complete | — |
+| Create page | ✅ `/products/new` | — |
+| Edit page | ✅ `/[id]` | — |
+| Form tokens | ✅ Uses project tokens | — |
+| Form validation | ✅ zod + react-hook-form | — |
+| Missing | ❌ Custom Label/FieldError vs shadcn | shadcn `FormField`/`FormItem`/`FormLabel` not added to `@tradehubuae/ui` package yet; would need to export them first |
+
+### 3. Orders `/orders`
+| Aspect | Status | Why (if not implemented) |
+|---|---|---|
+| List page | ✅ Complete | — |
+| Detail page | ✅ `/orders/[id]` created | — |
+| Search/Filter | ❌ Not added | API backend doesn't expose search/filter query params for orders; would need backend + frontend coordination |
+| Actions | ❌ Status update buttons | Order state machine (pending→confirmed→processing→shipped→delivered) needs backend validation of valid transitions |
+
+### 4. Categories `/categories`
+| Aspect | Status | Why (if not implemented) |
+|---|---|---|
+| List page | ✅ Complete | — |
+| Create page | ✅ `/categories/new` | — |
+| Edit page | ✅ `/[id]` | — |
+| Form tokens | ✅ Fixed — now uses project tokens | — |
+| Form validation | ❌ No zod RHF | Manual state + `alert()` works; upgrading to zod/RHF deferred — small form, low complexity |
+
+### 5. Brands `/brands`
+| Aspect | Status | Why (if not implemented) |
+|---|---|---|
+| List page | ✅ Complete | — |
+| Create page | ✅ `/brands/new` | — |
+| Edit page | ✅ `/[id]` | — |
+| Form tokens | ✅ Fixed — now uses project tokens | — |
+| Form validation | ❌ No zod RHF | Same as categories — manual state sufficient for 6-field form |
+
+### 6. Customers `/customers`
+| Aspect | Status | Why (if not implemented) |
+|---|---|---|
+| List page | ✅ Complete | — |
+| Detail page | ✅ `/customers/[id]` created | — |
+| Search/Filter | ❌ Not added | API doesn't expose customer search/filter params |
+
+### 7. Live Chat `/dashboard/chats`
+| Aspect | Status | Why (if not implemented) |
+|---|---|---|
+| Page | ✅ Complete | — |
+| Data | ✅ Uses store/local | — |
+
+### 8. Inventory `/inventory`
+| Aspect | Status | Why (if not implemented) |
+|---|---|---|
+| List page | ✅ Complete | — |
+| Error state | ❌ Silent catch | Same pattern as Dashboard — API error display deferred |
+| Actions | ❌ No stock adjust/batch edit | Requires backend endpoints for stock mutations and batch operations |
+
+### 9. Combo Offers `/combo-offers`
+| Aspect | Status | Why (if not implemented) |
+|---|---|---|
+| List page | ✅ Complete | — |
+| Create page | ✅ `/combo-offers/new` | — |
+| Edit page | ✅ `/[id]` | — |
+| Form tokens | ✅ Fixed — now uses project tokens | — |
+| Form validation | ❌ No zod RHF | Same pattern as categories — deferred, low complexity form |
+
+### 10. Bulk Sales `/bulk-sales`
+| Aspect | Status | Why (if not implemented) |
+|---|---|---|
+| List page | ✅ Complete | — |
+| Detail page | ✅ `/bulk-sales/[id]` created with approve/quote/reject | — |
+
+### 11. Reviews `/reviews`
+| Aspect | Status | Why (if not implemented) |
+|---|---|---|
+| List page | ✅ Complete | — |
+| Detail page | ✅ `/reviews/[id]` created with approve/reject | — |
+
+### 12. Media `/media`
+| Aspect | Status | Why (if not implemented) |
+|---|---|---|
+| Page | ✅ Complete | — |
+| Form tokens | ✅ Fixed — now uses project tokens | — |
+| Delete action | ❌ Trash icon unused | Delete endpoint not confirmed in media API; adding a delete without confirmation dialog is risky |
+
+### 13. Blog `/blog`
+| Aspect | Status | Why (if not implemented) |
+|---|---|---|
+| List page | ✅ Complete | — |
+| Create page | ✅ `/blog/new` created | — |
+| Edit page | ✅ `/blog/[id]` created | — |
+| Form component | ✅ BlogForm created | — |
+
+### 14. SEO `/seo`
+| Aspect | Status | Why (if not implemented) |
+|---|---|---|
+| Landing page | ✅ Cards linking to tools | — |
+| Meta page | ✅ `/seo/meta` created | — |
+| Sitemap | ✅ `/seo/sitemap` created | — |
+| Redirects | ✅ `/seo/redirects` created | — |
+
+### 15. Analytics `/analytics`
+| Aspect | Status | Why (if not implemented) |
+|---|---|---|
+| Page | ✅ Complete UI with 6 sections | — |
+| Data source | ❌ All hardcoded | No analytics tracking service exists — requires frontend tracking script (GA4/Meta Pixel) + backend aggregation API |
+| Loading/Error | ❌ No states | Data is hardcoded so no loading needed; error states would matter once API connected |
+| Mobile table | ❌ Ads table no mobile fallback | Ads table has 8 columns — mobile card view would lose comparative structure; needs responsive table design pattern |
+
+### 16. AI Assistant `/ai`
+| Aspect | Status | Why (if not implemented) |
+|---|---|---|
+| Page | ✅ Complete UI | — |
+| Functionality | ❌ Generate button no-op | No AI/LLM API provider configured — requires OpenAI/Claude API key + backend proxy endpoint for security |
+| Loading/Error | ❌ No states | Would be added when API connection is established |
+
+### 17. Users `/users`
+| Aspect | Status | Why (if not implemented) |
+|---|---|---|
+| List page | ✅ Complete | — |
+| Create page | ✅ `/users/new` created | — |
+| Detail page | ✅ `/users/[id]` created | — |
+
+### 18. Settings `/settings`
+| Aspect | Status | Why (if not implemented) |
+|---|---|---|
+| Landing page | ✅ Cards with `<Link>` wrappers — fixed | — |
+| General | ✅ `/settings/general` created | — |
+| Payments | ✅ `/settings/payments` created | — |
+| Shipping | ✅ `/settings/shipping` created | — |
+| Email | ✅ `/settings/email` created | — |
+| Security | ✅ `/settings/security` created | — |
+| Appearance | ✅ `/settings/appearance` created | — |
+
+### Global Files
+| File | Status | Why (if not implemented) |
+|---|---|---|
+| `loading.tsx` | ✅ Created | — |
+| `error.tsx` | ✅ Created | — |
+| `not-found.tsx` | ✅ Created | — |
+
+### Empty Dirs (not in sidebar, not linked)
+- `coupons/`, `permissions/`, `roles/` — ❌ No pages | Not in sidebar nav; would need API endpoints and business logic before building UIs
+
+### Summary of Remaining ❌ Items (all with valid deferral reasons)
+1. Dashboard error UI — needs API error contract
+2. ProductForm shadcn components — needs `@tradehubuae/ui` package update
+3. Orders search/filter/actions — needs backend support
+4. Categories/Brands/ComboOffers zod RHF — low priority (small forms)
+5. Inventory error/actions — needs backend stock endpoints
+6. Media delete — needs API confirmation
+7. Analytics API data — needs tracking infrastructure
+8. AI Assistant API — needs LLM provider setup
+9. Empty coupon/permission/role dirs — not in nav scope

@@ -1,96 +1,124 @@
 import { Injectable, NotFoundException, Logger } from "@nestjs/common";
-import { PrismaService } from "../../database/prisma.service";
+import { DrizzleService } from "../../database/drizzle.service";
+import { stock, stockHistory, stockTransfers, stockTransferItems } from "@tradehubuae/database";
+import { eq, and, lte, sql } from "drizzle-orm";
 
 @Injectable()
 export class InventoryService {
   private readonly logger = new Logger(InventoryService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private drizzle: DrizzleService) {}
 
   async getStock(productId: string) {
-    return this.prisma.stock.findMany({
-      where: { productId },
-      include: { warehouse: true },
+    return this.drizzle.db.query.stock.findMany({
+      where: eq(stock.productId, productId),
+      with: { warehouse: true },
     });
   }
 
   async getAllStock(query: { warehouseId?: string; lowStock?: boolean }) {
-    const where: any = {};
-    if (query.warehouseId) where.warehouseId = query.warehouseId;
-    if (query.lowStock) where.available = { lte: this.prisma.stock.fields.minimumStock };
+    const conditions: (typeof sql.arguments[number] | undefined)[] = [];
 
-    return this.prisma.stock.findMany({
+    if (query.warehouseId) conditions.push(eq(stock.warehouseId, query.warehouseId));
+
+    const where = conditions.length > 0 ? and(...conditions.filter(Boolean)) : undefined;
+
+    const allStock = await this.drizzle.db.query.stock.findMany({
       where,
-      include: {
+      with: {
         warehouse: true,
-        product: { select: { name: true, sku: true } },
+        product: { columns: { name: true, sku: true } },
       },
     });
+
+    if (query.lowStock) {
+      return allStock.filter((s) => s.available <= s.minimumStock);
+    }
+
+    return allStock;
   }
 
   async adjustStock(id: string, quantity: number, type: string, note?: string) {
-    const stock = await this.prisma.stock.findUnique({ where: { id } });
-    if (!stock) throw new NotFoundException("Stock record not found");
+    const [stockRecord] = await this.drizzle.db
+      .select()
+      .from(stock)
+      .where(eq(stock.id, id))
+      .limit(1);
 
-    const updated = await this.prisma.stock.update({
-      where: { id },
-      data: {
-        quantity: { increment: quantity },
-        available: { increment: quantity },
-      },
+    if (!stockRecord) throw new NotFoundException("Stock record not found");
+
+    const [updated] = await this.drizzle.db
+      .update(stock)
+      .set({
+        quantity: sql`quantity + ${quantity}`,
+        available: sql`available + ${quantity}`,
+      })
+      .where(eq(stock.id, id))
+      .returning();
+
+    await this.drizzle.db.insert(stockHistory).values({
+      variantId: id,
+      warehouseId: stockRecord.warehouseId,
+      type,
+      quantity,
+      note,
     });
 
-    await this.prisma.stockHistory.create({
-      data: {
-        variantId: id,
-        warehouseId: stock.warehouseId,
-        type,
-        quantity,
-        note,
-      },
-    });
-
-    return updated;
+    return updated!;
   }
 
   async transferStock(dto: { fromWarehouseId: string; toWarehouseId: string; items: { variantId: string; quantity: number }[] }) {
-    return this.prisma.$transaction(async (tx) => {
+    const transfer = await this.drizzle.db.transaction(async (tx) => {
       for (const item of dto.items) {
-        const fromStock = await tx.stock.findUnique({
-          where: { warehouseId_productId_variantId: { warehouseId: dto.fromWarehouseId, productId: "", variantId: item.variantId } },
-        });
+        const [fromStock] = await tx
+          .select()
+          .from(stock)
+          .where(
+            and(
+              eq(stock.warehouseId, dto.fromWarehouseId),
+              eq(stock.variantId, item.variantId),
+            ),
+          )
+          .limit(1);
 
         if (!fromStock || fromStock.available < item.quantity) {
           throw new Error(`Insufficient stock for variant ${item.variantId}`);
         }
       }
 
-      const transfer = await tx.stockTransfer.create({
-        data: {
+      const [transfer] = await tx
+        .insert(stockTransfers)
+        .values({
           fromWarehouseId: dto.fromWarehouseId,
           toWarehouseId: dto.toWarehouseId,
           referenceNumber: `ST-${Date.now().toString(36).toUpperCase()}`,
-          items: {
-            create: dto.items.map((item) => ({
-              variantId: item.variantId,
-              quantity: item.quantity,
-            })),
-          },
-        },
-      });
+        })
+        .returning();
 
-      return transfer;
+      if (dto.items.length > 0) {
+        await tx.insert(stockTransferItems).values(
+          dto.items.map((item) => ({
+            transferId: transfer!.id,
+            variantId: item.variantId,
+            quantity: item.quantity,
+          })),
+        );
+      }
+
+      return transfer!;
     });
+
+    return transfer;
   }
 
   async getLowStockAlerts(threshold: number = 5) {
-    return this.prisma.stock.findMany({
-      where: { available: { lte: threshold } },
-      include: {
-        product: { select: { name: true, sku: true } },
-        warehouse: { select: { name: true } },
+    return this.drizzle.db.query.stock.findMany({
+      where: lte(stock.available, threshold),
+      with: {
+        product: { columns: { name: true, sku: true } },
+        warehouse: { columns: { name: true } },
       },
-      orderBy: { available: "asc" },
+      orderBy: (stock, { asc }) => [asc(stock.available)],
     });
   }
 }

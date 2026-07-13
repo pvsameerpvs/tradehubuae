@@ -1,6 +1,8 @@
 import { Injectable, UnauthorizedException, ConflictException, Logger } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { PrismaService } from "../../database/prisma.service";
+import { DrizzleService } from "../../database/drizzle.service";
+import { users } from "@tradehubuae/database";
+import { eq } from "drizzle-orm";
 import type { LoginDto } from "./dto/login.dto";
 import type { RegisterDto } from "./dto/register.dto";
 
@@ -9,50 +11,69 @@ export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
   constructor(
-    private prisma: PrismaService,
+    private drizzle: DrizzleService,
     private jwtService: JwtService,
   ) {}
 
   async register(dto: RegisterDto) {
-    const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    const [existing] = await this.drizzle.db
+      .select()
+      .from(users)
+      .where(eq(users.email, dto.email))
+      .limit(1);
+
     if (existing) {
       throw new ConflictException("Email already registered");
     }
 
-    const user = await this.prisma.user.create({
-      data: {
+    const [user] = await this.drizzle.db
+      .insert(users)
+      .values({
         email: dto.email,
         name: dto.name,
         password: dto.password,
         phone: dto.phone,
         role: "CUSTOMER",
-      },
-    });
+      })
+      .returning();
 
+    if (!user) throw new Error("Failed to create user");
     const token = this.generateToken(user);
     return { user: this.sanitizeUser(user), token };
   }
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    const [user] = await this.drizzle.db
+      .select()
+      .from(users)
+      .where(eq(users.email, dto.email))
+      .limit(1);
+
     if (!user) {
       throw new UnauthorizedException("Invalid credentials");
     }
 
     const token = this.generateToken(user);
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { lastLoginAt: new Date() },
-    });
+
+    await this.drizzle.db
+      .update(users)
+      .set({ lastLoginAt: new Date() })
+      .where(eq(users.id, user.id));
 
     return { user: this.sanitizeUser(user), token };
   }
 
   async validateUser(userId: string) {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    const [user] = await this.drizzle.db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
     if (!user || !user.isActive) {
       throw new UnauthorizedException("User not found or inactive");
     }
+
     return this.sanitizeUser(user);
   }
 

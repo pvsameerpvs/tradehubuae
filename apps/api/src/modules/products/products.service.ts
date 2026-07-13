@@ -1,67 +1,75 @@
 import { Injectable, NotFoundException, Logger } from "@nestjs/common";
-import { PrismaService } from "../../database/prisma.service";
+import { DrizzleService } from "../../database/drizzle.service";
+import { products, productImages, brands, productCategories, productVariants, reviews } from "@tradehubuae/database";
+import { eq, and, like, or, sql, asc, desc, count } from "drizzle-orm";
 import type { CreateProductDto } from "./dto/create-product.dto";
 import type { UpdateProductDto } from "./dto/update-product.dto";
 import type { QueryProductDto } from "./dto/query-product.dto";
 import slugify from "slugify";
 import { generateSKU } from "@tradehubuae/utils";
 
+const productSortColumns: Record<string, any> = {
+  createdAt: products.createdAt,
+  name: products.name,
+  price: products.price,
+  viewCount: products.viewCount,
+  saleCount: products.saleCount,
+  updatedAt: products.updatedAt,
+};
+
 @Injectable()
 export class ProductsService {
   private readonly logger = new Logger(ProductsService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private drizzle: DrizzleService) {}
 
   async findAll(query: QueryProductDto) {
     const { page = 1, limit = 20, sort = "createdAt", order = "desc", q, category, brand, minPrice, maxPrice, condition, inStock } = query;
 
-    const where: any = { isActive: true };
+    const conditions: (typeof sql.arguments[number] | undefined)[] = [
+      eq(products.isActive, true),
+    ];
 
     if (q) {
-      where.OR = [
-        { name: { contains: q, mode: "insensitive" } },
-        { sku: { contains: q, mode: "insensitive" } },
-        { description: { contains: q, mode: "insensitive" } },
-        { shortDescription: { contains: q, mode: "insensitive" } },
-      ];
-    }
-
-    if (category) {
-      where.categories = { some: { category: { slug: category } } };
+      conditions.push(
+        or(
+          like(products.name, `%${q}%`),
+          like(products.sku, `%${q}%`),
+          like(products.description, `%${q}%`),
+          like(products.shortDescription, `%${q}%`),
+        ),
+      );
     }
 
     if (brand) {
-      where.brand = { slug: brand };
+      conditions.push(sql`EXISTS (SELECT 1 FROM ${brands} WHERE ${brands.slug} = ${brand} AND ${brands.id} = ${products.brandId})`);
     }
 
-    if (minPrice !== undefined || maxPrice !== undefined) {
-      where.price = {};
-      if (minPrice !== undefined) where.price.gte = minPrice;
-      if (maxPrice !== undefined) where.price.lte = maxPrice;
-    }
+    if (minPrice !== undefined) conditions.push(sql`${products.price} >= ${minPrice}`);
+    if (maxPrice !== undefined) conditions.push(sql`${products.price} <= ${maxPrice}`);
+    if (condition) conditions.push(eq(products.condition, condition as any));
+    if (inStock) conditions.push(sql`${products.availableStock} > 0`);
 
-    if (condition) {
-      where.condition = condition;
-    }
+    const where = and(...conditions.filter(Boolean));
 
-    if (inStock) {
-      where.availableStock = { gt: 0 };
-    }
+    const data = await this.drizzle.db.query.products.findMany({
+      where,
+      with: {
+        images: { where: eq(productImages.isPrimary, true), limit: 1 },
+        brand: true,
+        categories: { with: { category: true } },
+      },
+      orderBy: order === "desc" ? desc(productSortColumns[sort] ?? products.createdAt) : asc(productSortColumns[sort] ?? products.createdAt),
+      offset: (page - 1) * limit,
+      limit,
+    });
 
-    const [data, total] = await Promise.all([
-      this.prisma.product.findMany({
-        where,
-        include: {
-          images: { where: { isPrimary: true }, take: 1 },
-          brand: true,
-          categories: { include: { category: true } },
-        },
-        orderBy: { [sort]: order },
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      this.prisma.product.count({ where }),
-    ]);
+    const [totalResult] = await this.drizzle.db
+      .select({ total: count() })
+      .from(products)
+      .where(where);
+
+    const total = Number(totalResult?.total ?? 0);
 
     return {
       data,
@@ -77,19 +85,19 @@ export class ProductsService {
   }
 
   async findBySlug(slug: string) {
-    const product = await this.prisma.product.findUnique({
-      where: { slug },
-      include: {
-        images: { orderBy: { sortOrder: "asc" } },
+    const [product] = await this.drizzle.db.query.products.findMany({
+      where: eq(products.slug, slug),
+      with: {
+        images: { orderBy: (images, { asc }) => [asc(images.sortOrder)] },
         brand: true,
-        categories: { include: { category: true } },
-        specs: { orderBy: { sortOrder: "asc" } },
-        variants: { where: { isActive: true } },
+        categories: { with: { category: true } },
+        specs: { orderBy: (specs, { asc }) => [asc(specs.sortOrder)] },
+        variants: { where: eq(productVariants.isActive, true) },
         reviews: {
-          where: { isApproved: true },
-          include: { user: { select: { name: true, image: true } } },
-          orderBy: { createdAt: "desc" },
-          take: 10,
+          where: eq(reviews.isApproved, true),
+          with: { user: { columns: { name: true, image: true } } },
+          orderBy: (reviews, { desc }) => [desc(reviews.createdAt)],
+          limit: 10,
         },
       },
     });
@@ -98,18 +106,18 @@ export class ProductsService {
       throw new NotFoundException("Product not found");
     }
 
-    await this.prisma.product.update({
-      where: { id: product.id },
-      data: { viewCount: { increment: 1 } },
-    });
+    await this.drizzle.db
+      .update(products)
+      .set({ viewCount: sql`${products.viewCount} + 1` })
+      .where(eq(products.id, product.id));
 
     return product;
   }
 
   async findById(id: string) {
-    const product = await this.prisma.product.findUnique({
-      where: { id },
-      include: {
+    const [product] = await this.drizzle.db.query.products.findMany({
+      where: eq(products.id, id),
+      with: {
         images: true,
         brand: true,
         categories: true,
@@ -124,7 +132,11 @@ export class ProductsService {
 
   async create(dto: CreateProductDto) {
     const slug = slugify(dto.name, { lower: true, strict: true });
-    const existingSlug = await this.prisma.product.findUnique({ where: { slug } });
+    const [existingSlug] = await this.drizzle.db
+      .select()
+      .from(products)
+      .where(eq(products.slug, slug))
+      .limit(1);
 
     const finalSlug = existingSlug
       ? `${slug}-${Date.now().toString(36)}`
@@ -132,87 +144,101 @@ export class ProductsService {
 
     const sku = dto.sku ?? generateSKU(dto.categoryId ?? "", dto.brandId ?? "", Date.now());
 
-    const product = await this.prisma.product.create({
-      data: {
+    const [product] = await this.drizzle.db
+      .insert(products)
+      .values({
         name: dto.name,
         slug: finalSlug,
         description: dto.description,
         shortDescription: dto.shortDescription,
         sku,
+        barcode: dto.barcode,
         condition: dto.condition as any,
-        price: dto.price,
-        compareAtPrice: dto.compareAtPrice,
-        costPrice: dto.costPrice,
+        price: dto.price.toString(),
+        compareAtPrice: dto.compareAtPrice?.toString(),
+        costPrice: dto.costPrice?.toString(),
         brandId: dto.brandId,
         isActive: dto.isActive ?? true,
         isFeatured: dto.isFeatured ?? false,
         seoTitle: dto.seoTitle,
         seoDescription: dto.seoDescription,
         metaKeywords: dto.metaKeywords,
-        categories: dto.categoryId
-          ? { create: { categoryId: dto.categoryId, isPrimary: true } }
-          : undefined,
-      },
-      include: {
-        images: true,
-        brand: true,
-        categories: { include: { category: true } },
-      },
-    });
+      })
+      .returning();
 
-    this.logger.log(`Product created: ${product.name} (${product.sku})`);
-    return product;
+    if (dto.categoryId) {
+      await this.drizzle.db
+        .insert(productCategories)
+        .values({ productId: product!.id, categoryId: dto.categoryId, isPrimary: true });
+    }
+
+    const result = await this.findById(product!.id);
+
+    this.logger.log(`Product created: ${result.name} (${result.sku})`);
+    return result;
   }
 
   async update(id: string, dto: UpdateProductDto) {
     const existing = await this.findById(id);
 
-    const data: any = { ...dto };
+    const updateData: Record<string, any> = {};
+
+    if (dto.name !== undefined) updateData.name = dto.name;
+    if (dto.description !== undefined) updateData.description = dto.description;
+    if (dto.shortDescription !== undefined) updateData.shortDescription = dto.shortDescription;
+    if (dto.sku !== undefined) updateData.sku = dto.sku;
+    if (dto.barcode !== undefined) updateData.barcode = dto.barcode;
+    if (dto.condition !== undefined) updateData.condition = dto.condition;
+    if (dto.price !== undefined) updateData.price = dto.price.toString();
+    if (dto.compareAtPrice !== undefined) updateData.compareAtPrice = dto.compareAtPrice?.toString();
+    if (dto.costPrice !== undefined) updateData.costPrice = dto.costPrice?.toString();
+    if (dto.brandId !== undefined) updateData.brandId = dto.brandId;
+    if (dto.isActive !== undefined) updateData.isActive = dto.isActive;
+    if (dto.isFeatured !== undefined) updateData.isFeatured = dto.isFeatured;
+    if (dto.seoTitle !== undefined) updateData.seoTitle = dto.seoTitle;
+    if (dto.seoDescription !== undefined) updateData.seoDescription = dto.seoDescription;
+    if (dto.metaKeywords !== undefined) updateData.metaKeywords = dto.metaKeywords;
 
     if ("name" in dto && dto.name && dto.name !== existing.name) {
-      data.slug = slugify(dto.name, { lower: true, strict: true });
+      updateData.slug = slugify(dto.name, { lower: true, strict: true });
     }
 
-    const product = await this.prisma.product.update({
-      where: { id },
-      data,
-      include: {
-        images: true,
-        brand: true,
-        categories: { include: { category: true } },
-        specs: true,
-      },
-    });
+    await this.drizzle.db
+      .update(products)
+      .set(updateData)
+      .where(eq(products.id, id));
 
-    this.logger.log(`Product updated: ${product.name}`);
-    return product;
+    const result = await this.findById(id);
+
+    this.logger.log(`Product updated: ${result.name}`);
+    return result;
   }
 
   async remove(id: string) {
     await this.findById(id);
-    await this.prisma.product.update({
-      where: { id },
-      data: { isActive: false },
-    });
+    await this.drizzle.db
+      .update(products)
+      .set({ isActive: false })
+      .where(eq(products.id, id));
     this.logger.log(`Product soft-deleted: ${id}`);
   }
 
   async searchFullText(query: string, limit: number = 20) {
-    return this.prisma.product.findMany({
-      where: {
-        isActive: true,
-        OR: [
-          { name: { search: query } },
-          { description: { search: query } },
-          { sku: { search: query } },
-        ],
-      },
-      include: {
-        images: { where: { isPrimary: true }, take: 1 },
+    return this.drizzle.db.query.products.findMany({
+      where: and(
+        eq(products.isActive, true),
+        or(
+          like(products.name, `%${query}%`),
+          like(products.description, `%${query}%`),
+          like(products.sku, `%${query}%`),
+        ),
+      ),
+      with: {
+        images: { where: eq(productImages.isPrimary, true), limit: 1 },
         brand: true,
       },
-      orderBy: { viewCount: "desc" },
-      take: limit,
+      orderBy: desc(products.viewCount),
+      limit,
     });
   }
 }

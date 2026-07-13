@@ -17,7 +17,8 @@ import { AnalyticsModule } from "./modules/analytics/analytics.module";
 import { AIModule } from "./modules/ai/ai.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { ReportsModule } from "./modules/reports/reports.module";
-import { PrismaModule } from "./database/prisma.module";
+import { ComboOffersModule } from "./modules/combo-offers/combo-offers.module";
+import { DrizzleModule } from "./database/drizzle.module";
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { PrismaModule } from "./database/prisma.module";
         limit: 100,
       },
     ]),
-    PrismaModule,
+    DrizzleModule,
     AuthModule,
     UsersModule,
     ProductsModule,
@@ -48,6 +49,7 @@ import { PrismaModule } from "./database/prisma.module";
     AIModule,
     NotificationsModule,
     ReportsModule,
+    ComboOffersModule,
   ],
 })
 export class AppModule {}

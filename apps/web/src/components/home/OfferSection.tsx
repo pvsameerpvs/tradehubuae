@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Briefcase,
@@ -11,7 +14,7 @@ import {
   Gift,
   type LucideIcon,
 } from "lucide-react";
-import { offers, type Offer } from "@/data/offers";
+import { fetchOffers, type Offer } from "@/data/offers";
 
 const iconMap: Record<string, LucideIcon> = {
   briefcase: Briefcase,
@@ -78,6 +81,14 @@ function TypeIcon({ type }: { type: Offer["type"] }) {
 }
 
 export function OfferSection() {
+  const [offerList, setOfferList] = useState<Offer[]>([]);
+
+  useEffect(() => {
+    fetchOffers().then(setOfferList);
+  }, []);
+
+  if (offerList.length === 0) return null;
+
   return (
     <section>
       <div className="mb-6 flex items-center justify-between">
@@ -92,7 +103,7 @@ export function OfferSection() {
         </Link>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {offers.map((offer) => (
+        {offerList.map((offer) => (
           <OfferCard key={offer.id} offer={offer} />
         ))}
       </div>

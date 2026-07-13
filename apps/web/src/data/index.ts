@@ -10,7 +10,7 @@ export type { Brand } from "./brands";
 export { orders, orderStatusColor } from "./orders";
 export type { Order, OrderItem } from "./orders";
 
-export { comboOffers, getComboSavings } from "./comboOffers";
+export { comboOffers, getComboSavings, fetchComboOffers } from "./comboOffers";
 export type { ComboOffer, ComboOfferItem } from "./comboOffers";
 
 export { blogPosts } from "./blog";
@@ -24,5 +24,5 @@ export type { PromoCode } from "./promoCodes";
 export { defaultBulkTiers, getBulkDiscountPercent, getBulkTierForQuantity } from "./bulkPricing";
 export type { BulkTier } from "./bulkPricing";
 
-export { offers } from "./offers";
+export { offers, fetchOffers } from "./offers";
 export type { Offer, OfferType } from "./offers";

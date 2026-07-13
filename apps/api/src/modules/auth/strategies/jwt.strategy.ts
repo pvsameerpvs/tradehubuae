@@ -2,7 +2,9 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { ConfigService } from "@nestjs/config";
-import { PrismaService } from "../../../database/prisma.service";
+import { DrizzleService } from "../../../database/drizzle.service";
+import { users } from "@tradehubuae/database";
+import { eq } from "drizzle-orm";
 
 interface JwtPayload {
   sub: string;
@@ -14,7 +16,7 @@ interface JwtPayload {
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     configService: ConfigService,
-    private prisma: PrismaService,
+    private drizzle: DrizzleService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -24,10 +26,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: payload.sub },
-      select: { id: true, email: true, name: true, role: true, image: true, isActive: true },
-    });
+    const [user] = await this.drizzle.db
+      .select({
+        id: users.id,
+        email: users.email,
+        name: users.name,
+        role: users.role,
+        image: users.image,
+        isActive: users.isActive,
+      })
+      .from(users)
+      .where(eq(users.id, payload.sub))
+      .limit(1);
 
     if (!user || !user.isActive) {
       throw new UnauthorizedException();

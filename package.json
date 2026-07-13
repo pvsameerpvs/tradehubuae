@@ -20,6 +20,7 @@
     "db:migrate": "pnpm --filter @tradehubuae/database db:migrate",
     "db:seed": "pnpm --filter @tradehubuae/database db:seed",
     "db:studio": "pnpm --filter @tradehubuae/database db:studio",
+    "db:drop": "pnpm --filter @tradehubuae/database db:drop",
     "check-updates": "pnpm outdated"
   },
   "engines": {

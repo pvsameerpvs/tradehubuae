@@ -41,6 +41,10 @@ export class CreateProductDto {
   sku?: string;
 
   @IsOptional()
+  @IsString()
+  barcode?: string;
+
+  @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 
