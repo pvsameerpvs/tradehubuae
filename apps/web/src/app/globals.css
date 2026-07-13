@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    --brand: 158 85% 29%;
-    --brand-dark: 158 86% 23%;
+    --brand: 208.6 73.4% 28%;
+    --brand-dark: 208.6 73% 22%;
 
     --ink: 0 0% 13%;
     --ink-2: 0 0% 44%;
@@ -32,7 +32,7 @@
     --card-foreground: 0 0% 13%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 13%;
-    --primary: 158 85% 29%;
+    --primary: 208.6 73.4% 28%;
     --primary-foreground: 0 0% 100%;
     --secondary: 0 0% 97%;
     --secondary-foreground: 0 0% 13%;
@@ -44,7 +44,7 @@
     --destructive-foreground: 0 0% 100%;
     --border: 0 0% 87%;
     --input: 0 0% 87%;
-    --ring: 0 0% 13%;
+    --ring: 208.6 73.4% 28%;
     --radius: 0.5rem;
     --font-sans: "Inter", system-ui, sans-serif;
     --font-heading: "Inter", system-ui, sans-serif;
