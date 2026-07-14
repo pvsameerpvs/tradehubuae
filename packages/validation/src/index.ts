@@ -100,6 +100,8 @@ export const orderCreateSchema = z.object({
       }),
     )
     .min(1, "At least one item is required"),
+  contactName: z.string().min(1, "Name is required").max(255),
+  contactPhone: phoneSchema,
   shippingAddress: addressSchema,
   billingAddress: addressSchema.optional(),
   shippingMethod: z.enum(["standard", "express", "next_day"]),

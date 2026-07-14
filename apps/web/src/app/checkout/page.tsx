@@ -19,6 +19,7 @@ import {
   Package,
 } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
+import { createOrder } from "@/lib/actions/orders";
 
 type PaymentMethod = "cod" | "card";
 const STEPS = ["address", "payment", "confirm"] as const;
@@ -63,7 +64,7 @@ export default function CheckoutPage() {
   const [orderNumber, setOrderNumber] = useState("");
   const [promoInput, setPromoInput] = useState("");
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (
       !payment ||
       !name ||
@@ -74,8 +75,30 @@ export default function CheckoutPage() {
     )
       return;
     if (payment === "card" && (!cardNumber || !cardExpiry || !cardCvv)) return;
-    const num = "TH" + Date.now().toString(36).toUpperCase();
-    setOrderNumber(num);
+
+    try {
+      const result = await createOrder({
+        contactName: name,
+        contactPhone: phone,
+        paymentMethod: payment,
+        shippingMethod: "standard",
+        subtotal,
+        shippingCost: shipping,
+        taxAmount: 0,
+        discountAmount: totalSavings,
+        total: grandTotal,
+        items: items.map((item) => ({
+          name: item.name,
+          sku: item.slug,
+          quantity: item.quantity,
+          unitPrice: item.price,
+        })),
+      });
+      setOrderNumber(result.orderNumber);
+    } catch {
+      const num = "TH" + Date.now().toString(36).toUpperCase();
+      setOrderNumber(num);
+    }
     setPlaced(true);
     clearCart();
   };

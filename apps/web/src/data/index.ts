@@ -7,7 +7,7 @@ export type { Product, ProductSpec, CompareSpec } from "./products";
 export { brands } from "./brands";
 export type { Brand } from "./brands";
 
-export { orders, orderStatusColor } from "./orders";
+export { orders, orderStatusColor, formatStatus, ORDER_STATUS_FLOW, ORDER_TERMINAL_STATUSES } from "./orders";
 export type { Order, OrderItem } from "./orders";
 
 export { comboOffers, getComboSavings, fetchComboOffers } from "./comboOffers";

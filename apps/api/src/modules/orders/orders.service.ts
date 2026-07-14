@@ -10,8 +10,8 @@ export class OrdersService {
 
   constructor(private drizzle: DrizzleService) {}
 
-  async findAll(query: { page?: number; limit?: number; status?: string; userId?: string }) {
-    const { page = 1, limit = 20, status, userId } = query;
+  async findAll(query: { page?: number; limit?: number; status?: string; userId?: string; search?: string }) {
+    const { page = 1, limit = 20, status, userId, search } = query;
     const conditions: any[] = [];
 
     if (status) conditions.push(eq(orders.status, status as any));
@@ -23,7 +23,8 @@ export class OrdersService {
       where,
       with: {
         items: true,
-        user: { columns: { name: true, email: true } },
+        user: { columns: { name: true, email: true, phone: true } },
+        shippingAddress: true,
       },
       orderBy: [desc(orders.createdAt)],
       offset: (page - 1) * limit,
@@ -37,13 +38,26 @@ export class OrdersService {
 
     const total = Number(totalResult?.total ?? 0);
 
+    let filteredData = data;
+    if (search) {
+      const q = search.toLowerCase();
+      filteredData = data.filter(
+        (o) =>
+          o.orderNumber.toLowerCase().includes(q) ||
+          o.contactName?.toLowerCase().includes(q) ||
+          o.contactPhone?.toLowerCase().includes(q) ||
+          o.user?.name?.toLowerCase().includes(q) ||
+          o.user?.email?.toLowerCase().includes(q),
+      );
+    }
+
     return {
-      data,
+      data: filteredData,
       meta: {
-        total,
+        total: search ? filteredData.length : total,
         page,
         limit,
-        totalPages: Math.ceil(total / limit),
+        totalPages: Math.ceil((search ? filteredData.length : total) / limit),
       },
     };
   }
@@ -73,6 +87,7 @@ export class OrdersService {
       where: eq(orders.orderNumber, orderNumber),
       with: {
         items: true,
+        user: { columns: { name: true, email: true, phone: true } },
         shippingAddress: true,
       },
     });
@@ -83,6 +98,15 @@ export class OrdersService {
 
   async create(dto: any, userId?: string) {
     const orderNumber = generateOrderNumber();
+
+    const estDelivery = new Date();
+    if (dto.shippingMethod === "express") {
+      estDelivery.setDate(estDelivery.getDate() + 2);
+    } else if (dto.shippingMethod === "next_day") {
+      estDelivery.setDate(estDelivery.getDate() + 1);
+    } else {
+      estDelivery.setDate(estDelivery.getDate() + 5);
+    }
 
     const [order] = await this.drizzle.db
       .insert(orders)
@@ -97,6 +121,9 @@ export class OrdersService {
         total: dto.total.toString(),
         paymentMethod: dto.paymentMethod,
         shippingMethod: dto.shippingMethod,
+        contactName: dto.contactName,
+        contactPhone: dto.contactPhone,
+        estimatedDeliveryDate: estDelivery,
         notes: dto.notes,
       })
       .returning();

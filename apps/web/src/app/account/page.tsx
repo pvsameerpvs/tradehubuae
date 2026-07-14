@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button, Badge } from "@tradehubuae/ui";
+import { orderStatusColor, formatStatus } from "@/data";
+import { getMyOrders, type OrderData } from "@/lib/actions/orders";
 
 const tabs = [
   { id: "overview", label: "Overview" },
@@ -11,29 +13,48 @@ const tabs = [
   { id: "addresses", label: "Addresses" },
 ];
 
-const recentOrders = [
-  { id: "ORD-001", date: "2026-07-10", status: "Delivered", total: 5499, items: 1 },
-  { id: "ORD-002", date: "2026-07-05", status: "Shipped", total: 698, items: 2 },
-  { id: "ORD-003", date: "2026-06-28", status: "Processing", total: 1299, items: 1 },
-];
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-line bg-white p-4">
+      <p className="text-sm text-ink-2">{label}</p>
+      <p className="mt-1 text-2xl font-bold text-ink">{value}</p>
+    </div>
+  );
+}
 
 export default function AccountPage() {
   const [activeTab, setActiveTab] = useState("overview");
+  const [orders, setOrders] = useState<OrderData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getMyOrders()
+      .then((res) => setOrders(res.data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const activeOrders = orders.filter(
+    (o) => o.status === "PENDING" || o.status === "CONFIRMED" || o.status === "PROCESSING" || o.status === "SHIPPED",
+  );
+  const recentOrders = orders.slice(0, 3);
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 text-3xl font-bold">My Account</h1>
+      <h1 className="mb-8 text-[26px] font-semibold leading-[30px] text-ink" style={{ letterSpacing: "-0.01em" }}>
+        My Account
+      </h1>
 
       <div className="grid gap-8 lg:grid-cols-4">
         <div className="lg:col-span-1">
-          <div className="rounded-xl border bg-white p-4">
+          <div className="rounded-xl border border-line bg-white p-4">
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand text-lg font-bold text-white">
                 A
               </div>
-              <div>
-                <p className="font-medium">Ahmed Al Maktoum</p>
-                <p className="text-sm text-ink-2">ahmed@example.com</p>
+              <div className="min-w-0">
+                <p className="truncate font-medium text-ink">Ahmed Al Maktoum</p>
+                <p className="truncate text-sm text-ink-2">ahmed@example.com</p>
               </div>
             </div>
             <nav className="space-y-1">
@@ -62,41 +83,44 @@ export default function AccountPage() {
           {activeTab === "overview" && (
             <div className="space-y-6">
               <div className="grid gap-4 sm:grid-cols-3">
-                <div className="rounded-xl border bg-white p-4">
-                  <p className="text-sm text-ink-2">Total Orders</p>
-                  <p className="mt-1 text-2xl font-bold">12</p>
-                </div>
-                <div className="rounded-xl border bg-white p-4">
-                  <p className="text-sm text-ink-2">Active Orders</p>
-                  <p className="mt-1 text-2xl font-bold">2</p>
-                </div>
-                <div className="rounded-xl border bg-white p-4">
-                  <p className="text-sm text-ink-2">Wishlist Items</p>
-                  <p className="mt-1 text-2xl font-bold">5</p>
-                </div>
+                <StatCard label="Total Orders" value={String(orders.length)} />
+                <StatCard label="Active Orders" value={String(activeOrders.length)} />
+                <StatCard label="Wishlist Items" value="5" />
               </div>
 
-              <div className="rounded-xl border bg-white">
-                <div className="border-b p-4">
-                  <h2 className="font-semibold">Recent Orders</h2>
+              <div className="rounded-xl border border-line bg-white">
+                <div className="border-b border-line p-4">
+                  <h2 className="font-semibold text-ink">Recent Orders</h2>
                 </div>
-                <div className="divide-y">
-                  {recentOrders.map((order) => (
-                    <div key={order.id} className="flex items-center justify-between p-4">
-                      <div>
-                        <p className="font-medium">{order.id}</p>
-                        <p className="text-sm text-ink-2">{order.date} &middot; {order.items} item(s)</p>
+                {recentOrders.length === 0 && !loading ? (
+                  <div className="p-6 text-center text-sm text-ink-2">No orders yet</div>
+                ) : (
+                  <div className="divide-y divide-line">
+                    {recentOrders.map((order) => (
+                      <div key={order.id} className="flex items-center justify-between p-4">
+                        <div className="min-w-0">
+                          <p className="truncate font-medium text-ink">{order.orderNumber}</p>
+                          <p className="mt-0.5 text-sm text-ink-2">
+                            {new Date(order.createdAt).toLocaleDateString("en-AE", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                            {" · "}
+                            {order.items.length} item(s)
+                          </p>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          <Badge variant={orderStatusColor[order.status] || "default"}>
+                            {formatStatus(order.status)}
+                          </Badge>
+                          <p className="mt-1 text-sm font-medium text-ink">AED {Number(order.total).toLocaleString()}</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <Badge variant={order.status === "Delivered" ? "success" : order.status === "Shipped" ? "default" : "warning"}>
-                          {order.status}
-                        </Badge>
-                        <p className="mt-1 text-sm font-medium">AED {order.total}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="border-t p-4">
+                    ))}
+                  </div>
+                )}
+                <div className="border-t border-line p-4">
                   <Link href="/orders">
                     <Button variant="ghost" size="sm">View All Orders</Button>
                   </Link>
@@ -106,51 +130,65 @@ export default function AccountPage() {
           )}
 
           {activeTab === "orders" && (
-            <div className="rounded-xl border bg-white">
-              <div className="border-b p-4">
-                <h2 className="font-semibold">Order History</h2>
+            <div className="rounded-xl border border-line bg-white">
+              <div className="border-b border-line p-4">
+                <h2 className="font-semibold text-ink">Order History</h2>
               </div>
-              <div className="divide-y">
-                {recentOrders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between p-4">
-                    <div>
-                      <p className="font-medium">{order.id}</p>
-                      <p className="text-sm text-ink-2">{order.date} &middot; {order.items} item(s) &middot; AED {order.total}</p>
+              {orders.length === 0 && !loading ? (
+                <div className="p-6 text-center text-sm text-ink-2">No orders yet</div>
+              ) : (
+                <div className="divide-y divide-line">
+                  {orders.map((order) => (
+                    <div key={order.id} className="flex items-center justify-between p-4">
+                      <div className="min-w-0">
+                        <p className="truncate font-medium text-ink">{order.orderNumber}</p>
+                        <p className="mt-0.5 text-sm text-ink-2">
+                          {new Date(order.createdAt).toLocaleDateString("en-AE", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                          {" · "}
+                          {order.items.length} item(s)
+                          {" · "}
+                          AED {Number(order.total).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-3">
+                        <Badge variant={orderStatusColor[order.status] || "default"}>
+                          {formatStatus(order.status)}
+                        </Badge>
+                        <Link href={`/track-order?order=${encodeURIComponent(order.orderNumber)}`}>
+                          <Button variant="outline" size="sm">Track</Button>
+                        </Link>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Badge variant={order.status === "Delivered" ? "success" : order.status === "Shipped" ? "default" : "warning"}>
-                        {order.status}
-                      </Badge>
-                      <Link href="/track-order">
-                        <Button variant="outline" size="sm">Track</Button>
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {activeTab === "details" && (
-            <div className="rounded-xl border bg-white p-6">
-              <h2 className="mb-6 font-semibold">Account Details</h2>
+            <div className="rounded-xl border border-line bg-white p-6">
+              <h2 className="mb-6 font-semibold text-ink">Account Details</h2>
               <form className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium">First Name</label>
-                    <input className="flex h-10 w-full rounded-md border border-line bg-white px-3 py-2 text-sm" defaultValue="Ahmed" />
+                    <label className="mb-1.5 block text-sm font-medium text-ink">First Name</label>
+                    <input className="flex h-10 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink" defaultValue="Ahmed" />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium">Last Name</label>
-                    <input className="flex h-10 w-full rounded-md border border-line bg-white px-3 py-2 text-sm" defaultValue="Al Maktoum" />
+                    <label className="mb-1.5 block text-sm font-medium text-ink">Last Name</label>
+                    <input className="flex h-10 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink" defaultValue="Al Maktoum" />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium">Email</label>
-                    <input className="flex h-10 w-full rounded-md border border-line bg-white px-3 py-2 text-sm" defaultValue="ahmed@example.com" type="email" />
+                    <label className="mb-1.5 block text-sm font-medium text-ink">Email</label>
+                    <input className="flex h-10 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink" defaultValue="ahmed@example.com" type="email" />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium">Phone</label>
-                    <input className="flex h-10 w-full rounded-md border border-line bg-white px-3 py-2 text-sm" defaultValue="+971 50 123 4567" type="tel" />
+                    <label className="mb-1.5 block text-sm font-medium text-ink">Phone</label>
+                    <input className="flex h-10 w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink" defaultValue="+971 50 123 4567" type="tel" />
                   </div>
                 </div>
                 <Button>Save Changes</Button>
@@ -160,14 +198,17 @@ export default function AccountPage() {
 
           {activeTab === "addresses" && (
             <div className="space-y-4">
-              <div className="rounded-xl border bg-white p-6">
+              <div className="rounded-xl border border-line bg-white p-6">
                 <div className="mb-4 flex items-center justify-between">
-                  <h2 className="font-semibold">Saved Addresses</h2>
+                  <h2 className="font-semibold text-ink">Saved Addresses</h2>
                   <Button size="sm">Add New</Button>
                 </div>
-                <div className="rounded-lg border bg-bg2/30 p-4">
-                  <p className="font-medium">Home</p>
-                  <p className="text-sm text-ink-2">Sheikh Zayed Road, Downtown Dubai<br />Dubai, UAE</p>
+                <div className="rounded-lg border border-line bg-bg2/30 p-4">
+                  <p className="font-medium text-ink">Home</p>
+                  <p className="mt-1 text-sm text-ink-2">
+                    Sheikh Zayed Road, Downtown Dubai<br />
+                    Dubai, UAE
+                  </p>
                   <p className="mt-1 text-sm text-ink-2">+971 50 123 4567</p>
                 </div>
               </div>
