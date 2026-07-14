@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Truck, Save, Plus, Trash2, GripVertical } from "lucide-react";
+import { ArrowLeft, Truck, Save, Plus, Trash2, GripVertical } from "lucide-react";
 import { Card, CardContent, Input } from "@tradehubuae/ui";
 import { Button } from "@tradehubuae/ui";
+import { useRouter } from "next/navigation";
 
 interface ShippingZone {
   name: string;
@@ -12,6 +13,7 @@ interface ShippingZone {
 }
 
 export default function ShippingSettingsPage() {
+  const router = useRouter();
   const [zones, setZones] = useState<ShippingZone[]>([
     { name: "Dubai", rate: "15", estimatedDays: "1-2" },
     { name: "Sharjah", rate: "15", estimatedDays: "1-2" },
@@ -39,9 +41,14 @@ export default function ShippingSettingsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>Shipping Settings</h1>
-          <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Manage shipping zones and rates</p>
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.back()} className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-2 hover:bg-bg3 transition-colors">
+            <ArrowLeft className="h-4 w-4" strokeWidth={1.75} />
+          </button>
+          <div>
+            <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>Shipping Settings</h1>
+            <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Manage shipping zones and rates</p>
+          </div>
         </div>
         <Button size="sm" onClick={addZone}>
           <Plus className="mr-1.5 h-3.5 w-3.5" strokeWidth={1.75} />

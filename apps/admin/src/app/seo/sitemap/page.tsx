@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Globe, RefreshCw, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Globe, RefreshCw, CheckCircle2 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@tradehubuae/ui";
 import { Button } from "@tradehubuae/ui";
+import { useRouter } from "next/navigation";
 
 const sitemapUrls = [
   { path: "/", priority: "1.0", freq: "daily" },
@@ -15,6 +16,7 @@ const sitemapUrls = [
 ];
 
 export default function SitemapPage() {
+  const router = useRouter();
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState(false);
 
@@ -28,9 +30,14 @@ export default function SitemapPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>Sitemap</h1>
-        <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Generate and manage XML sitemaps for search engines</p>
+      <div className="flex items-center gap-3">
+        <button onClick={() => router.back()} className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-2 hover:bg-bg3 transition-colors">
+          <ArrowLeft className="h-4 w-4" strokeWidth={1.75} />
+        </button>
+        <div>
+          <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>Sitemap</h1>
+          <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Generate and manage XML sitemaps for search engines</p>
+        </div>
       </div>
       <Card>
         <CardHeader className="px-5 py-4">

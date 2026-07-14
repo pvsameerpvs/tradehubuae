@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import {
   TrendingUp, Search, Package, AlertTriangle, Eye,
-  RefreshCw, BarChart3, Target, CheckCircle2, Clock,
+  RefreshCw, BarChart3, Target, CheckCircle2, Clock, ArrowLeft,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@tradehubuae/ui";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -57,6 +58,7 @@ const charData = [
 ];
 
 export default function SeoReportsPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [seoEntries, setSeoEntries] = useState<SeoStatEntry[]>([]);
   const [seoStats, setSeoStats] = useState<SeoStats | null>(null);
@@ -121,9 +123,14 @@ export default function SeoReportsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>SEO Reports</h1>
-          <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">SEO performance, coverage analysis, and AI generation results</p>
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.back()} className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-2 hover:bg-bg3 transition-colors">
+            <ArrowLeft className="h-4 w-4" strokeWidth={1.75} />
+          </button>
+          <div>
+            <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>SEO Reports</h1>
+            <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">SEO performance, coverage analysis, and AI generation results</p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={loadData} className="flex h-8 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-semibold text-ink-2 hover:bg-bg3 transition-colors">

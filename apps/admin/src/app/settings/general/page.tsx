@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Settings2, Save } from "lucide-react";
+import { ArrowLeft, Settings2, Save } from "lucide-react";
 import { Card, CardContent } from "@tradehubuae/ui";
 import { Button } from "@tradehubuae/ui";
+import { useRouter } from "next/navigation";
 
 export default function GeneralSettingsPage() {
+  const router = useRouter();
   const [form, setForm] = useState({
     storeName: "TradeHub UAE",
     currency: "AED",
@@ -22,9 +24,14 @@ export default function GeneralSettingsPage() {
 
   return (
     <div className="max-w-lg space-y-6">
-      <div>
-        <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>General Settings</h1>
-        <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Store name, currency, timezone, and tax configuration</p>
+      <div className="flex items-center gap-3">
+        <button onClick={() => router.back()} className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-2 hover:bg-bg3 transition-colors">
+          <ArrowLeft className="h-4 w-4" strokeWidth={1.75} />
+        </button>
+        <div>
+          <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>General Settings</h1>
+          <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Store name, currency, timezone, and tax configuration</p>
+        </div>
       </div>
       <Card>
         <CardContent className="p-5 space-y-4">

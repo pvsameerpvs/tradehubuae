@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FileText, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
+import { ArrowLeft, FileText, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@tradehubuae/ui";
 import { Button } from "@tradehubuae/ui";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 
 interface SeoEntry {
@@ -37,6 +38,7 @@ const defaultPages: Omit<PageMeta, "title" | "description" | "saved" | "saving">
 ];
 
 export default function MetaPage() {
+  const router = useRouter();
   const [pages, setPages] = useState<PageMeta[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -143,9 +145,14 @@ export default function MetaPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>Page Meta</h1>
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.back()} className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-2 hover:bg-bg3 transition-colors">
+            <ArrowLeft className="h-4 w-4" strokeWidth={1.75} />
+          </button>
+          <div>
+            <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>Page Meta</h1>
           <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Edit title tags and meta descriptions for every page</p>
+        </div>
         </div>
         <Button size="sm" onClick={handleGenerateAll} disabled={generating}>
           <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${generating ? "animate-spin" : ""}`} strokeWidth={1.75} />

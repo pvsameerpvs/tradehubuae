@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@tradehubuae/ui";
 
 export default function NewUserPage() {
@@ -26,6 +27,10 @@ export default function NewUserPage() {
 
   return (
     <div className="max-w-lg space-y-6">
+      <button onClick={() => router.back()} className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-2 transition-colors hover:text-ink">
+        <ArrowLeft className="h-4 w-4" strokeWidth={1.75} />
+        Back
+      </button>
       <div>
         <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>Create User</h1>
         <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Add a new team member</p>

@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { CreditCard, Save, Truck } from "lucide-react";
+import { ArrowLeft, CreditCard, Save, Truck } from "lucide-react";
 import { Card, CardContent } from "@tradehubuae/ui";
 import { Button } from "@tradehubuae/ui";
+import { useRouter } from "next/navigation";
 
 export default function PaymentSettingsPage() {
+  const router = useRouter();
   const [codEnabled, setCodEnabled] = useState(true);
   const [saved, setSaved] = useState(false);
 
@@ -16,9 +18,14 @@ export default function PaymentSettingsPage() {
 
   return (
     <div className="max-w-lg space-y-6">
-      <div>
-        <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>Payment Settings</h1>
-        <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Configure available payment methods</p>
+      <div className="flex items-center gap-3">
+        <button onClick={() => router.back()} className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-2 hover:bg-bg3 transition-colors">
+          <ArrowLeft className="h-4 w-4" strokeWidth={1.75} />
+        </button>
+        <div>
+          <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>Payment Settings</h1>
+          <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Configure available payment methods</p>
+        </div>
       </div>
 
       <Card>

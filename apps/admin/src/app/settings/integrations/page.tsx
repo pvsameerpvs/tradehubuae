@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Link2, Save, CheckCircle2, AlertCircle, Eye, EyeOff, RefreshCw } from "lucide-react";
+import { ArrowLeft, Link2, Save, CheckCircle2, AlertCircle, Eye, EyeOff, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "@tradehubuae/ui";
 import { Button } from "@tradehubuae/ui";
+import { useRouter } from "next/navigation";
 
 interface Integration {
   id: string;
@@ -95,6 +96,7 @@ const integrations: Integration[] = [
 type FormState = Record<string, Record<string, string>>;
 
 export default function IntegrationsSettingsPage() {
+  const router = useRouter();
   const [form, setForm] = useState<FormState>(() => {
     const initial: FormState = {};
     for (const int of integrations) {
@@ -133,9 +135,14 @@ export default function IntegrationsSettingsPage() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>Integrations</h1>
-        <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Manage API connections for analytics, ads, email, and AI services</p>
+      <div className="flex items-center gap-3">
+        <button onClick={() => router.back()} className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-2 hover:bg-bg3 transition-colors">
+          <ArrowLeft className="h-4 w-4" strokeWidth={1.75} />
+        </button>
+        <div>
+          <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>Integrations</h1>
+          <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Manage API connections for analytics, ads, email, and AI services</p>
+        </div>
       </div>
 
       {integrations.map((int) => (

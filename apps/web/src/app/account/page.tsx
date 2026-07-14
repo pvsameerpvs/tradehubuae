@@ -16,8 +16,10 @@ import {
   Plus,
   ShoppingBag,
   ChevronDown,
+  ArrowLeft,
 } from "lucide-react";
 import { orderStatusColor, formatStatus } from "@/data";
+import { useRouter } from "next/navigation";
 import { getMyOrders, type OrderData } from "@/lib/actions/orders";
 import {
   getAddresses,
@@ -56,6 +58,7 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: string; 
 }
 
 export default function AccountPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
   const [orders, setOrders] = useState<OrderData[]>([]);
   const [addresses, setAddresses] = useState<AddressData[]>([]);
@@ -116,6 +119,10 @@ export default function AccountPage() {
 
   return (
     <div className="mx-auto max-w-[1120px] px-4 py-6 sm:px-6 lg:py-10">
+      <button onClick={() => router.back()} className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-ink-2 transition-colors hover:text-ink sm:mb-6">
+        <ArrowLeft className="h-4 w-4" strokeWidth={1.75} />
+        Back
+      </button>
       <div className="mb-6 sm:mb-8">
         <h1 className="text-[26px] font-semibold leading-[30px] text-ink" style={{ letterSpacing: "-0.01em" }}>
           My Account

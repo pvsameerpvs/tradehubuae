@@ -50,7 +50,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema()) }}
         />
       </head>
-      <body className={cn("min-h-screen bg-white antialiased", inter.variable)}>
+      <body className={cn("min-h-screen flex flex-col bg-white antialiased", inter.variable)}>
         <CartProvider>
           <CartFlyProvider>
             <Header />

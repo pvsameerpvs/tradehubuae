@@ -13,6 +13,7 @@ import {
   ToggleLeft,
   ToggleRight,
   Settings2,
+  ArrowLeft,
 } from "lucide-react";
 import {
   getSessions,
@@ -27,8 +28,10 @@ import {
   type ChatSession,
   type ChatMessage,
 } from "@/lib/chat-store";
+import { useRouter } from "next/navigation";
 
 export default function ChatsPage() {
+  const router = useRouter();
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -105,11 +108,16 @@ export default function ChatsPage() {
   return (
     <div>
       <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>Live Chat</h1>
-          <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">
-            {sessions.filter((s) => s.status === "active").length} active conversations
-          </p>
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.back()} className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-2 hover:bg-bg3 transition-colors">
+            <ArrowLeft className="h-4 w-4" strokeWidth={1.75} />
+          </button>
+          <div>
+            <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>Live Chat</h1>
+            <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">
+              {sessions.filter((s) => s.status === "active").length} active conversations
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <button
