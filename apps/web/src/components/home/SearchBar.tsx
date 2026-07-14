@@ -42,13 +42,13 @@ export function SearchBar() {
         </div>
       </div>
 
-      <div className="flex sm:hidden">
+      <div className="flex px-2 sm:hidden sm:px-0">
         <div className="relative flex w-full items-center">
-          <Search className="absolute left-4 h-5 w-5 text-ink-3" strokeWidth={2} />
+          <Search className="absolute left-[18px] h-5 w-5 text-ink-3" strokeWidth={2} />
           <input
             type="search"
             placeholder="Search laptops, PCs, accessories..."
-            className="h-14 w-full rounded-full border border-line/80 bg-white pl-12 pr-4 text-base text-ink placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-ink/10"
+            className="h-[52px] w-full rounded-full border-0 bg-white/95 pl-[50px] pr-5 text-[15px] text-ink placeholder:text-ink-3 shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.06)] backdrop-blur-sm transition-shadow duration-200 focus:shadow-[0_4px_16px_rgba(0,0,0,0.14)] focus:outline-none focus:ring-2 focus:ring-white/30"
           />
         </div>
       </div>

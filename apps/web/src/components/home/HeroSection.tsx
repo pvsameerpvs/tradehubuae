@@ -50,16 +50,16 @@ export function HeroSection() {
       </div>
 
       <div
-        className="relative z-10 mb-8 text-center transition-all duration-200"
+        className="relative z-10 mb-6 text-center transition-all duration-200 sm:mb-8"
         style={{ opacity: headingOpacity, transform: `translateY(${headingTranslateY}px)` }}
       >
         <h1
-          className="mb-3 text-[26px] font-semibold leading-[30px] text-white"
+          className="mb-2 text-[22px] font-semibold leading-[26px] text-white sm:mb-3 sm:text-[26px] sm:leading-[30px]"
           style={{ letterSpacing: "-0.01em" }}
         >
           Find your next laptop in the UAE
         </h1>
-        <p className="text-sm leading-[18px] text-white/80">
+        <p className="px-4 text-sm leading-[18px] text-white/70 sm:px-0 sm:text-white/80">
           New, certified refurbished, and like-new — from top brands
         </p>
       </div>
