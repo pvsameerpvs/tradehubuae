@@ -178,8 +178,7 @@ export default function CheckoutPage() {
   const addressSectionComplete = name && phone && address;
 
   return (
-    <div className="mx-auto max-w-[1120px] px-4 py-8 md:px-6">
-      {/* Step indicator */}
+    <div className="mx-auto max-w-[1120px] px-4 py-8 pb-24 md:px-6 md:pb-8">
       <div className="mb-10 flex items-center justify-center gap-0">
         {STEPS.map((s, i) => (
           <div key={s} className="flex items-center">
@@ -282,7 +281,7 @@ export default function CheckoutPage() {
                     )}
                   </div>
                 </div>
-                <div className="flex justify-end pt-2">
+                <div className="hidden justify-end pt-2 md:flex">
                   <button
                     type="button"
                     onClick={() => setStep("payment")}
@@ -351,7 +350,7 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                 )}
-                <div className="flex gap-3 pt-1">
+                <div className="hidden gap-3 pt-1 md:flex">
                   <button type="button" onClick={() => setStep("address")}
                     className="flex h-12 items-center gap-1.5 rounded-lg border border-ink bg-white px-6 text-base font-semibold text-ink transition-colors hover:bg-bg3">
                     <ChevronLeft className="h-4 w-4" strokeWidth={1.75} /> Back
@@ -408,7 +407,7 @@ export default function CheckoutPage() {
                   <Link href="#" className="font-medium text-ink underline underline-offset-2">Privacy Policy</Link>
                 </span>
               </label>
-              <div className="mt-6 flex gap-3">
+              <div className="mt-6 hidden gap-3 md:flex">
                 <button type="button" onClick={() => setStep("payment")}
                   className="flex h-12 items-center gap-1.5 rounded-lg border border-ink bg-white px-6 text-base font-semibold text-ink transition-colors hover:bg-bg3">
                   <ChevronLeft className="h-4 w-4" strokeWidth={1.75} /> Back
@@ -499,6 +498,51 @@ export default function CheckoutPage() {
               {!activePromo && <p className="mt-2 text-xs text-ink-3">Try: SAVE10, WELCOME20, SAVE50, FLASHSALE, BULK5</p>}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Mobile bottom bar — step buttons */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-line bg-white px-4 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] md:hidden">
+        <div className="flex gap-3">
+          {step !== "address" && (
+            <button
+              type="button"
+              onClick={() => setStep(STEPS[currentIdx - 1])}
+              className="flex h-12 items-center gap-1.5 rounded-lg border border-ink bg-white px-6 text-base font-semibold text-ink transition-colors hover:bg-bg3"
+            >
+              <ChevronLeft className="h-4 w-4" strokeWidth={1.75} /> Back
+            </button>
+          )}
+          {step === "address" && (
+            <button
+              type="button"
+              onClick={() => setStep("payment")}
+              disabled={!addressSectionComplete}
+              className="btn-brand flex h-12 flex-1 items-center justify-center gap-1.5 rounded-lg text-base font-semibold text-white transition-opacity disabled:opacity-40"
+            >
+              Continue <ChevronRight className="h-4 w-4" strokeWidth={2.5} />
+            </button>
+          )}
+          {step === "payment" && (
+            <button
+              type="button"
+              onClick={() => setStep("confirm")}
+              disabled={!payment || (payment === "card" && (!cardNumber || !cardExpiry || !cardCvv))}
+              className="btn-brand flex h-12 flex-1 items-center justify-center gap-1.5 rounded-lg text-base font-semibold text-white transition-opacity disabled:opacity-40"
+            >
+              Continue <ChevronRight className="h-4 w-4" strokeWidth={2.5} />
+            </button>
+          )}
+          {step === "confirm" && (
+            <button
+              type="button"
+              onClick={handlePlaceOrder}
+              disabled={!agreed}
+              className="btn-brand flex h-12 flex-1 items-center justify-center gap-1.5 rounded-lg text-base font-semibold text-white transition-opacity disabled:opacity-40"
+            >
+              Place Order
+            </button>
+          )}
         </div>
       </div>
 

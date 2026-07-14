@@ -1,4 +1,5 @@
 import { HeroSection, ProductRow, ProductRowScroll, DiscoveryGrid, LatestArrivalsRow, OfferSection } from "@/components/home";
+import { LiveChatWidget } from "@/components/chat/LiveChatWidget";
 import { searchProducts, categories } from "@/data";
 import { CategoryCard } from "@/components/shared/CategoryCard";
 import Link from "next/link";
@@ -14,6 +15,7 @@ export default function HomePage() {
   return (
     <>
       <HeroSection />
+      <LiveChatWidget />
 
       <div className="mx-auto max-w-[1760px] px-6 md:px-10 lg:px-20">
         <div className="space-y-16 pb-16">

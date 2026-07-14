@@ -10,8 +10,8 @@ import { searchProducts } from "@/data";
 import type { Product } from "@/data";
 
 function QtySelector({ qty, onChange, compact, max }: { qty: number; onChange: (d: number) => void; compact?: boolean; max?: number }) {
-  const size = compact ? "h-9 w-9" : "h-10 w-10";
-  const iconSize = compact ? "h-3.5 w-3.5" : "h-4 w-4";
+  const size = compact ? "h-8 w-8" : "h-10 w-10";
+  const iconSize = compact ? "h-3 w-3" : "h-4 w-4";
   const atMax = max !== undefined && qty >= max;
 
   return (
@@ -136,23 +136,10 @@ export function BuyButtons({ product }: { product: Product }) {
 
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-line bg-white px-4 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] md:hidden">
         <div className="flex items-center justify-between gap-2">
-          <QtySelector qty={qty} onChange={handleQtyChange} compact max={maxStock} />
           <AnimatedPrice amount={totalPrice} label="Total" />
-          <div className="flex gap-1.5">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleAddToCart}
-              aria-label="Add to cart"
-              className="h-12 w-12 p-0"
-              disabled={maxStock === 0}
-            >
-              <ShoppingCart className="h-5 w-5" strokeWidth={1.75} />
-            </Button>
-            <Button size="lg" onClick={handleBuyNow} className="min-w-[100px] transition-all duration-150 active:scale-[0.98]" disabled={maxStock === 0}>
-              Buy now
-            </Button>
-          </div>
+          <Button size="lg" onClick={handleBuyNow} className="min-w-[100px] transition-all duration-150 active:scale-[0.98]" disabled={maxStock === 0}>
+            Buy now
+          </Button>
         </div>
       </div>
     </>
