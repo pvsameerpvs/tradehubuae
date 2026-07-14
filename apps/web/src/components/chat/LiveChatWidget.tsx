@@ -179,9 +179,9 @@ export function LiveChatWidget() {
   if (!settings.liveChatEnabled) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-0 right-0 z-50 sm:bottom-6 sm:right-6">
       {open ? (
-        <div className="flex h-[560px] w-[380px] flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-panel sm:w-[400px] animate-in fade-in slide-in-from-bottom-4 duration-200">
+        <div className="mx-auto flex h-[85vh] w-full max-w-[400px] flex-col overflow-hidden rounded-t-2xl border border-line bg-white shadow-panel sm:h-[560px] sm:rounded-2xl animate-in fade-in slide-in-from-bottom-4 duration-200">
           {/* HEADER */}
           <div className="flex items-center justify-between bg-brand px-5 py-4 text-white">
             <div className="flex items-center gap-3">
@@ -360,13 +360,15 @@ export function LiveChatWidget() {
         </div>
       ) : (
         /* FAB BUTTON */
-        <button
-          onClick={openWithProduct}
-          aria-label="Open live chat"
-          className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white shadow-panel transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
-        >
-          <MessageSquareMore className="h-7 w-7 transition-transform duration-200 group-hover:scale-110" strokeWidth={1.75} />
-        </button>
+        <div className="flex justify-end p-4 sm:p-0">
+          <button
+            onClick={openWithProduct}
+            aria-label="Open live chat"
+            className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white shadow-panel transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
+          >
+            <MessageSquareMore className="h-7 w-7 transition-transform duration-200 group-hover:scale-110" strokeWidth={1.75} />
+          </button>
+        </div>
       )}
     </div>
   );
