@@ -136,7 +136,7 @@ export default function ProductForm({ id }: { id?: string }) {
         setCategories(cats.data);
         setBrands(brs.data);
       })
-      .catch(console.error);
+      .catch((err) => console.error("Failed to fetch categories/brands", err));
   }, []);
 
   useEffect(() => {
@@ -166,7 +166,7 @@ export default function ProductForm({ id }: { id?: string }) {
         });
         setImages(p.images?.filter((img) => img?.url).map((img) => img.url) ?? []);
       })
-      .catch(console.error)
+      .catch((err) => console.error("Failed to fetch product", err))
       .finally(() => setFetching(false));
   }, [id, reset]);
 

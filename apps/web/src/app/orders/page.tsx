@@ -7,8 +7,8 @@ import { Package, Search, ChevronRight } from "lucide-react";
 import { orders as staticOrders, orderStatusColor, formatStatus } from "@/data";
 import { getMyOrders, type OrderData } from "@/lib/actions/orders";
 
-function hasOrderNumber(o: any): o is OrderData {
-  return "orderNumber" in o;
+function hasOrderNumber(o: unknown): o is OrderData {
+  return typeof o === "object" && o !== null && "orderNumber" in o;
 }
 
 function OrderCard({ order }: { order: OrderData }) {
@@ -31,7 +31,7 @@ function OrderCard({ order }: { order: OrderData }) {
               year: "numeric",
             })}
             {" · "}
-            {items.reduce((s: number, i: any) => s + (i.qty || i.quantity || 1), 0)} item(s)
+            {items.reduce((s: number, i: { qty?: number; quantity?: number }) => s + (i.qty || i.quantity || 1), 0)} item(s)
           </p>
           {order.contactName && (
             <p className="mt-0.5 text-xs text-ink-3">{order.contactName}</p>
@@ -51,7 +51,7 @@ function OrderCard({ order }: { order: OrderData }) {
       </div>
       <div className="mt-3 border-t border-line pt-3">
         <div className="flex flex-wrap gap-2">
-          {items.map((item: any, i: number) => (
+          {items.map((item: { name: string; qty?: number; quantity?: number; price?: number; image?: string | null }, i: number) => (
             <span key={i} className="rounded-md bg-bg2 px-2.5 py-1 text-xs text-ink-2">
               {item.name} × {item.qty || item.quantity}
             </span>

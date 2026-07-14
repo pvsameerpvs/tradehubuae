@@ -16,7 +16,7 @@ const TIMELINE_STEPS = [
 ];
 
 function getTimelineStatus(orderStatus: string, stepKey: string): "completed" | "current" | "upcoming" {
-  const orderIdx = ORDER_STATUS_FLOW.indexOf(orderStatus as any);
+  const orderIdx = ORDER_STATUS_FLOW.indexOf(orderStatus);
   const stepIdx = TIMELINE_STEPS.findIndex((s) => s.key === stepKey);
   if (stepIdx < orderIdx) return "completed";
   if (stepIdx === orderIdx) return "current";
@@ -299,8 +299,8 @@ export default function TrackOrderPage() {
     try {
       const result = await trackOrder(orderId.trim());
       setOrder(result);
-    } catch (err: any) {
-      setError(err.message || "Order not found. Please check your order number.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Order not found. Please check your order number.");
     } finally {
       setLoading(false);
     }

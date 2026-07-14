@@ -56,7 +56,7 @@ COD only for now. Stripe, Tabby, and Tamara will be added when online payments a
 |---|---|---|---|
 | **Resend (Email)** | Resend SDK | 🔧 Missing | `RESEND_API_KEY` ✅ in `.env` but empty |
 | **SMS** | Twilio / SMS provider | ❌ Missing | — |
-| **n8n** | n8n webhook | ❌ Missing | Referenced in chat-store but not connected |
+| **n8n** | n8n webhook | ❌ Missing | Referenced in @tradehubuae/chat but not connected |
 
 ---
 

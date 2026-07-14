@@ -4,6 +4,21 @@ export interface ComboOfferItem {
   quantity: number;
 }
 
+interface ApiComboOfferItem {
+  product?: { name: string; slug: string; price: number };
+  quantity: number;
+}
+
+interface ApiComboOffer {
+  id: string;
+  name: string;
+  description: string | null;
+  discountType: string;
+  discountValue: number;
+  image: string | null;
+  items: ApiComboOfferItem[];
+}
+
 export interface ComboOffer {
   id: string;
   name: string;
@@ -19,44 +34,53 @@ export interface ComboOffer {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
+function calcComboPrice(offer: ApiComboOffer): { totalOriginal: number; price: number } {
+  const totalOriginal = offer.items.reduce((sum, item) => {
+    return sum + Number(item.product?.price ?? 0) * item.quantity;
+  }, 0);
+
+  let price = totalOriginal;
+  if (offer.discountType === "PERCENTAGE") {
+    price = totalOriginal - (totalOriginal * Number(offer.discountValue) / 100);
+  } else {
+    price = totalOriginal - Number(offer.discountValue);
+  }
+  price = Math.max(0, price);
+  return { totalOriginal, price };
+}
+
+function toComboOfferItem(item: ApiComboOfferItem): ComboOfferItem {
+  return {
+    name: item.product?.name ?? "Unknown",
+    slug: item.product?.slug ?? "",
+    quantity: item.quantity,
+  };
+}
+
+function toComboOffer(offer: ApiComboOffer): ComboOffer {
+  const { totalOriginal, price } = calcComboPrice(offer);
+  return {
+    id: offer.id,
+    name: offer.name,
+    description: offer.description ?? "",
+    items: offer.items.map(toComboOfferItem),
+    original: Math.round(totalOriginal),
+    price: Math.round(price),
+    badge: offer.discountType === "PERCENTAGE" ? `-${offer.discountValue}%` : `Save AED ${offer.discountValue}`,
+    image: offer.image ?? "",
+    savings: Math.round(totalOriginal - price),
+    savingsPercent: totalOriginal > 0 ? Math.round(((totalOriginal - price) / totalOriginal) * 100) : 0,
+  };
+}
+
 export async function fetchComboOffers(): Promise<ComboOffer[]> {
   try {
     const res = await fetch(`${API_BASE}/combo-offers/active`, { next: { revalidate: 60 } });
     if (!res.ok) return [];
-    const data = await res.json();
-
-    return data.map((offer: any) => {
-      const totalOriginal = offer.items.reduce((sum: number, item: any) => {
-        const price = Number(item.product?.price ?? 0);
-        return sum + price * item.quantity;
-      }, 0);
-
-      let price = totalOriginal;
-      if (offer.discountType === "PERCENTAGE") {
-        price = totalOriginal - (totalOriginal * Number(offer.discountValue) / 100);
-      } else {
-        price = totalOriginal - Number(offer.discountValue);
-      }
-      price = Math.max(0, price);
-
-      return {
-        id: offer.id,
-        name: offer.name,
-        description: offer.description ?? "",
-        items: offer.items.map((item: any) => ({
-          name: item.product?.name ?? "Unknown",
-          slug: item.product?.slug ?? "",
-          quantity: item.quantity,
-        })),
-        original: Math.round(totalOriginal),
-        price: Math.round(price),
-        badge: offer.discountType === "PERCENTAGE" ? `-${offer.discountValue}%` : `Save AED ${offer.discountValue}`,
-        image: offer.image ?? "",
-        savings: Math.round(totalOriginal - price),
-        savingsPercent: totalOriginal > 0 ? Math.round(((totalOriginal - price) / totalOriginal) * 100) : 0,
-      };
-    });
-  } catch {
+    const data: ApiComboOffer[] = await res.json();
+    return data.map(toComboOffer);
+  } catch (err) {
+    console.error("Failed to fetch combo offers", err);
     return [];
   }
 }

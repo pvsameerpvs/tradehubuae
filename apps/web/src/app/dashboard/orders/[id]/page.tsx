@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, Badge } from "@tradehubuae/ui";
@@ -35,7 +35,7 @@ const STATUS_TRANSITIONS: Record<string, string[]> = {
   [ORDER_STATUS.REFUNDED]: [],
 };
 
-function InfoRow({ icon: Icon, label, value }: { icon: any; label: string; value: string | null | undefined }) {
+function InfoRow({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string; strokeWidth?: number }>; label: string; value: string | null | undefined }) {
   if (!value) return null;
   return (
     <div className="flex items-start gap-3">
@@ -99,8 +99,8 @@ export default function AdminOrderDetailPage() {
     try {
       const data = await getOrderById(params.id as string);
       setOrder(data);
-    } catch (err: any) {
-      setError(err.message || "Failed to load order");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load order");
     } finally {
       setLoading(false);
     }
@@ -117,8 +117,8 @@ export default function AdminOrderDetailPage() {
     try {
       const updated = await updateOrderStatus(order.id, newStatus);
       setOrder(updated);
-    } catch (err: any) {
-      alert(err.message || "Failed to update status");
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to update status");
     } finally {
       setUpdating(false);
     }

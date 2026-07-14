@@ -110,15 +110,13 @@ Most pages use **hardcoded static data arrays** instead of calling the backend A
 - Orders server actions (`src/lib/actions/orders.ts`) → calls `/orders/*` endpoints
 - Combo offers on home page (`data/comboOffers.ts`, `data/offers.ts`) → calls `GET /combo-offers/active`
 
-### ❌ API BASE URL MISMATCH
+### ✅ API BASE URL — FIXED
 
 | File | Base URL | Expected | Status |
 |------|----------|----------|--------|
-| `src/lib/api.ts:1` | `http://localhost:4000/api` | `http://localhost:4000/api/v1` | **Missing `/v1`** |
-| `src/data/comboOffers.ts:20` | `http://localhost:4000/api/v1` | `http://localhost:4000/api/v1` | ✅ Correct |
-| `.env` | `NEXT_PUBLIC_API_URL=http://localhost:4000` | — | No path suffix |
-
-The server actions in `lib/api.ts` will call `POST /api/orders` instead of `POST /api/v1/orders`, which won't match the NestJS global prefix.
+| `src/lib/api.ts:1` | `http://localhost:4000/api/v1` | `/api/v1` | ✅ Fixed |
+| `src/data/comboOffers.ts:20` | `http://localhost:4000/api/v1` | `/api/v1` | ✅ Correct |
+| `.env` | `NEXT_PUBLIC_API_URL=http://localhost:4000` | — | ⚠️ Set to `http://localhost:4000/api/v1` |
 
 ### ❌ AUTHENTICATION DISCONNECTED
 

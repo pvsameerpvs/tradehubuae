@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
 export class ApiError extends Error {
   constructor(
@@ -10,17 +10,38 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(
-  path: string,
-  options?: RequestInit,
-): Promise<T> {
-  const url = `${API_BASE}${path}`;
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+}
+
+interface FetchOptions extends RequestInit {
+  params?: Record<string, string | number | boolean | undefined>;
+}
+
+async function request<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
+  const { params, ...fetchOpts } = options;
+
+  let url = `${API_BASE}${endpoint}`;
+  if (params) {
+    const searchParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined) searchParams.set(key, String(value));
+    }
+    const qs = searchParams.toString();
+    if (qs) url += `?${qs}`;
+  }
+
   const res = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
+    headers: { "Content-Type": "application/json", ...fetchOpts.headers },
+    ...fetchOpts,
   });
 
   if (!res.ok) {
@@ -28,16 +49,20 @@ async function request<T>(
     throw new ApiError(res.status, body.message || `Request failed (${res.status})`);
   }
 
+  if (res.status === 204) return undefined as T;
   return res.json();
 }
 
 export const api = {
-  get: <T>(path: string, init?: RequestInit) =>
-    request<T>(path, { ...init, method: "GET" }),
+  get: <T>(endpoint: string, params?: Record<string, string | number | boolean | undefined>) =>
+    request<T>(endpoint, { params }),
 
-  post: <T>(path: string, body: unknown, init?: RequestInit) =>
-    request<T>(path, { ...init, method: "POST", body: JSON.stringify(body) }),
+  post: <T>(endpoint: string, body: unknown) =>
+    request<T>(endpoint, { method: "POST", body: JSON.stringify(body) }),
 
-  put: <T>(path: string, body: unknown, init?: RequestInit) =>
-    request<T>(path, { ...init, method: "PUT", body: JSON.stringify(body) }),
+  put: <T>(endpoint: string, body: unknown) =>
+    request<T>(endpoint, { method: "PUT", body: JSON.stringify(body) }),
+
+  delete: <T>(endpoint: string) =>
+    request<T>(endpoint, { method: "DELETE" }),
 };

@@ -53,7 +53,7 @@ export default function ComboOfferForm({ id }: { id?: string }) {
   useEffect(() => {
     api.get<PaginatedResponse<Product>>("/products", { limit: 200, sort: "name", order: "asc" })
       .then((res) => setProducts(res.data))
-      .catch(console.error);
+      .catch((err) => console.error("Failed to fetch products", err));
   }, []);
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function ComboOfferForm({ id }: { id?: string }) {
         });
         setItems(offer.items.map((i) => ({ productId: i.productId, quantity: i.quantity, product: i.product })));
       })
-      .catch(console.error)
+      .catch((err) => console.error("Failed to fetch combo offer", err))
       .finally(() => setFetching(false));
   }, [id]);
 
@@ -87,7 +87,7 @@ export default function ComboOfferForm({ id }: { id?: string }) {
 
   const updateItem = (idx: number, field: keyof ComboOfferItem, value: string | number) => {
     const updated = [...items];
-    (updated[idx] as any)[field] = value;
+    updated[idx] = { ...updated[idx], [field]: value } as ComboOfferItem;
     setItems(updated);
   };
 

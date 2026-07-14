@@ -43,6 +43,7 @@ tradehubuae/
 │   ├── types/        # Shared TypeScript types (@tradehubuae/types)
 │   ├── validation/   # Zod schemas for all entities (@tradehubuae/validation)
 │   ├── ai/           # Gemini AI service (@tradehubuae/ai)
+│   ├── chat/         # Chat store (@tradehubuae/chat)
 │   ├── storage/      # Cloudflare R2 / S3 storage (@tradehubuae/storage)
 │   ├── seo/          # SEO utilities (metadata, schemas) (@tradehubuae/seo)
 │   ├── utils/        # Shared utility functions (@tradehubuae/utils)

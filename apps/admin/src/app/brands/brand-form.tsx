@@ -37,7 +37,7 @@ export default function BrandForm({ id }: { id?: string }) {
         sortOrder: brand.sortOrder,
         isActive: brand.isActive,
       }))
-      .catch(console.error)
+      .catch((err) => console.error("Failed to fetch brand", err))
       .finally(() => setFetching(false));
   }, [id]);
 

@@ -11,10 +11,13 @@
     "clean": "rm -rf node_modules"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.21.0",
+    "@ai-sdk/anthropic": "^4.0.14",
+    "@ai-sdk/google": "^1.1.0",
+    "@ai-sdk/openai": "^4.0.13",
     "@tradehubuae/config": "workspace:*",
     "@tradehubuae/logger": "workspace:*",
     "@tradehubuae/types": "workspace:*",
+    "ai": "^4.1.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {

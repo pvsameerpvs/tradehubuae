@@ -124,8 +124,8 @@ export default function AdminOrdersPage() {
       const res = await getAllOrders({ page, limit: 20, status: statusFilter || undefined, search: search || undefined });
       setOrders(res.data);
       setTotalPages(res.meta.totalPages);
-    } catch (err: any) {
-      setOrders(staticOrders as any);
+    } catch {
+      setOrders(staticOrders);
       setError(null);
     } finally {
       setLoading(false);

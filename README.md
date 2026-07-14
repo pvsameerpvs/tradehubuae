@@ -24,6 +24,7 @@ tradehubuae/
 │   ├── seo/          # SEO utilities
 │   ├── utils/        # Utility functions
 │   ├── ai/           # AI integration (Gemini)
+│   ├── chat/         # Chat store (localStorage-based)
 │   ├── storage/      # File storage (S3/R2)
 │   └── logger/       # Logging service
 ├── docker/           # Docker configurations

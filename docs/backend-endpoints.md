@@ -259,12 +259,10 @@ The `POST /auth/register`, `POST /auth/login`, `GET /auth/me` endpoints work per
 - No JWT token is ever sent with requests (no Authorization header)
 - Admin app has no login page at all — completely open to anyone
 
-### ❌ API BASE URL MISMATCH
+### ✅ API BASE URL — FIXED
 
 | Client | Fallback URL | NestJS Prefix | Match? |
 |--------|-------------|---------------|--------|
-| `apps/web/src/lib/api.ts` | `http://localhost:4000/api` | `/api/v1` | ❌ Missing `/v1` |
+| `apps/web/src/lib/api.ts` | `http://localhost:4000/api/v1` | `/api/v1` | ✅ Fixed |
 | `apps/admin/src/lib/api.ts` | `http://localhost:4000/api/v1` | `/api/v1` | ✅ |
-| `.env` `NEXT_PUBLIC_API_URL` | `http://localhost:4000` | `/api/v1` | ❌ No path — all calls miss prefix |
-
-The NestJS backend sets `app.setGlobalPrefix("api/v1")`, so all endpoints are at `/api/v1/*`. The web app's `api.ts` calls `/api/*` — those requests will never match.
+| `.env` `NEXT_PUBLIC_API_URL` | `http://localhost:4000` | `/api/v1` | ❌ No path — set to `http://localhost:4000/api/v1` |

@@ -23,7 +23,7 @@ export default function EditUserPage() {
   useEffect(() => {
     api.get<User>(`/users/${params.id}`)
       .then((user) => setForm({ name: user.name, email: user.email, role: user.role, isActive: user.isActive }))
-      .catch(console.error)
+      .catch((err) => console.error("Failed to fetch user", err))
       .finally(() => setLoading(false));
   }, [params.id]);
 

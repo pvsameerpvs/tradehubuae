@@ -8,7 +8,7 @@ Cross-cutting issues grouped by priority.
 
 | # | Issue | Files Affected | Fix |
 |---|-------|---------------|-----|
-| 1 | **Web API base URL missing `/v1`** | `apps/web/src/lib/api.ts:1` | Change `http://localhost:4000/api` → `http://localhost:4000/api/v1` |
+| 1 | **Web API base URL missing `/v1`** | `apps/web/src/lib/api.ts:1` | ✅ Fixed — now uses `/api/v1` |
 | 2 | **Product route conflict** | `apps/api/src/modules/products/products.controller.ts:26-32` | `findBySlug` and `findById` both match `GET /:param`. Either merge into one handler or use distinct paths |
 
 ## 🟠 P1 — Admin Pages Broken at Runtime

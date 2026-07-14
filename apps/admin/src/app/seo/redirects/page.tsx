@@ -28,7 +28,7 @@ export default function RedirectsPage() {
 
   const updateRedirect = (idx: number, field: keyof Redirect, value: string | number) => {
     const updated = [...redirects];
-    (updated[idx] as any)[field] = value;
+    updated[idx] = { ...updated[idx], [field]: value } as Redirect;
     setRedirects(updated);
   };
 

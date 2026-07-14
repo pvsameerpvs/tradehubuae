@@ -37,7 +37,7 @@ export default function BlogForm({ id }: { id?: string }) {
     if (!id) return;
     setFetching(true);
     api.get<BlogPost>(`/blog/${id}`)
-      .then((post) => setForm({
+      .then((post: BlogPost) => setForm({
         title: post.title,
         content: post.content,
         excerpt: post.excerpt ?? "",
@@ -46,7 +46,7 @@ export default function BlogForm({ id }: { id?: string }) {
         readTime: post.readTime ?? "",
         published: post.published,
       }))
-      .catch(console.error)
+      .catch((err: unknown) => console.error("Failed to fetch blog post", err))
       .finally(() => setFetching(false));
   }, [id]);
 

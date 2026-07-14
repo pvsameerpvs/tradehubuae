@@ -35,7 +35,7 @@ export default function CategoryForm({ id }: { id?: string }) {
   useEffect(() => {
     api.get<PaginatedResponse<Category>>("/categories", { limit: 200, sort: "name", order: "asc" })
       .then((res) => setCategories(res.data))
-      .catch(console.error);
+      .catch((err) => console.error("Failed to fetch categories", err));
   }, []);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export default function CategoryForm({ id }: { id?: string }) {
         sortOrder: cat.sortOrder ?? 0,
         isActive: cat.isActive ?? true,
       }))
-      .catch(console.error)
+      .catch((err) => console.error("Failed to fetch category", err))
       .finally(() => setFetching(false));
   }, [id]);
 

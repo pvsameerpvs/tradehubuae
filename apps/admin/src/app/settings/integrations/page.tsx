@@ -79,15 +79,16 @@ const integrations: Integration[] = [
     docUrl: "https://resend.com/docs",
   },
   {
-    id: "gemini",
-    name: "Google Gemini (AI)",
-    desc: "Powers automated SEO generation, product descriptions, and image analysis",
-    provider: "Gemini Pro API",
+    id: "ai-provider",
+    name: "AI Provider (Vercel AI SDK)",
+    desc: "Powers automated SEO generation, product descriptions, and image analysis. Set AI_PROVIDER in .env (google|openai|anthropic|openai-compatible)",
+    provider: "Vercel AI SDK",
     fields: [
-      { key: "GEMINI_API_KEY", label: "API Key", type: "password" },
+      { key: "AI_API_KEY", label: "API Key", type: "password" },
+      { key: "AI_BASE_URL", label: "Base URL (openai-compatible only, e.g. https://api.deepseek.com/v1)", type: "text" },
     ],
     status: "connected",
-    docUrl: "https://ai.google.dev/gemini-api",
+    docUrl: "https://sdk.vercel.ai/docs",
   },
 ];
 
