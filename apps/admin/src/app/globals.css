@@ -56,6 +56,13 @@
 }
 
 @layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
   .btn-brand {
     background: linear-gradient(90deg, #1A5A8C 0%, #134A7C 50%, #103E68 100%);
   }

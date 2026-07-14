@@ -254,16 +254,9 @@ export default function AccountPage() {
                           </p>
                         </div>
                         <div className="ml-3 flex shrink-0 items-center gap-3">
-                          <div className="hidden sm:block">
-                            <Badge variant={orderStatusColor[order.status] || "default"}>
-                              {formatStatus(order.status)}
-                            </Badge>
-                          </div>
-                          <div className="sm:hidden">
-                            <Badge variant={orderStatusColor[order.status] || "default"} className="text-[10px]">
-                              {formatStatus(order.status)}
-                            </Badge>
-                          </div>
+                          <Badge variant={orderStatusColor[order.status] || "default"} className="text-xs">
+                            {formatStatus(order.status)}
+                          </Badge>
                           <span className="text-sm font-semibold text-ink">AED {Number(order.total).toLocaleString()}</span>
                           <ChevronRight className="h-4 w-4 text-ink-3" strokeWidth={2} />
                         </div>

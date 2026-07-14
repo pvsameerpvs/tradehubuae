@@ -7,10 +7,6 @@ import { Package, Search, ChevronRight } from "lucide-react";
 import { orders as staticOrders, orderStatusColor, formatStatus } from "@/data";
 import { getMyOrders, type OrderData } from "@/lib/actions/orders";
 
-function hasOrderNumber(o: unknown): o is OrderData {
-  return typeof o === "object" && o !== null && "orderNumber" in o;
-}
-
 function OrderCard({ order }: { order: OrderData }) {
   const orderNumber = order.orderNumber;
   const items = order.items;
@@ -62,23 +58,8 @@ function OrderCard({ order }: { order: OrderData }) {
   );
 }
 
-export default function OrdersPage() {
-  const [orders, setOrders] = useState<OrderData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    getMyOrders()
-      .then((res) => {
-        if (res.data.length > 0) setOrders(res.data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
-      });
-  }, []);
-
-  const fallbackOrders: OrderData[] = staticOrders.map((o) => ({
+function mapStaticToOrderData(o: typeof staticOrders[number]): OrderData {
+  return {
     id: o.id,
     orderNumber: o.orderNumber,
     status: o.status,
@@ -110,7 +91,25 @@ export default function OrdersPage() {
     })),
     user: null,
     shippingAddress: null,
-  }));
+  };
+}
+
+export default function OrdersPage() {
+  const [orders, setOrders] = useState<OrderData[] | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getMyOrders()
+      .then((res) => {
+        setOrders(res.data.length > 0 ? res.data : null);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  const displayOrders = orders ?? (staticOrders.length > 0 ? staticOrders.map(mapStaticToOrderData) : []);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -149,16 +148,7 @@ export default function OrdersPage() {
         </div>
       )}
 
-      {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
-          <p className="text-sm text-red-700">{error}</p>
-          <Button variant="outline" size="sm" className="mt-3" onClick={() => window.location.reload()}>
-            Try Again
-          </Button>
-        </div>
-      )}
-
-      {!loading && !error && orders.length === 0 && fallbackOrders.length === 0 && (
+      {!loading && displayOrders.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20">
           <Package className="mb-4 h-16 w-16 text-ink-3" strokeWidth={1} />
           <h2 className="mb-2 text-xl font-semibold text-ink">No orders yet</h2>
@@ -171,16 +161,9 @@ export default function OrdersPage() {
         </div>
       )}
 
-      {!loading && orders.length > 0 && (
+      {!loading && displayOrders.length > 0 && (
         <div className="space-y-4">
-          {orders.map((order) => (
-            <OrderCard key={order.id} order={order} />
-          ))}
-        </div>
-      )}
-      {!loading && orders.length === 0 && fallbackOrders.length > 0 && (
-        <div className="space-y-4">
-          {fallbackOrders.map((order) => (
+          {displayOrders.map((order) => (
             <OrderCard key={order.id} order={order} />
           ))}
         </div>

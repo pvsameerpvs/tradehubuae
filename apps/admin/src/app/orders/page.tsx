@@ -17,13 +17,14 @@ interface Order {
 }
 
 const statusStyles: Record<string, string> = {
-  pending: "bg-amber-50 text-amber-700",
-  confirmed: "bg-blue-50 text-blue-700",
-  processing: "bg-violet-50 text-violet-700",
-  shipped: "bg-brand/10 text-brand",
-  delivered: "bg-emerald-50 text-emerald-700",
-  cancelled: "bg-red-50 text-red-700",
-  refunded: "bg-ink-2/10 text-ink-2",
+  PENDING: "bg-amber-50 text-amber-700 border-amber-200",
+  CONFIRMED: "bg-blue-50 text-blue-700 border-blue-200",
+  PROCESSING: "bg-violet-50 text-violet-700 border-violet-200",
+  SHIPPED: "bg-cyan-50 text-cyan-700 border-cyan-200",
+  DELIVERED: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  CANCELLED: "bg-red-50 text-red-700 border-red-200",
+  RETURNED: "bg-rose-50 text-rose-700 border-rose-200",
+  REFUNDED: "bg-ink-2/10 text-ink-2 border-ink-2/20",
 };
 
 export default function OrdersPage() {
@@ -60,11 +61,11 @@ export default function OrdersPage() {
           <>
             <div className="divide-y divide-line sm:hidden">
               {data.data.map((order) => (
-                <div key={order.id} className="px-4 py-3">
+                <Link key={order.id} href={`/orders/${order.id}`} className="flex flex-col px-4 py-3 transition-colors hover:bg-bg2">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-ink">#{order.orderNumber}</p>
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${statusStyles[order.status] ?? "bg-bg2 text-ink-3"}`}>
-                      {order.status}
+                    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${statusStyles[order.status] ?? "bg-bg2 text-ink-3"}`}>
+                      {order.status.charAt(0) + order.status.slice(1).toLowerCase()}
                     </span>
                   </div>
                   <div className="mt-1 flex items-center gap-2 text-xs text-ink-3">
@@ -77,7 +78,7 @@ export default function OrdersPage() {
                     <span>·</span>
                     <span>{order.items?.length ?? 0} items</span>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
             <table className="hidden sm:table w-full">
@@ -93,7 +94,11 @@ export default function OrdersPage() {
               </thead>
               <tbody>
                 {data.data.map((order) => (
-                  <tr key={order.id} className="border-b last:border-0 transition-colors hover:bg-bg2">
+                  <tr
+                    key={order.id}
+                    onClick={() => window.location.href = `/orders/${order.id}`}
+                    className="cursor-pointer border-b last:border-0 transition-colors hover:bg-bg2"
+                  >
                     <td className="p-4">
                       <p className="text-sm font-medium text-ink">#{order.orderNumber}</p>
                     </td>
@@ -104,8 +109,8 @@ export default function OrdersPage() {
                     <td className="p-4 text-sm text-ink">{order.items?.length ?? 0}</td>
                     <td className="p-4 text-sm font-medium text-ink">AED {Number(order.total).toLocaleString()}</td>
                     <td className="p-4">
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusStyles[order.status] ?? "bg-bg2 text-ink-3"}`}>
-                        {order.status}
+                      <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusStyles[order.status] ?? "bg-bg2 text-ink-3"}`}>
+                        {order.status.charAt(0) + order.status.slice(1).toLowerCase()}
                       </span>
                     </td>
                     <td className="p-4 text-sm text-ink-2">

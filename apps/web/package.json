@@ -14,32 +14,33 @@
     "clean": "rm -rf .next node_modules"
   },
   "dependencies": {
-    "@tradehubuae/ui": "workspace:*",
     "@tradehubuae/auth": "workspace:*",
-    "@tradehubuae/config": "workspace:*",
-    "@tradehubuae/types": "workspace:*",
-    "@tradehubuae/validation": "workspace:*",
-    "@tradehubuae/seo": "workspace:*",
-    "@tradehubuae/utils": "workspace:*",
-    "@tradehubuae/logger": "workspace:*",
     "@tradehubuae/chat": "workspace:*",
+    "@tradehubuae/config": "workspace:*",
+    "@tradehubuae/logger": "workspace:*",
+    "@tradehubuae/seo": "workspace:*",
+    "@tradehubuae/types": "workspace:*",
+    "@tradehubuae/ui": "workspace:*",
+    "@tradehubuae/utils": "workspace:*",
+    "@tradehubuae/validation": "workspace:*",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.468.0",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "lucide-react": "^0.468.0",
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^2.6.0",
-    "class-variance-authority": "^0.7.1"
+    "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "typescript": "^5.7.2",
-    "vitest": "^2.1.8",
-    "tailwindcss": "^3.4.17",
+    "autoprefixer": "^10.4.20",
+    "jsdom": "^29.1.1",
     "postcss": "^8.4.49",
-    "autoprefixer": "^10.4.20"
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   }
 }

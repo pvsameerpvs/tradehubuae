@@ -3,16 +3,29 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button, Input, Badge } from "@tradehubuae/ui";
-import { Search, Package, Phone, MapPin, Calendar, Truck, ChevronRight } from "lucide-react";
+import {
+  Search,
+  ShoppingCart,
+  CheckCircle2,
+  RefreshCw,
+  Truck,
+  PackageCheck,
+  Phone,
+  MapPin,
+  Calendar,
+  Copy,
+  ClipboardCheck,
+  XCircle,
+} from "lucide-react";
 import { formatStatus, orderStatusColor, ORDER_STATUS_FLOW } from "@/data";
 import { trackOrder, type OrderData } from "@/lib/actions/orders";
 
 const TIMELINE_STEPS = [
-  { key: "PENDING", label: "Order Placed", icon: Package },
-  { key: "CONFIRMED", label: "Confirmed", icon: Package },
-  { key: "PROCESSING", label: "Processing", icon: Package },
+  { key: "PENDING", label: "Order Placed", icon: ShoppingCart },
+  { key: "CONFIRMED", label: "Confirmed", icon: CheckCircle2 },
+  { key: "PROCESSING", label: "Processing", icon: RefreshCw },
   { key: "SHIPPED", label: "Shipped", icon: Truck },
-  { key: "DELIVERED", label: "Delivered", icon: Truck },
+  { key: "DELIVERED", label: "Delivered", icon: PackageCheck },
 ];
 
 function getTimelineStatus(orderStatus: string, stepKey: string): "completed" | "current" | "upcoming" {
@@ -24,11 +37,12 @@ function getTimelineStatus(orderStatus: string, stepKey: string): "completed" | 
 }
 
 function Timeline({ status, shippedAt, deliveredAt }: { status: string; shippedAt?: string | null; deliveredAt?: string | null }) {
+  const isTerminal = status === "CANCELLED" || status === "RETURNED" || status === "REFUNDED";
+
   return (
     <div className="relative">
       {TIMELINE_STEPS.map((step, i) => {
         const stepStatus = getTimelineStatus(status, step.key);
-        const isTerminal = status === "CANCELLED" || status === "RETURNED" || status === "REFUNDED";
         const showLine = i < TIMELINE_STEPS.length - 1;
 
         if (isTerminal && stepStatus === "upcoming") return null;
@@ -41,13 +55,15 @@ function Timeline({ status, shippedAt, deliveredAt }: { status: string; shippedA
           dateLabel = new Date(deliveredAt).toLocaleDateString("en-AE", { day: "numeric", month: "short", year: "numeric" });
         }
 
+        const StepIcon = step.icon;
+
         return (
           <div key={step.key} className="flex gap-4 pb-6 last:pb-0">
             <div className="flex flex-col items-center">
               <div
                 className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-sm font-medium transition-all ${
                   stepStatus === "completed"
-                    ? "border-brand bg-brand text-white"
+                    ? "border-emerald-500 bg-emerald-500 text-white"
                     : stepStatus === "current"
                       ? "border-brand bg-white text-brand ring-2 ring-brand/20"
                       : "border-line bg-white text-ink-3"
@@ -58,13 +74,13 @@ function Timeline({ status, shippedAt, deliveredAt }: { status: string; shippedA
                     <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                   </svg>
                 ) : (
-                  <step.icon className="h-4 w-4" strokeWidth={2} />
+                  <StepIcon className="h-4 w-4" strokeWidth={2} />
                 )}
               </div>
               {showLine && (
                 <div
                   className={`mt-1 h-full w-0.5 ${
-                    stepStatus === "completed" ? "bg-brand" : "bg-line"
+                    stepStatus === "completed" ? "bg-emerald-400" : "bg-line"
                   }`}
                 />
               )}
@@ -89,7 +105,45 @@ function Timeline({ status, shippedAt, deliveredAt }: { status: string; shippedA
           </div>
         );
       })}
+      {isTerminal && (
+        <div className="flex gap-4">
+          <div className="flex flex-col items-center">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-red-300 bg-red-50 text-red-500">
+              <XCircle className="h-4 w-4" strokeWidth={2} />
+            </div>
+          </div>
+          <div className="min-w-0 pt-1.5">
+            <p className="text-sm font-medium text-red-600">
+              {status === "CANCELLED" ? "Cancelled" : status === "RETURNED" ? "Returned" : "Refunded"}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      void 0;
+    }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="ml-2 inline-flex h-6 w-6 items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-bg2 hover:text-ink"
+      title="Copy"
+    >
+      {copied ? <ClipboardCheck className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" strokeWidth={1.75} />}
+    </button>
   );
 }
 
@@ -98,20 +152,28 @@ function OrderTrackCard({ order }: { order: OrderData }) {
 
   return (
     <div className="space-y-5">
-      {/* Order Header */}
       <div className="rounded-xl border border-line bg-white p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-xs text-ink-3">Order Number</p>
-            <p className="mt-0.5 text-lg font-semibold text-ink">{order.orderNumber}</p>
+            <p className="mt-0.5 flex items-center gap-1 text-lg font-semibold text-ink">
+              {order.orderNumber}
+              <CopyButton text={order.orderNumber} />
+            </p>
           </div>
-          <Badge
-            variant={orderStatusColor[order.status] || "default"}
-            className="px-3 py-1 text-xs"
-          >
+          <Badge variant={orderStatusColor[order.status] || "default"} className="px-3 py-1 text-xs">
             {formatStatus(order.status)}
           </Badge>
         </div>
+
+        {order.trackingNumber && (
+          <div className="mt-3 flex items-center gap-2 rounded-lg bg-brand/5 px-3 py-2">
+            <Truck className="h-4 w-4 text-brand" strokeWidth={1.75} />
+            <span className="text-xs text-ink-2">Tracking:</span>
+            <span className="text-sm font-medium text-ink">{order.trackingNumber}</span>
+            <CopyButton text={order.trackingNumber} />
+          </div>
+        )}
 
         <div className="mt-4 grid grid-cols-2 gap-4 border-t border-line pt-4 sm:grid-cols-4">
           <div>
@@ -132,8 +194,8 @@ function OrderTrackCard({ order }: { order: OrderData }) {
           </div>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wider text-ink-3">Payment</p>
-            <p className="mt-1 text-sm font-medium text-ink">
-              {order.paymentMethod === "cod" ? "Cash on Delivery" : "Card"}
+            <p className="mt-1 text-sm font-medium capitalize text-ink">
+              {order.paymentMethod === "cod" ? "Cash on Delivery" : order.paymentMethod === "card" ? "Card Payment" : order.paymentMethod}
             </p>
           </div>
           <div>
@@ -145,7 +207,6 @@ function OrderTrackCard({ order }: { order: OrderData }) {
         </div>
       </div>
 
-      {/* Estimated Delivery */}
       {order.estimatedDeliveryDate && !isTerminal && (
         <div className="rounded-xl border border-line bg-brand/5 p-5">
           <div className="flex items-center gap-3">
@@ -169,12 +230,11 @@ function OrderTrackCard({ order }: { order: OrderData }) {
         </div>
       )}
 
-      {/* Terminal status message */}
       {isTerminal && (
         <div className="rounded-xl border border-red-100 bg-red-50 p-5">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
-              <Package className="h-5 w-5 text-red-600" strokeWidth={1.75} />
+              <XCircle className="h-5 w-5 text-red-600" strokeWidth={1.75} />
             </div>
             <div>
               <p className="text-sm font-semibold text-red-700">
@@ -186,7 +246,6 @@ function OrderTrackCard({ order }: { order: OrderData }) {
         </div>
       )}
 
-      {/* Timeline */}
       <div className="rounded-xl border border-line bg-white p-5">
         <h3 className="mb-5 text-sm font-semibold text-ink">Order Progress</h3>
         <Timeline
@@ -196,14 +255,13 @@ function OrderTrackCard({ order }: { order: OrderData }) {
         />
       </div>
 
-      {/* Contact & Shipping Info */}
       <div className="rounded-xl border border-line bg-white p-5">
         <h3 className="mb-4 text-sm font-semibold text-ink">Delivery Details</h3>
         <div className="space-y-4">
           {order.contactName && (
             <div className="flex items-start gap-3">
               <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bg2">
-                <Package className="h-4 w-4 text-ink-2" strokeWidth={1.75} />
+                <ShoppingCart className="h-4 w-4 text-ink-2" strokeWidth={1.75} />
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-ink-3">Name</p>
@@ -245,7 +303,6 @@ function OrderTrackCard({ order }: { order: OrderData }) {
         </div>
       </div>
 
-      {/* Order Items */}
       <div className="rounded-xl border border-line bg-white p-5">
         <h3 className="mb-4 text-sm font-semibold text-ink">Items ({order.items.length})</h3>
         <div className="divide-y divide-line">
@@ -299,8 +356,8 @@ export default function TrackOrderPage() {
     try {
       const result = await trackOrder(orderId.trim());
       setOrder(result);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Order not found. Please check your order number.");
+    } catch {
+      setError("Order not found. Please check your order number.");
     } finally {
       setLoading(false);
     }
@@ -309,7 +366,6 @@ export default function TrackOrderPage() {
   return (
     <div className="container mx-auto px-4 py-8 sm:py-12">
       <div className="mx-auto max-w-2xl">
-        {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-[26px] font-semibold leading-[30px] text-ink" style={{ letterSpacing: "-0.01em" }}>
             Track Your Order
@@ -319,7 +375,6 @@ export default function TrackOrderPage() {
           </p>
         </div>
 
-        {/* Search */}
         <div className="mb-8 flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-3" strokeWidth={1.75} />
@@ -341,14 +396,12 @@ export default function TrackOrderPage() {
           </Button>
         </div>
 
-        {/* Error */}
         {error && (
           <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-center">
             <p className="text-sm text-red-700">{error}</p>
           </div>
         )}
 
-        {/* Loading Skeleton */}
         {loading && (
           <div className="animate-pulse space-y-5">
             <div className="h-40 rounded-xl bg-bg2" />
@@ -357,7 +410,6 @@ export default function TrackOrderPage() {
           </div>
         )}
 
-        {/* Order Result */}
         {order && <OrderTrackCard order={order} />}
       </div>
     </div>

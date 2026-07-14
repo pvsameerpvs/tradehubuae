@@ -39,7 +39,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 space-y-2 overflow-y-auto p-3">
+      <nav className="flex-1 space-y-2 overflow-y-auto scrollbar-hide p-3">
         <NavLinks sections={navSections} onNavClick={onClose} />
       </nav>
 
