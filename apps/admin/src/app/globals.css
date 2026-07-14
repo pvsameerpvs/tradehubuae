@@ -51,3 +51,15 @@
   * { @apply border-border; }
   body { @apply bg-background text-foreground; }
 }
+
+@layer utilities {
+  .btn-brand {
+    background: linear-gradient(90deg, #1A5A8C 0%, #134A7C 50%, #103E68 100%);
+  }
+  .btn-brand:hover {
+    opacity: 0.9;
+  }
+  .btn-brand:active {
+    opacity: 1;
+  }
+}

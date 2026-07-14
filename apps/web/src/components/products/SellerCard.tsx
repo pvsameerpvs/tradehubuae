@@ -1,3 +1,5 @@
+"use client";
+
 import { Star, MessageSquareMore } from "lucide-react";
 import { Card, CardContent } from "@tradehubuae/ui";
 import { setProductContext } from "@/lib/chat-store";

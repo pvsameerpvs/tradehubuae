@@ -8,6 +8,7 @@ import { z } from "zod";
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from "@tradehubuae/ui";
 import { api, type PaginatedResponse } from "@/lib/api";
 import ImageUpload from "@/components/ImageUpload";
+import { Sparkles } from "lucide-react";
 
 interface Category {
   id: string;
@@ -34,18 +35,22 @@ interface ProductCategory {
 interface ExistingProduct {
   name: string;
   description: string | null;
-  shortDescription: string | null;
   condition: string;
   price: number;
   compareAtPrice: number | null;
-  costPrice: number | null;
   brandId: string | null;
+  badge: string | null;
   isActive: boolean;
   isFeatured: boolean;
   totalStock: number;
-  seoTitle: string | null;
-  seoDescription: string | null;
-  metaKeywords: string | null;
+  specProcessor: string | null;
+  specRam: string | null;
+  specStorage: string | null;
+  specDisplay: string | null;
+  specGpu: string | null;
+  specBattery: string | null;
+  specWeight: string | null;
+  specWarranty: string | null;
   images: ProductImage[];
   categories: ProductCategory[];
 }
@@ -53,7 +58,6 @@ interface ExistingProduct {
 const productSchema = z.object({
   name: z.string().min(1, "Product name is required").max(500),
   description: z.string().optional(),
-  shortDescription: z.string().optional(),
   condition: z.enum(["New", "Like_New", "Excellent", "Good", "Fair"]),
   price: z.preprocess(
     (v) => (v === "" ? undefined : Number(v)),
@@ -63,17 +67,19 @@ const productSchema = z.object({
     (v) => (v === "" || v === undefined || v === null ? undefined : Number(v)),
     z.number().min(0).optional(),
   ),
-  costPrice: z.preprocess(
-    (v) => (v === "" || v === undefined || v === null ? undefined : Number(v)),
-    z.number().min(0).optional(),
-  ),
   categoryId: z.string().optional(),
   brandId: z.string().optional(),
+  badge: z.string().optional(),
+  specProcessor: z.string().optional(),
+  specRam: z.string().optional(),
+  specStorage: z.string().optional(),
+  specDisplay: z.string().optional(),
+  specGpu: z.string().optional(),
+  specBattery: z.string().optional(),
+  specWeight: z.string().optional(),
+  specWarranty: z.string().optional(),
   isActive: z.boolean(),
   isFeatured: z.boolean(),
-  seoTitle: z.string().max(70, "Max 70 characters").optional(),
-  seoDescription: z.string().max(160, "Max 160 characters").optional(),
-  metaKeywords: z.string().max(255).optional(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -81,18 +87,22 @@ type ProductFormValues = z.infer<typeof productSchema>;
 const defaultValues: ProductFormValues = {
   name: "",
   description: "",
-  shortDescription: "",
   condition: "New",
   price: undefined as unknown as number,
   compareAtPrice: undefined,
-  costPrice: undefined,
   categoryId: "",
   brandId: "",
+  badge: "",
+  specProcessor: "",
+  specRam: "",
+  specStorage: "",
+  specDisplay: "",
+  specGpu: "",
+  specBattery: "",
+  specWeight: "",
+  specWarranty: "",
   isActive: true,
   isFeatured: false,
-  seoTitle: "",
-  seoDescription: "",
-  metaKeywords: "",
 };
 
 export default function ProductForm({ id }: { id?: string }) {
@@ -102,11 +112,15 @@ export default function ProductForm({ id }: { id?: string }) {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [fetching, setFetching] = useState(!!id);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     reset,
+    getValues,
+    setValue,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
@@ -133,18 +147,22 @@ export default function ProductForm({ id }: { id?: string }) {
         reset({
           name: p.name,
           description: p.description ?? "",
-          shortDescription: p.shortDescription ?? "",
           condition: p.condition as ProductFormValues["condition"],
           price: Number(p.price),
           compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : undefined,
-          costPrice: p.costPrice ? Number(p.costPrice) : undefined,
           categoryId: (p.categories?.find((c) => c.isPrimary)?.categoryId ?? p.categories?.[0]?.categoryId) ?? "",
           brandId: p.brandId ?? "",
+          badge: p.badge ?? "",
+          specProcessor: p.specProcessor ?? "",
+          specRam: p.specRam ?? "",
+          specStorage: p.specStorage ?? "",
+          specDisplay: p.specDisplay ?? "",
+          specGpu: p.specGpu ?? "",
+          specBattery: p.specBattery ?? "",
+          specWeight: p.specWeight ?? "",
+          specWarranty: p.specWarranty ?? "",
           isActive: p.isActive,
           isFeatured: p.isFeatured,
-          seoTitle: p.seoTitle ?? "",
-          seoDescription: p.seoDescription ?? "",
-          metaKeywords: p.metaKeywords ?? "",
         });
         setImages(p.images?.filter((img) => img?.url).map((img) => img.url) ?? []);
       })
@@ -152,24 +170,88 @@ export default function ProductForm({ id }: { id?: string }) {
       .finally(() => setFetching(false));
   }, [id, reset]);
 
+  const handleAiGenerate = async () => {
+    setGenerating(true);
+    setGenerationError(null);
+
+    try {
+      const formData = getValues();
+      const categoryName = categories.find((c) => c.id === formData.categoryId)?.name;
+      const brandName = brands.find((b) => b.id === formData.brandId)?.name;
+
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
+      const res = await fetch(`${API_BASE}/ai/auto-fill`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          images,
+          name: formData.name || undefined,
+          description: formData.description || undefined,
+          category: categoryName,
+          brand: brandName,
+          condition: formData.condition,
+          specProcessor: formData.specProcessor || undefined,
+          specRam: formData.specRam || undefined,
+          specStorage: formData.specStorage || undefined,
+          specDisplay: formData.specDisplay || undefined,
+          specGpu: formData.specGpu || undefined,
+          specBattery: formData.specBattery || undefined,
+          specWeight: formData.specWeight || undefined,
+          specWarranty: formData.specWarranty || undefined,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ message: "AI generation failed" }));
+        throw new Error(err.message);
+      }
+
+      const data = await res.json();
+
+      if (data.name) setValue("name", data.name);
+      if (data.description) setValue("description", data.description);
+      if (data.condition) setValue("condition", data.condition);
+      if (data.price) setValue("price", Number(data.price));
+      if (data.categoryId) setValue("categoryId", data.categoryId);
+      if (data.brandId) setValue("brandId", data.brandId);
+      if (data.badge) setValue("badge", data.badge);
+      if (data.specProcessor) setValue("specProcessor", data.specProcessor);
+      if (data.specRam) setValue("specRam", data.specRam);
+      if (data.specStorage) setValue("specStorage", data.specStorage);
+      if (data.specDisplay) setValue("specDisplay", data.specDisplay);
+      if (data.specGpu) setValue("specGpu", data.specGpu);
+      if (data.specBattery) setValue("specBattery", data.specBattery);
+      if (data.specWeight) setValue("specWeight", data.specWeight);
+      if (data.specWarranty) setValue("specWarranty", data.specWarranty);
+    } catch (err) {
+      setGenerationError(err instanceof Error ? err.message : "AI generation failed");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   const onSubmit = async (data: ProductFormValues) => {
     setSubmitError(null);
     try {
       const payload = {
         name: data.name,
         description: data.description || undefined,
-        shortDescription: data.shortDescription || undefined,
         condition: data.condition,
         price: data.price,
         compareAtPrice: data.compareAtPrice || undefined,
-        costPrice: data.costPrice || undefined,
         categoryId: data.categoryId || undefined,
         brandId: data.brandId || undefined,
+        badge: data.badge || undefined,
+        specProcessor: data.specProcessor || undefined,
+        specRam: data.specRam || undefined,
+        specStorage: data.specStorage || undefined,
+        specDisplay: data.specDisplay || undefined,
+        specGpu: data.specGpu || undefined,
+        specBattery: data.specBattery || undefined,
+        specWeight: data.specWeight || undefined,
+        specWarranty: data.specWarranty || undefined,
         isActive: data.isActive,
         isFeatured: data.isFeatured,
-        seoTitle: data.seoTitle || undefined,
-        seoDescription: data.seoDescription || undefined,
-        metaKeywords: data.metaKeywords || undefined,
       };
 
       if (id) {
@@ -200,6 +282,29 @@ export default function ProductForm({ id }: { id?: string }) {
         </div>
       )}
 
+      {/* AI Auto-fill */}
+      <div className="flex items-center justify-between rounded-xl border border-brand/20 bg-brand/[0.03] px-5 py-4">
+        <div>
+          <p className="text-sm font-semibold text-ink">Auto-fill with AI</p>
+          <p className="mt-0.5 text-xs text-ink-2">
+            Upload images or type any details, then click generate to auto-fill all fields
+          </p>
+        </div>
+        <Button
+          type="button"
+          onClick={handleAiGenerate}
+          disabled={generating}
+        >
+          <Sparkles className="mr-1.5 h-4 w-4" strokeWidth={1.75} />
+          {generating ? "Generating..." : "Generate"}
+        </Button>
+      </div>
+      {generationError && (
+        <div className="rounded-lg border border-sale/30 bg-sale/5 px-4 py-3 text-sm text-sale">
+          {generationError}
+        </div>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>Basic Information</CardTitle>
@@ -220,15 +325,6 @@ export default function ProductForm({ id }: { id?: string }) {
                 className="flex w-full rounded-lg border border-line bg-white px-4 py-3 text-base text-ink placeholder:text-ink-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink/40"
               />
             </div>
-            <div className="col-span-2">
-              <Label htmlFor="shortDescription">Short Description</Label>
-              <textarea
-                id="shortDescription"
-                rows={2}
-                {...register("shortDescription")}
-                className="flex w-full rounded-lg border border-line bg-white px-4 py-3 text-base text-ink placeholder:text-ink-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink/40"
-              />
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -238,7 +334,7 @@ export default function ProductForm({ id }: { id?: string }) {
           <CardTitle>Pricing</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="price">Price (AED) *</Label>
               <Input id="price" type="number" min={0} step="0.01" {...register("price")} />
@@ -247,10 +343,6 @@ export default function ProductForm({ id }: { id?: string }) {
             <div>
               <Label htmlFor="compareAtPrice">Compare At</Label>
               <Input id="compareAtPrice" type="number" min={0} step="0.01" {...register("compareAtPrice")} />
-            </div>
-            <div>
-              <Label htmlFor="costPrice">Cost Price</Label>
-              <Input id="costPrice" type="number" min={0} step="0.01" {...register("costPrice")} />
             </div>
           </div>
         </CardContent>
@@ -302,6 +394,65 @@ export default function ProductForm({ id }: { id?: string }) {
                 <option value="Fair">Fair</option>
               </select>
             </div>
+            <div>
+              <Label htmlFor="badge">Badge</Label>
+              <select
+                id="badge"
+                {...register("badge")}
+                className="flex h-12 w-full rounded-lg border border-line bg-white px-4 text-base text-ink transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink/40"
+              >
+                <option value="">None</option>
+                <option value="Certified">Certified</option>
+                <option value="Best Seller">Best Seller</option>
+                <option value="New">New</option>
+                <option value="Great deal">Great deal</option>
+                <option value="Staff pick">Staff pick</option>
+                <option value="Like new">Like new</option>
+                <option value="Low stock">Low stock</option>
+              </select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Key Specifications</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="specProcessor">Processor</Label>
+              <Input id="specProcessor" placeholder="e.g. Apple M2" {...register("specProcessor")} />
+            </div>
+            <div>
+              <Label htmlFor="specRam">RAM</Label>
+              <Input id="specRam" placeholder="e.g. 16GB DDR5" {...register("specRam")} />
+            </div>
+            <div>
+              <Label htmlFor="specStorage">Storage</Label>
+              <Input id="specStorage" placeholder="e.g. 512GB SSD" {...register("specStorage")} />
+            </div>
+            <div>
+              <Label htmlFor="specDisplay">Display</Label>
+              <Input id="specDisplay" placeholder='e.g. 15.6" FHD+' {...register("specDisplay")} />
+            </div>
+            <div>
+              <Label htmlFor="specGpu">GPU</Label>
+              <Input id="specGpu" placeholder="e.g. NVIDIA RTX 4060" {...register("specGpu")} />
+            </div>
+            <div>
+              <Label htmlFor="specBattery">Battery</Label>
+              <Input id="specBattery" placeholder="e.g. Up to 10 hours" {...register("specBattery")} />
+            </div>
+            <div>
+              <Label htmlFor="specWeight">Weight</Label>
+              <Input id="specWeight" placeholder="e.g. 1.8 kg" {...register("specWeight")} />
+            </div>
+            <div>
+              <Label htmlFor="specWarranty">Warranty</Label>
+              <Input id="specWarranty" placeholder="e.g. 2 Years" {...register("specWarranty")} />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -330,7 +481,7 @@ export default function ProductForm({ id }: { id?: string }) {
                 </button>
               </div>
             ))}
-            {images.length < 8 && (
+            {images.length < 6 && (
               <ImageUpload
                 value=""
                 onChange={(url) => setImages([...images, url])}
@@ -342,35 +493,6 @@ export default function ProductForm({ id }: { id?: string }) {
           {images.length === 0 && (
             <p className="mt-2 text-xs text-ink-3">Upload at least one image for the product gallery.</p>
           )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>SEO</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="seoTitle">SEO Title</Label>
-              <Input id="seoTitle" {...register("seoTitle")} />
-              {errors.seoTitle && <FieldError>{errors.seoTitle.message}</FieldError>}
-            </div>
-            <div>
-              <Label htmlFor="seoDescription">SEO Description</Label>
-              <textarea
-                id="seoDescription"
-                rows={2}
-                {...register("seoDescription")}
-                className="flex w-full rounded-lg border border-line bg-white px-4 py-3 text-base text-ink placeholder:text-ink-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink/40"
-              />
-              {errors.seoDescription && <FieldError>{errors.seoDescription.message}</FieldError>}
-            </div>
-            <div>
-              <Label htmlFor="metaKeywords">Meta Keywords</Label>
-              <Input id="metaKeywords" {...register("metaKeywords")} />
-            </div>
-          </div>
         </CardContent>
       </Card>
 

@@ -26,13 +26,10 @@ export default function CategoryForm({ id }: { id?: string }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [form, setForm] = useState({
     name: "",
-    description: "",
     image: "",
     parentId: "",
     sortOrder: 0,
     isActive: true,
-    seoTitle: "",
-    seoDescription: "",
   });
 
   useEffect(() => {
@@ -47,13 +44,10 @@ export default function CategoryForm({ id }: { id?: string }) {
     api.get<Category>(`/categories/${id}`)
       .then((cat) => setForm({
         name: cat.name,
-        description: cat.description ?? "",
         image: cat.image ?? "",
         parentId: cat.parent?.id ?? "",
         sortOrder: cat.sortOrder ?? 0,
         isActive: cat.isActive ?? true,
-        seoTitle: cat.seoTitle ?? "",
-        seoDescription: cat.seoDescription ?? "",
       }))
       .catch(console.error)
       .finally(() => setFetching(false));
@@ -99,15 +93,6 @@ export default function CategoryForm({ id }: { id?: string }) {
           className="w-full rounded-lg border border-line bg-bg2 px-3 py-2 text-sm text-ink-2"
         />
       </div>
-      <div>
-        <label className="mb-1 block text-sm font-medium text-ink">Description</label>
-        <textarea
-          value={form.description}
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
-          rows={3}
-          className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-3 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-        />
-      </div>
       <ImageUpload
         value={form.image}
         onChange={(url) => setForm({ ...form, image: url })}
@@ -147,23 +132,6 @@ export default function CategoryForm({ id }: { id?: string }) {
           />
           <label htmlFor="isActive" className="text-sm font-medium text-ink">Active</label>
         </div>
-      </div>
-      <div>
-        <label className="mb-1 block text-sm font-medium text-ink">SEO Title</label>
-        <input
-          value={form.seoTitle}
-          onChange={(e) => setForm({ ...form, seoTitle: e.target.value })}
-          className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-3 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-        />
-      </div>
-      <div>
-        <label className="mb-1 block text-sm font-medium text-ink">SEO Description</label>
-        <textarea
-          value={form.seoDescription}
-          onChange={(e) => setForm({ ...form, seoDescription: e.target.value })}
-          rows={2}
-          className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-3 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-        />
       </div>
       <div className="flex gap-4 pt-2">
         <Button type="submit" disabled={loading}>

@@ -13,7 +13,8 @@ interface BlogPost {
   content: string;
   excerpt: string | null;
   image: string | null;
-  tags: string[];
+  category: string | null;
+  readTime: string | null;
   published: boolean;
   authorId: string | null;
 }
@@ -27,7 +28,8 @@ export default function BlogForm({ id }: { id?: string }) {
     content: "",
     excerpt: "",
     image: "",
-    tags: "",
+    category: "",
+    readTime: "",
     published: false,
   });
 
@@ -40,7 +42,8 @@ export default function BlogForm({ id }: { id?: string }) {
         content: post.content,
         excerpt: post.excerpt ?? "",
         image: post.image ?? "",
-        tags: (post.tags ?? []).join(", "),
+        category: post.category ?? "",
+        readTime: post.readTime ?? "",
         published: post.published,
       }))
       .catch(console.error)
@@ -53,9 +56,10 @@ export default function BlogForm({ id }: { id?: string }) {
     try {
       const payload = {
         ...form,
-        tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
         image: form.image || undefined,
         excerpt: form.excerpt || undefined,
+        category: form.category || undefined,
+        readTime: form.readTime || undefined,
       };
       if (id) {
         await api.put(`/blog/${id}`, payload);
@@ -117,14 +121,31 @@ export default function BlogForm({ id }: { id?: string }) {
           className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-3 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
         />
       </div>
-      <div>
-        <label className="mb-1 block text-sm font-medium text-ink">Tags (comma-separated)</label>
-        <input
-          value={form.tags}
-          onChange={(e) => setForm({ ...form, tags: e.target.value })}
-          placeholder="e.g. electronics, reviews, news"
-          className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-3 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-        />
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="mb-1 block text-sm font-medium text-ink">Category</label>
+          <select
+            value={form.category}
+            onChange={(e) => setForm({ ...form, category: e.target.value })}
+            className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+          >
+            <option value="">Select category...</option>
+            <option value="Buying Guide">Buying Guide</option>
+            <option value="Gaming">Gaming</option>
+            <option value="Networking">Networking</option>
+            <option value="Industry Insights">Industry Insights</option>
+            <option value="Guides">Guides</option>
+          </select>
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-ink">Read Time</label>
+          <input
+            value={form.readTime}
+            onChange={(e) => setForm({ ...form, readTime: e.target.value })}
+            placeholder="e.g. 5 min read"
+            className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-3 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+          />
+        </div>
       </div>
       <div className="flex items-center gap-2">
         <input

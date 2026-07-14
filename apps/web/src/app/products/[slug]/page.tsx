@@ -90,7 +90,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <div>
               <h2 className="text-base font-semibold text-ink">Key specifications</h2>
               <div className="mt-2">
-                <SpecsTable specs={defaultSpecs} />
+                <SpecsTable specs={product.detailedSpecs ?? defaultSpecs} />
               </div>
             </div>
 

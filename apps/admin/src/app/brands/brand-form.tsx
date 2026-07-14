@@ -22,9 +22,7 @@ export default function BrandForm({ id }: { id?: string }) {
   const [fetching, setFetching] = useState(!!id);
   const [form, setForm] = useState({
     name: "",
-    description: "",
     logo: "",
-    website: "",
     sortOrder: 0,
     isActive: true,
   });
@@ -35,9 +33,7 @@ export default function BrandForm({ id }: { id?: string }) {
     api.get<Brand>(`/brands/${id}`)
       .then((brand) => setForm({
         name: brand.name,
-        description: brand.description ?? "",
         logo: brand.logo ?? "",
-        website: brand.website ?? "",
         sortOrder: brand.sortOrder,
         isActive: brand.isActive,
       }))
@@ -49,7 +45,7 @@ export default function BrandForm({ id }: { id?: string }) {
     e.preventDefault();
     setLoading(true);
     try {
-      const payload = { ...form, logo: form.logo || undefined, website: form.website || undefined };
+      const payload = { ...form, logo: form.logo || undefined };
       if (id) {
         await api.put(`/brands/${id}`, payload);
       } else {
@@ -85,30 +81,12 @@ export default function BrandForm({ id }: { id?: string }) {
           className="w-full rounded-lg border border-line bg-bg2 px-3 py-2 text-sm text-ink-2"
         />
       </div>
-      <div>
-        <label className="mb-1 block text-sm font-medium text-ink">Description</label>
-        <textarea
-          value={form.description}
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
-          rows={3}
-          className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-3 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-        />
-      </div>
       <ImageUpload
         value={form.logo}
         onChange={(url) => setForm({ ...form, logo: url })}
         label="Brand Logo"
         folder="brands"
       />
-      <div>
-        <label className="mb-1 block text-sm font-medium text-ink">Website</label>
-        <input
-          type="url"
-          value={form.website}
-          onChange={(e) => setForm({ ...form, website: e.target.value })}
-          className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-3 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-        />
-      </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="mb-1 block text-sm font-medium text-ink">Sort Order</label>

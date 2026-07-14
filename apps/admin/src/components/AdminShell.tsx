@@ -14,7 +14,6 @@ import {
   Users,
   Building2,
   Tags,
-  Star,
   FileText,
   Image,
   Search,
@@ -42,7 +41,7 @@ const secondaryNav = [
   { label: "Inventory", href: "/inventory", icon: Warehouse },
   { label: "Combo Offers", href: "/combo-offers", icon: Tags },
   { label: "Bulk Sales", href: "/bulk-sales", icon: Building2 },
-  { label: "Reviews", href: "/reviews", icon: Star },
+
   { label: "Media", href: "/media", icon: Image },
   { label: "Blog", href: "/blog", icon: FileText },
   { label: "SEO", href: "/seo", icon: Search },
