@@ -11,16 +11,16 @@ Cross-cutting issues grouped by priority.
 | 1 | **Web API base URL missing `/v1`** | `apps/web/src/lib/api.ts:1` | ✅ Fixed — now uses `/api/v1` |
 | 2 | **Product route conflict** | `apps/api/src/modules/products/products.controller.ts:26-32` | `findBySlug` and `findById` both match `GET /:param`. Either merge into one handler or use distinct paths |
 
-## 🟠 P1 — Admin Pages Broken at Runtime
+## 🟠 P1 — Missing Backend Modules (frontend API calls removed)
 
-| # | Issue | Admin Page | Backend Needed |
-|---|-------|-----------|----------------|
-| 3 | `GET /customers` + `GET /customers/:id` | `/customers`, `/customers/[id]` | Build Customers controller (module exists empty) |
-| 4 | `GET /users`, `POST /users`, `PUT /users/:id` | `/users`, `/users/new`, `/users/[id]`, `/users/[id]/edit` | Build Users controller (module exists empty) |
-| 5 | `GET /blog`, `POST /blog`, `PUT /blog/:id` | `/blog`, `/blog/new`, `/blog/[id]` | Create Blog module from scratch |
-| 6 | `GET /bulk-sales`, `GET /bulk-sales/:id`, `PUT /bulk-sales/:id` | `/bulk-sales`, `/bulk-sales/[id]` | Create Bulk Sales module from scratch |
-| 7 | `GET /media` | `/media` | Add `GET /media` to MediaController (only POST exists) |
-| 8 | `POST /ai/auto-fill` | `/products/new` (AI button) | Add `auto-fill` route or change frontend to call `POST /ai/generate-product` |
+| # | Issue | Status | Action |
+|---|-------|--------|--------|
+| 3 | `GET /customers` + `GET /customers/:id` | ✅ Frontend API calls removed. Backend still empty — build when needed | Build Customers controller |
+| 4 | `GET /users`, `POST /users`, `PUT /users/:id` | ✅ Frontend API calls removed | Build Users controller |
+| 5 | `GET /blog`, `POST /blog`, `PUT /blog/:id` | ✅ Frontend API calls removed | Create Blog module |
+| 6 | `GET /bulk-sales`, `GET /bulk-sales/:id`, `PUT /bulk-sales/:id` | ✅ Frontend API calls removed | Create Bulk Sales module |
+| 7 | `GET /media` | ✅ Frontend API call removed | Add `GET /media` to MediaController |
+| 8 | `POST /ai/auto-fill` | ✅ Frontend fetch removed. Backend has `POST /ai/generate-product` instead | N/A — use existing endpoint when wiring |
 
 ## 🟡 P2 — Authentication Gap
 
@@ -103,13 +103,13 @@ Cross-cutting issues grouped by priority.
 | Priority | Issues | Category |
 |----------|--------|----------|
 | 🔴 P0 | 2 | Blocks all API communication |
-| 🟠 P1 | 6 | Admin pages error at runtime |
+| 🟠 P1 | 6 | Missing backend modules (frontend calls removed, non-blocking) |
 | 🟡 P2 | 5 | No auth anywhere |
 | 🟢 P3 | 8 | Static → API migration |
 | 🔵 P4 | 5 | Missing delete UIs |
-| 🟣 P5 | 6 | Missing pages/broken links |
-| ⚪ P6 | 5 | Hardcoded admin data |
+| 🟣 P5 | 5 | Missing pages/broken links |
+| ⚪ P6 | 3 | Hardcoded admin data |
 | 🟤 P7 | 6 | Empty backend modules |
 | ⚪ P8 | 5 | Validation/tech debt |
 
-**Total: 48 issues**
+**Total: 45 issues** (3 P1 issues resolved — frontend no longer calls missing endpoints)

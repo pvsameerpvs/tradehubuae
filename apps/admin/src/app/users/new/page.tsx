@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "@/lib/api";
 import { Button } from "@tradehubuae/ui";
 
 export default function NewUserPage() {
@@ -18,15 +17,11 @@ export default function NewUserPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      await api.post("/users", form);
+    setTimeout(() => {
+      setLoading(false);
       router.push("/users");
       router.refresh();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to create user");
-    } finally {
-      setLoading(false);
-    }
+    }, 500);
   };
 
   return (

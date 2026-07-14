@@ -7,6 +7,9 @@ export type { Product, ProductSpec, CompareSpec } from "./products";
 export { brands } from "./brands";
 export type { Brand } from "./brands";
 
+export { uses, getUse, getUseBySlug } from "./uses";
+export type { Use } from "./uses";
+
 export { orders, orderStatusColor, formatStatus, ORDER_STATUS_FLOW, ORDER_TERMINAL_STATUSES } from "./orders";
 export type { Order, OrderItem } from "./orders";
 

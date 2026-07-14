@@ -78,7 +78,7 @@ tradehubuae/
 | `@tradehubuae/utils` | ✅ | cn(), slugify, formatPrice, generateSKU, generateOrderNumber, debounce, etc. |
 | `@tradehubuae/logger` | ✅ | Structured logger with levels, context, JSON output |
 
-### API Modules (9/17 — 53% complete)
+### API Modules (11/17 — 65% complete)
 
 | Module | Status | Endpoints |
 |--------|--------|-----------|
@@ -91,16 +91,16 @@ tradehubuae/
 | **Inventory** | ✅ Full | Stock management + warehouse CRUD + transfers |
 | **Media** | ✅ Full | `POST /media/upload` with multer + R2 storage |
 | **AI** | ✅ Full | `POST /ai/generate-product`, `POST /ai/analyze-image`, `POST /ai/generate-seo` |
+| **SEO** | ✅ Full | CRUD + generate + stats |
+| **Analytics** | ✅ Full | Overview, top products, search terms, devices, SEO stats, weekly trend |
 | **Users** | 🔄 Stub | Empty module |
 | **Customers** | 🔄 Stub | Empty module |
 | **Reviews** | 🔄 Stub | Empty module |
 | **Coupons** | 🔄 Stub | Empty module |
-| **SEO** | 🔄 Stub | Empty module |
-| **Analytics** | 🔄 Stub | Empty module |
 | **Notifications** | 🔄 Stub | Empty module |
 | **Reports** | 🔄 Stub | Empty module |
 
-### Admin Dashboard (15/27 pages — 55% complete)
+### Admin Dashboard (17/18 sidebar pages — 94% complete)
 
 | Page | Status | Notes |
 |------|--------|-------|
@@ -112,19 +112,19 @@ tradehubuae/
 | **Combo Offers** | ✅ | List + Create + Edit forms with image upload, product items, discount config, date range |
 | **AI** | ✅ | UI for product/SEO generation (not wired to API) |
 | **Users** | ✅ | User management page |
-| **Settings** | ✅ | Settings page |
-| **Customers** | ✅ | Customers page |
+| **Settings** | ✅ | Settings (8 sub-pages: general, payments, shipping, email, security, appearance, integrations) |
+| **Customers** | ✅ | Customers list + detail pages |
 | **Orders** | ⬜ Placeholder | "Coming soon" text |
 | **Inventory** | ⬜ Placeholder | Description cards only |
-| **Bulk Sales** | ❌ Missing | Empty directory |
-| **Reviews** | ❌ Missing | Empty directory |
-| **Blog** | ❌ Missing | Empty directory |
-| **Media** | ❌ Missing | Empty directory |
-| **SEO** | ❌ Missing | Empty directory |
-| **Analytics** | ❌ Missing | Empty directory |
-| **Coupons** | ❌ Missing | Empty directory |
-| **Permissions** | ❌ Missing | Empty directory |
-| **Roles** | ❌ Missing | Empty directory |
+| **Bulk Sales** | ✅ | List + detail with approve/quote/reject |
+| **Blog** | ✅ | List + Create + Edit with BlogForm |
+| **Media** | ✅ | Gallery page |
+| **SEO** | ✅ | Landing + Meta + Sitemap + Redirects + Reports pages |
+| **Analytics** | ✅ | Dashboard with 6 chart sections, wired to real API (returns empty until tracking middleware is active) |
+| **Reviews** | ❌ Missing | No page files exist |
+| **Coupons** | ❌ Missing | Not in sidebar nav scope |
+| **Permissions** | ❌ Missing | Not in sidebar nav scope |
+| **Roles** | ❌ Missing | Not in sidebar nav scope |
 
 ### Storefront (19/19 pages — 100% complete)
 
@@ -132,7 +132,7 @@ All customer-facing pages are implemented: Home, Product Detail (with gallery/sp
 
 **Note**: All pages currently use hardcoded mock data from `apps/web/src/data/`. API integration is planned.
 
-### Worker (4 queues defined, all handlers are stubs)
+### Worker (6 queues defined)
 
 | Queue | Handler | Status |
 |-------|---------|--------|
@@ -140,8 +140,8 @@ All customer-facing pages are implemented: Home, Product Detail (with gallery/sp
 | `image-processing` | Image resize/optimization | 🔄 Stub (console.log) |
 | `email-sending` | Transactional emails | 🔄 Stub (console.log) |
 | `invoice-generation` | PDF invoice generation | 🔄 Stub (console.log) |
-| `analytics-processing` | — | Not yet defined |
-| `seo-generation` | — | Not yet defined |
+| `seo-generation` | Daily SEO via Gemini | ✅ Full implementation (top 20 products, DB upsert) |
+| `analytics-processing` | — | ❌ Not yet defined |
 
 ---
 

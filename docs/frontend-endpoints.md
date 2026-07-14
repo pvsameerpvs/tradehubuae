@@ -75,20 +75,20 @@ Framework: Next.js (App Router)
 
 | Link | Source | Issue |
 |------|--------|-------|
-| `/brands/dell` | `DiscoveryGrid.tsx:21` | No `/brands/[slug]` page exists |
-| `/brands/hp` | `DiscoveryGrid.tsx:22` | Same — no brand detail route |
-| `/brands/lenovo` | `DiscoveryGrid.tsx:23` | Same |
-| `/brands/apple` | `DiscoveryGrid.tsx:24` | Same |
-| `/brands/asus` | `DiscoveryGrid.tsx:25` | Same |
-| `/brands/samsung` | `DiscoveryGrid.tsx:26` | Same |
+| `/brands/dell` | `DiscoveryGrid.tsx:21` | ✅ Exists — `/brands/[slug]` is implemented |
+| `/brands/hp` | `DiscoveryGrid.tsx:22` | ✅ Exists — `/brands/[slug]` is implemented |
+| `/brands/lenovo` | `DiscoveryGrid.tsx:23` | ✅ Exists |
+| `/brands/apple` | `DiscoveryGrid.tsx:24` | ✅ Exists |
+| `/brands/asus` | `DiscoveryGrid.tsx:25` | ✅ Exists |
+| `/brands/samsung` | `DiscoveryGrid.tsx:26` | ✅ Exists |
 | `#` (placeholder) | `checkout/page.tsx:494,501` | Inert link, scrolls to top |
 
 ### ❌ MISSING PAGES (referenced but not implemented)
 
 | Route | Referenced From | Notes |
 |-------|----------------|-------|
-| `/brands/[slug]` | DiscoveryGrid (6 brands), Header, Footer | Only `/brands` listing exists — no brand detail page |
-| `/blog/[slug]` | Blog listing implicitly expects detail links | Only `/blog` list exists in web app |
+| `/brands/[slug]` | DiscoveryGrid (6 brands), Header, Footer | ✅ Exists — brand detail page is implemented |
+| `/blog/[slug]` | Blog listing implicitly expects detail links | ❌ Missing — only `/blog` list page exists, no detail route |
 
 ### ❌ DATA ARCHITECTURE: Static Data vs API
 

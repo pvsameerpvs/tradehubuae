@@ -38,7 +38,7 @@ coverage/
 # Turbo
 .turbo/
 
-# Prisma
+# Drizzle
 packages/database/generated/
 
 # Next.js

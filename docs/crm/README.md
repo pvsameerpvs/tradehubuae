@@ -2,7 +2,7 @@
 
 > **Target:** `crm.tradehubuae.com`
 > **Purpose:** Customer Relationship Management with full financial tracking, partner management, and analytics
-> **Completion goal:** 5 phases, ~18-22 days
+> **Status:** 📋 Plan document — implementation not yet started. ~18-22 days estimated.
 
 ## Document Index
 

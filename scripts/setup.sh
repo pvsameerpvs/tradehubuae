@@ -21,8 +21,8 @@ if [ ! -f .env ]; then
   echo "⚠️ Edit .env with your configuration"
 fi
 
-# Generate Prisma client
-echo "🗄️ Generating Prisma client..."
+# Generate Drizzle client
+echo "🗄️ Generating Drizzle client..."
 pnpm db:generate
 
 # Setup Husky

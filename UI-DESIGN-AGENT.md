@@ -19,22 +19,22 @@ Define these as CSS variables in `globals.css` and map them in `tailwind.config.
 --brand-dark:     #103E68   /* hover */
 --brand-grad:     linear-gradient(90deg, #1A5A8C 0%, #134A7C 50%, #103E68 100%);
 
---ink:            #222222   /* primary text, icons, active states */
---ink-2:          #717171   /* secondary text, meta, captions */
---ink-3:          #B0B0B0   /* disabled, placeholder */
+--ink:            #0F172A   /* titles, primary text */
+--ink-2:          #475569   /* body text, meta, captions */
+--ink-3:          #94A3B8   /* disabled, placeholder */
 
---line:           #DDDDDD   /* 1px borders and dividers */
---line-soft:      #EBEBEB   /* subtle inner dividers */
+--line:           #E2E8F0   /* 1px borders and dividers */
+--line-soft:      #F1F5F9   /* subtle inner dividers */
 
---bg:             #FFFFFF   /* page background, always white */
---bg-2:           #F7F7F7   /* footer, image placeholder fill */
---bg-3:           #F0F0F0   /* hover fill on ghost buttons */
+--bg:             #FFFFFF   /* page background, cards, always white */
+--bg-2:           #F8FAFC   /* section background, image placeholder fill */
+--bg-3:           #F1F5F9   /* hover fill on ghost buttons */
 
---star:           #222222   /* star glyph is black, not gold */
+--star:           #134A7C   /* star glyph is brand color */
 --sale:           #C13515   /* strikethrough / discount label only */
 ```
 
-The whole page is white. Color appears in exactly three places: the primary button, the price, and the wishlist heart when active. Nothing else is colored.
+The whole page is white. Color appears in exactly three places: the primary button, the price, and the wishlist heart when active.
 
 ### Type
 
@@ -206,7 +206,7 @@ The card is a single link. **No border, no shadow, no background, no button insi
 - Named exports only (no default exports except pages)
 - TypeScript strict mode
 - Tailwind classes for styling (no CSS modules)
-- Use `cn()` from `tailwind-merge` for class merging
+- Use `cn()` from `@tradehubuae/ui` for class merging
 - Responsive-first: mobile-first Tailwind breakpoints
 - Use `lucide-react` for icons (size 16–24, strokeWidth 1.75)
 - Every interactive element gets an `aria-label` if it has no visible text

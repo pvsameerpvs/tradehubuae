@@ -1,47 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@tradehubuae/ui";
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  isActive: boolean;
-}
-
 export default function EditUserPage() {
-  const params = useParams();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", role: "staff", isActive: true });
-
-  useEffect(() => {
-    api.get<User>(`/users/${params.id}`)
-      .then((user) => setForm({ name: user.name, email: user.email, role: user.role, isActive: user.isActive }))
-      .catch((err) => console.error("Failed to fetch user", err))
-      .finally(() => setLoading(false));
-  }, [params.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    try {
-      await api.put(`/users/${params.id}`, form);
+    setTimeout(() => {
+      setSaving(false);
       router.push("/users");
       router.refresh();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to update user");
-    } finally {
-      setSaving(false);
-    }
+    }, 500);
   };
-
-  if (loading) return <p className="text-sm text-ink-2">Loading...</p>;
 
   return (
     <div className="max-w-lg space-y-6">

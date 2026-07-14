@@ -16,7 +16,7 @@ tradehubuae/
 │   └── docs/         # Documentation
 ├── packages/
 │   ├── ui/           # Shared UI components (shadcn/ui)
-│   ├── database/     # Prisma schema & client
+│   ├── database/     # Drizzle schema & client
 │   ├── auth/         # Authentication (NextAuth)
 │   ├── config/       # Shared configuration
 │   ├── types/        # TypeScript types
@@ -37,7 +37,7 @@ tradehubuae/
 |----------|-----------|
 | **Monorepo** | Turborepo + pnpm |
 | **Frontend** | Next.js 15, React 19, Tailwind CSS, shadcn/ui |
-| **Backend** | NestJS, Prisma ORM |
+| **Backend** | NestJS, Drizzle ORM |
 | **Database** | PostgreSQL |
 | **Queue** | BullMQ + Redis |
 | **Auth** | NextAuth.js (Auth.js) + JWT |
@@ -65,7 +65,7 @@ pnpm install
 cp .env.example .env
 # Edit .env with your credentials
 
-# Generate Prisma client
+# Generate Drizzle client
 pnpm db:generate
 
 # Push database schema

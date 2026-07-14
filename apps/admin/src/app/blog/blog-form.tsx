@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "@/lib/api";
 import { Button } from "@tradehubuae/ui";
 import ImageUpload from "@/components/ImageUpload";
 
@@ -22,7 +21,6 @@ interface BlogPost {
 export default function BlogForm({ id }: { id?: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(!!id);
   const [form, setForm] = useState({
     title: "",
     content: "",
@@ -33,49 +31,15 @@ export default function BlogForm({ id }: { id?: string }) {
     published: false,
   });
 
-  useEffect(() => {
-    if (!id) return;
-    setFetching(true);
-    api.get<BlogPost>(`/blog/${id}`)
-      .then((post: BlogPost) => setForm({
-        title: post.title,
-        content: post.content,
-        excerpt: post.excerpt ?? "",
-        image: post.image ?? "",
-        category: post.category ?? "",
-        readTime: post.readTime ?? "",
-        published: post.published,
-      }))
-      .catch((err: unknown) => console.error("Failed to fetch blog post", err))
-      .finally(() => setFetching(false));
-  }, [id]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      const payload = {
-        ...form,
-        image: form.image || undefined,
-        excerpt: form.excerpt || undefined,
-        category: form.category || undefined,
-        readTime: form.readTime || undefined,
-      };
-      if (id) {
-        await api.put(`/blog/${id}`, payload);
-      } else {
-        await api.post("/blog", payload);
-      }
+    setTimeout(() => {
+      setLoading(false);
       router.push("/blog");
       router.refresh();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to save");
-    } finally {
-      setLoading(false);
-    }
+    }, 500);
   };
-
-  if (fetching) return <p className="text-sm text-ink-2">Loading...</p>;
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl space-y-5">

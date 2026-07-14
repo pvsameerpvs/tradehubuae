@@ -16,7 +16,7 @@ const TIMELINE_STEPS = [
 ];
 
 function getTimelineStatus(orderStatus: string, stepKey: string): "completed" | "current" | "upcoming" {
-  const orderIdx = ORDER_STATUS_FLOW.indexOf(orderStatus);
+  const orderIdx = ORDER_STATUS_FLOW.indexOf(orderStatus as typeof ORDER_STATUS_FLOW[number]);
   const stepIdx = TIMELINE_STEPS.findIndex((s) => s.key === stepKey);
   if (stepIdx < orderIdx) return "completed";
   if (stepIdx === orderIdx) return "current";

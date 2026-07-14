@@ -266,7 +266,7 @@ Despite having full CRUD UI, these admin list pages use **hardcoded mock data**:
 | `/media` | Hardcoded array | No — only upload endpoint exists |
 | `/blog` | `useState` with fetched data | Yes, but API doesn't exist |
 | `/users` | Hardcoded array | No |
-| `/analytics` | **All hardcoded** | Yes, API exists but not connected |
+| `/analytics` | **API-connected (empty until tracking middleware active)** | Yes, API exists and page calls it |
 
 ### ❌ NO AUTHENTICATION ON ADMIN
 
@@ -328,4 +328,4 @@ These admin pages have both UI and working API:
 | `/inventory` | Products | ✅ (uses products endpoint) |
 | `/combo-offers`, `/combo-offers/new`, `/combo-offers/[id]` | Combo Offers | ✅ |
 | `/seo/*` | SEO, Analytics | ✅ |
-| `/analytics` | Analytics | ✅ (but data hardcoded, not connected) |
+| `/analytics` | Analytics | ✅ (page wired to real API, data empty until tracking middleware active) |

@@ -17,6 +17,7 @@ import {
   Bot,
   Settings,
   Shield,
+  Grid3X3,
 } from "lucide-react";
 
 export interface NavItem {
@@ -51,6 +52,7 @@ export const navSections: NavSection[] = [
       { label: "Bulk Sales", href: "/bulk-sales", icon: Building2 },
       { label: "Media", href: "/media", icon: Image },
       { label: "Blog", href: "/blog", icon: FileText },
+      { label: "Uses", href: "/uses", icon: Grid3X3 },
       { label: "SEO", href: "/seo", icon: Search },
       { label: "Analytics", href: "/analytics", icon: BarChart3 },
       { label: "AI Assistant", href: "/ai", icon: Bot },

@@ -20,6 +20,11 @@ interface Brand {
   name: string;
 }
 
+interface UseItem {
+  id: string;
+  name: string;
+}
+
 interface ProductImage {
   id: string;
   url: string;
@@ -39,6 +44,7 @@ interface ExistingProduct {
   price: number;
   compareAtPrice: number | null;
   brandId: string | null;
+  useId: string | null;
   badge: string | null;
   isActive: boolean;
   isFeatured: boolean;
@@ -69,6 +75,7 @@ const productSchema = z.object({
   ),
   categoryId: z.string().optional(),
   brandId: z.string().optional(),
+  useId: z.string().optional(),
   badge: z.string().optional(),
   specProcessor: z.string().optional(),
   specRam: z.string().optional(),
@@ -92,6 +99,7 @@ const defaultValues: ProductFormValues = {
   compareAtPrice: undefined,
   categoryId: "",
   brandId: "",
+  useId: "",
   badge: "",
   specProcessor: "",
   specRam: "",
@@ -110,6 +118,7 @@ export default function ProductForm({ id }: { id?: string }) {
   const [images, setImages] = useState<string[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
+  const [uses, setUses] = useState<UseItem[]>([]);
   const [fetching, setFetching] = useState(!!id);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -131,12 +140,14 @@ export default function ProductForm({ id }: { id?: string }) {
     Promise.all([
       api.get<PaginatedResponse<Category>>("/categories", { limit: 200, sort: "name", order: "asc" }),
       api.get<PaginatedResponse<Brand>>("/brands", { limit: 200, sort: "name", order: "asc" }),
+      api.get<PaginatedResponse<UseItem>>("/uses", { limit: 200, sort: "name", order: "asc" }),
     ])
-      .then(([cats, brs]) => {
+      .then(([cats, brs, us]) => {
         setCategories(cats.data);
         setBrands(brs.data);
+        setUses(us.data);
       })
-      .catch((err) => console.error("Failed to fetch categories/brands", err));
+      .catch((err) => console.error("Failed to fetch categories/brands/uses", err));
   }, []);
 
   useEffect(() => {
@@ -152,6 +163,7 @@ export default function ProductForm({ id }: { id?: string }) {
           compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : undefined,
           categoryId: (p.categories?.find((c) => c.isPrimary)?.categoryId ?? p.categories?.[0]?.categoryId) ?? "",
           brandId: p.brandId ?? "",
+          useId: p.useId ?? "",
           badge: p.badge ?? "",
           specProcessor: p.specProcessor ?? "",
           specRam: p.specRam ?? "",
@@ -174,60 +186,10 @@ export default function ProductForm({ id }: { id?: string }) {
     setGenerating(true);
     setGenerationError(null);
 
-    try {
-      const formData = getValues();
-      const categoryName = categories.find((c) => c.id === formData.categoryId)?.name;
-      const brandName = brands.find((b) => b.id === formData.brandId)?.name;
-
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
-      const res = await fetch(`${API_BASE}/ai/auto-fill`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          images,
-          name: formData.name || undefined,
-          description: formData.description || undefined,
-          category: categoryName,
-          brand: brandName,
-          condition: formData.condition,
-          specProcessor: formData.specProcessor || undefined,
-          specRam: formData.specRam || undefined,
-          specStorage: formData.specStorage || undefined,
-          specDisplay: formData.specDisplay || undefined,
-          specGpu: formData.specGpu || undefined,
-          specBattery: formData.specBattery || undefined,
-          specWeight: formData.specWeight || undefined,
-          specWarranty: formData.specWarranty || undefined,
-        }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ message: "AI generation failed" }));
-        throw new Error(err.message);
-      }
-
-      const data = await res.json();
-
-      if (data.name) setValue("name", data.name);
-      if (data.description) setValue("description", data.description);
-      if (data.condition) setValue("condition", data.condition);
-      if (data.price) setValue("price", Number(data.price));
-      if (data.categoryId) setValue("categoryId", data.categoryId);
-      if (data.brandId) setValue("brandId", data.brandId);
-      if (data.badge) setValue("badge", data.badge);
-      if (data.specProcessor) setValue("specProcessor", data.specProcessor);
-      if (data.specRam) setValue("specRam", data.specRam);
-      if (data.specStorage) setValue("specStorage", data.specStorage);
-      if (data.specDisplay) setValue("specDisplay", data.specDisplay);
-      if (data.specGpu) setValue("specGpu", data.specGpu);
-      if (data.specBattery) setValue("specBattery", data.specBattery);
-      if (data.specWeight) setValue("specWeight", data.specWeight);
-      if (data.specWarranty) setValue("specWarranty", data.specWarranty);
-    } catch (err) {
-      setGenerationError(err instanceof Error ? err.message : "AI generation failed");
-    } finally {
+    setTimeout(() => {
+      setGenerationError("AI generation endpoint not available");
       setGenerating(false);
-    }
+    }, 500);
   };
 
   const onSubmit = async (data: ProductFormValues) => {
@@ -241,6 +203,7 @@ export default function ProductForm({ id }: { id?: string }) {
         compareAtPrice: data.compareAtPrice || undefined,
         categoryId: data.categoryId || undefined,
         brandId: data.brandId || undefined,
+        useId: data.useId || undefined,
         badge: data.badge || undefined,
         specProcessor: data.specProcessor || undefined,
         specRam: data.specRam || undefined,
@@ -377,6 +340,19 @@ export default function ProductForm({ id }: { id?: string }) {
                 <option value="">Select brand...</option>
                 {brands.map((b) => (
                   <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="useId">Use</Label>
+              <select
+                id="useId"
+                {...register("useId")}
+                className="flex h-12 w-full rounded-lg border border-line bg-white px-4 text-base text-ink transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink/40"
+              >
+                <option value="">Select use...</option>
+                {uses.map((u) => (
+                  <option key={u.id} value={u.id}>{u.name}</option>
                 ))}
               </select>
             </div>
