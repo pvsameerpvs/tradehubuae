@@ -147,8 +147,8 @@ export default function InventoryPage() {
         </Card>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <div className="relative w-full sm:flex-1 sm:min-w-[200px]">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-3" strokeWidth={1.75} />
           <input
             value={searchQuery}
@@ -160,7 +160,7 @@ export default function InventoryPage() {
         <select
           value={filterBrand}
           onChange={(e) => setFilterBrand(e.target.value)}
-          className="rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+          className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand sm:w-auto"
         >
           <option value="">All Brands</option>
           {brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
@@ -168,7 +168,7 @@ export default function InventoryPage() {
         <select
           value={filterCategory}
           onChange={(e) => { setFilterCategory(e.target.value); setFilterSubcategory(""); }}
-          className="rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+          className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand sm:w-auto"
         >
           <option value="">All Categories</option>
           {mainCategories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -177,7 +177,7 @@ export default function InventoryPage() {
           <select
             value={filterSubcategory}
             onChange={(e) => setFilterSubcategory(e.target.value)}
-            className="rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+            className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand sm:w-auto"
           >
             <option value="">All Subcategories</option>
             {subcategories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -186,7 +186,7 @@ export default function InventoryPage() {
         <select
           value={filterActive}
           onChange={(e) => setFilterActive(e.target.value)}
-          className="rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+          className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand sm:w-auto"
         >
           <option value="all">All Status</option>
           <option value="active">Active</option>
@@ -234,7 +234,7 @@ export default function InventoryPage() {
                         <span className={`text-sm font-semibold ${p.availableStock <= 0 ? "text-sale" : p.availableStock <= 5 ? "text-amber-600" : "text-ink"}`}>
                           {p.availableStock}
                         </span>
-                        <label className="relative inline-flex cursor-pointer items-center">
+                        <label className="relative inline-flex cursor-pointer items-center p-1.5 -m-1.5">
                           <input
                             type="checkbox"
                             checked={p.isActive}
@@ -280,7 +280,7 @@ export default function InventoryPage() {
                         </span>
                       </td>
                       <td className="p-4 text-center">
-                        <label className="relative inline-flex cursor-pointer items-center">
+                        <label className="relative inline-flex cursor-pointer items-center p-1">
                           <input
                             type="checkbox"
                             checked={p.isActive}

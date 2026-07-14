@@ -64,16 +64,16 @@ export default function OrdersPage() {
                 <Link key={order.id} href={`/orders/${order.id}`} className="flex flex-col px-4 py-3 transition-colors hover:bg-bg2">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-ink">#{order.orderNumber}</p>
-                    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${statusStyles[order.status] ?? "bg-bg2 text-ink-3"}`}>
+                    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${statusStyles[order.status] ?? "bg-bg2 text-ink-3"}`}>
                       {order.status.charAt(0) + order.status.slice(1).toLowerCase()}
                     </span>
                   </div>
-                  <div className="mt-1 flex items-center gap-2 text-xs text-ink-3">
+                  <div className="mt-1 flex items-center gap-2 text-sm text-ink-3">
                     <span>{order.customer?.name ?? "Guest"}</span>
                     <span>·</span>
                     <span>AED {Number(order.total).toLocaleString()}</span>
                   </div>
-                  <div className="mt-1.5 flex items-center gap-2 text-[10px] text-ink-3">
+                  <div className="mt-1.5 flex items-center gap-2 text-xs text-ink-3">
                     <span>{new Date(order.createdAt).toLocaleDateString()}</span>
                     <span>·</span>
                     <span>{order.items?.length ?? 0} items</span>

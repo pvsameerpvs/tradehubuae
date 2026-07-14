@@ -246,7 +246,7 @@ export default function ProductForm({ id }: { id?: string }) {
       )}
 
       {/* AI Auto-fill */}
-      <div className="flex items-center justify-between rounded-xl border border-brand/20 bg-brand/[0.03] px-5 py-4">
+      <div className="flex flex-col items-start gap-3 rounded-xl border border-brand/20 bg-brand/[0.03] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-ink">Auto-fill with AI</p>
           <p className="mt-0.5 text-xs text-ink-2">
@@ -297,7 +297,7 @@ export default function ProductForm({ id }: { id?: string }) {
           <CardTitle>Pricing</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="price">Price (AED) *</Label>
               <Input id="price" type="number" min={0} step="0.01" {...register("price")} />
@@ -316,7 +316,7 @@ export default function ProductForm({ id }: { id?: string }) {
           <CardTitle>Classification</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="categoryId">Category</Label>
               <select
@@ -396,7 +396,7 @@ export default function ProductForm({ id }: { id?: string }) {
           <CardTitle>Key Specifications</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="specProcessor">Processor</Label>
               <Input id="specProcessor" placeholder="e.g. Apple M2" {...register("specProcessor")} />
@@ -440,7 +440,7 @@ export default function ProductForm({ id }: { id?: string }) {
         <CardContent>
           <div className="flex flex-wrap gap-4">
             {images.map((url, idx) => (
-              <div key={idx} className="group relative h-28 w-28 overflow-hidden rounded-lg border border-line bg-bg2">
+              <div key={idx} className="group relative h-24 w-24 overflow-hidden rounded-lg border border-line bg-bg2 sm:h-28 sm:w-28">
                 <img src={url} alt="" className="h-full w-full object-cover" />
                 {idx === 0 && (
                   <span className="absolute left-1 top-1 rounded bg-brand px-1.5 py-0.5 text-[10px] font-semibold text-white shadow-chip">
@@ -491,11 +491,11 @@ export default function ProductForm({ id }: { id?: string }) {
         </label>
       </div>
 
-      <div className="flex items-center gap-4">
-        <Button type="submit" disabled={isSubmitting}>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
           {isSubmitting ? "Saving..." : id ? "Update Product" : "Create Product"}
         </Button>
-        <Button type="button" variant="outline" onClick={() => router.push("/products")}>
+        <Button type="button" variant="outline" onClick={() => router.push("/products")} className="w-full sm:w-auto">
           Cancel
         </Button>
       </div>

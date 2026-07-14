@@ -87,7 +87,7 @@ export default function BrandForm({ id }: { id?: string }) {
         label="Brand Logo"
         folder="brands"
       />
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-sm font-medium text-ink">Sort Order</label>
           <input
@@ -108,11 +108,11 @@ export default function BrandForm({ id }: { id?: string }) {
           <label htmlFor="isActive" className="text-sm font-medium text-ink">Active</label>
         </div>
       </div>
-      <div className="flex gap-4 pt-2">
-        <Button type="submit" disabled={loading}>
+      <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+        <Button type="submit" disabled={loading} className="w-full sm:w-auto">
           {loading ? "Saving..." : id ? "Update" : "Create"}
         </Button>
-        <Button type="button" variant="secondary" onClick={() => router.push("/brands")}>
+        <Button type="button" variant="secondary" onClick={() => router.push("/brands")} className="w-full sm:w-auto">
           Cancel
         </Button>
       </div>
