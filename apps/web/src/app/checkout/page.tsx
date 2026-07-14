@@ -146,7 +146,7 @@ export default function CheckoutPage() {
         <div className="mx-auto mt-10 max-w-xs space-y-3">
           <button
             type="button"
-            onClick={() => router.push("/orders")}
+            onClick={() => router.push("/account/orders")}
             className="btn-brand flex h-12 w-full items-center justify-center rounded-lg text-base font-semibold text-white"
           >
             View Orders
