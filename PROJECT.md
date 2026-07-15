@@ -31,9 +31,10 @@
 tradehubuae/
 ├── apps/
 │   ├── web/          # Customer-facing Next.js app (port 3000)
-│   ├── admin/        # Admin dashboard Next.js app (port 3001)
+│   ├── admin/        # Admin dashboard + CRM (port 3001, subdomain routed)
 │   ├── api/          # NestJS REST API (port 4000)
-│   └── worker/       # BullMQ background job processors
+│   ├── worker/       # BullMQ background job processors
+│   └── chat/         # ⬜ Chat PWA (planned — standalone app, port 3003)
 ├── packages/
 │   ├── ui/           # Shared shadcn/ui components (@tradehubuae/ui)
 │   ├── database/     # Drizzle schema + client (@tradehubuae/database)
@@ -323,8 +324,9 @@ pnpm --filter @tradehubuae/worker dev   # BullMQ worker
 - [ ] Configure CI/CD (GitHub Actions → Railway)
 
 ### Medium-term
+- [ ] **CRM module** (`crm.tradehubuae.com`) — finance & expense tracking, partners, deals pipeline, enhanced customer CRM — inside `apps/admin` with subdomain middleware
+- [ ] **Chat PWA** (`chat.tradehubuae.com`) — standalone `apps/chat` with WebSocket, service worker, push notifications, offline support
 - [ ] Stripe / Tabby / Tamara payment integration
 - [ ] Multi-warehouse inventory management
-- [ ] Real-time chat (admin ↔ customer)
 - [ ] n8n workflow automation
 - [ ] Full-text search with rankings
