@@ -33,8 +33,7 @@ tradehubuae/
 │   ├── web/          # Customer-facing Next.js app (port 3000)
 │   ├── admin/        # Admin dashboard Next.js app (port 3001)
 │   ├── api/          # NestJS REST API (port 4000)
-│   ├── worker/       # BullMQ background job processors
-│   └── docs/         # Documentation
+│   └── worker/       # BullMQ background job processors
 ├── packages/
 │   ├── ui/           # Shared shadcn/ui components (@tradehubuae/ui)
 │   ├── database/     # Drizzle schema + client (@tradehubuae/database)

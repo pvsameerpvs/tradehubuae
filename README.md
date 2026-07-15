@@ -1,6 +1,4 @@
-# tradehubuae
-
-# TradeHub UAE 🚀
+# TradeHub UAE
 
 **Enterprise Ecommerce Platform** for IT Equipment in the United Arab Emirates.
 
@@ -12,8 +10,7 @@ tradehubuae/
 │   ├── web/          # Customer website (Next.js 15)
 │   ├── admin/        # Admin dashboard (Next.js 15)
 │   ├── api/          # Backend API (NestJS)
-│   ├── worker/       # Background workers (BullMQ)
-│   └── docs/         # Documentation
+│   └── worker/       # Background workers (BullMQ)
 ├── packages/
 │   ├── ui/           # Shared UI components (shadcn/ui)
 │   ├── database/     # Drizzle schema & client
