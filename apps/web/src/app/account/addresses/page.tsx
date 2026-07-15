@@ -25,7 +25,7 @@ export default function AccountAddresses() {
   useEffect(() => {
     getAddresses()
       .then(setAddresses)
-      .catch(() => {})
+      .catch(() => {/* ignore */})
       .finally(() => setLoading(false));
   }, []);
 

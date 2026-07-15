@@ -208,7 +208,7 @@ export default function AccountOrders() {
   useEffect(() => {
     getMyOrders()
       .then((res) => setOrders(res.data))
-      .catch(() => {})
+      .catch(() => {/* ignore */})
       .finally(() => setLoading(false));
   }, []);
 

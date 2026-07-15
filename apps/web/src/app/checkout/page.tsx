@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -33,6 +33,7 @@ import { AddressForm } from "@/components/shared/AddressForm";
 
 type PaymentMethod = "cod" | "card";
 const STEPS = ["address", "payment", "confirm"] as const;
+const CHECKOUT_KEY = "th_checkout";
 
 function formatCardNumber(v: string) {
   const digits = v.replace(/\D/g, "").slice(0, 16);
@@ -67,19 +68,41 @@ export default function CheckoutPage() {
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [addressFormOpen, setAddressFormOpen] = useState(false);
   const [addressesLoading, setAddressesLoading] = useState(true);
+  const restoredRef = useRef(false);
 
   useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(CHECKOUT_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.step && STEPS.includes(parsed.step)) setStep(parsed.step);
+        if (parsed.payment) setPayment(parsed.payment);
+        if (parsed.name) setName(parsed.name);
+        if (parsed.phone) setPhone(parsed.phone);
+        if (parsed.address) setAddress(parsed.address);
+        if (parsed.cardNumber) setCardNumber(parsed.cardNumber);
+        if (parsed.cardExpiry) setCardExpiry(parsed.cardExpiry);
+        if (parsed.cardCvv) setCardCvv(parsed.cardCvv);
+        if (parsed.selectedAddressId) setSelectedAddressId(parsed.selectedAddressId);
+        restoredRef.current = true;
+      }
+    } catch {/* ignore parse errors */}
     getAddresses()
       .then((data) => {
         setSavedAddresses(data);
-        const defaultAddr = data.find((a) => a.isDefault) || data[0];
-        if (defaultAddr) {
-          selectAddress(defaultAddr);
+        if (!restoredRef.current) {
+          const defaultAddr = data.find((a) => a.isDefault) || data[0];
+          if (defaultAddr) selectAddress(defaultAddr);
         }
       })
-      .catch(() => {})
+      .catch(() => {/* ignore */})
       .finally(() => setAddressesLoading(false));
   }, []);
+
+  useEffect(() => {
+    const state = { step, payment, name, phone, address, cardNumber, cardExpiry, cardCvv, selectedAddressId };
+    sessionStorage.setItem(CHECKOUT_KEY, JSON.stringify(state));
+  }, [step, payment, name, phone, address, cardNumber, cardExpiry, cardCvv, selectedAddressId]);
 
   function selectAddress(addr: AddressData) {
     setSelectedAddressId(addr.id);
@@ -124,26 +147,29 @@ export default function CheckoutPage() {
       const num = "TH" + Date.now().toString(36).toUpperCase();
       setOrderNumber(num);
     }
+    sessionStorage.removeItem(CHECKOUT_KEY);
     setPlaced(true);
     clearCart();
   };
 
   if (placed) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-20 text-center animate-fade-in">
-        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-brand/10">
-          <CheckCircle2 className="h-10 w-10 text-brand" strokeWidth={1.5} />
+      <div className="mx-auto max-w-lg px-4 py-20 text-center">
+        <div className="animate-scale-in">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-brand/10">
+            <CheckCircle2 className="h-10 w-10 text-brand" strokeWidth={1.5} />
+          </div>
         </div>
-        <h1 className="text-[26px] font-semibold leading-[30px] text-ink" style={{ letterSpacing: "-0.01em" }}>
+        <h1 className="animate-fade-in text-[26px] font-semibold leading-[30px] text-ink" style={{ letterSpacing: "-0.01em", animationDelay: "0.1s", animationFillMode: "both" }}>
           Order Placed!
         </h1>
-        <p className="mt-2 text-sm text-ink-2">Your order is confirmed.</p>
-        <p className="mt-1 text-[22px] font-semibold text-ink">#{orderNumber}</p>
-        <p className="mt-6 text-sm text-ink-2">
+        <p className="animate-fade-in mt-2 text-sm text-ink-2" style={{ animationDelay: "0.2s", animationFillMode: "both" }}>Your order is confirmed.</p>
+        <p className="animate-fade-in mt-1 text-[22px] font-semibold text-ink" style={{ animationDelay: "0.3s", animationFillMode: "both" }}>#{orderNumber}</p>
+        <p className="animate-fade-in mt-6 text-sm text-ink-2" style={{ animationDelay: "0.4s", animationFillMode: "both" }}>
           {payment === "cod" ? "Pay when you receive your order." : "Payment successful."}
           {" We'll notify you once it ships."}
         </p>
-        <div className="mx-auto mt-10 max-w-xs space-y-3">
+        <div className="animate-fade-in mx-auto mt-10 max-w-xs space-y-3" style={{ animationDelay: "0.5s", animationFillMode: "both" }}>
           <button
             type="button"
             onClick={() => router.push("/account/orders")}

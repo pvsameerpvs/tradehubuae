@@ -118,7 +118,7 @@ export function saveMessage(msg: ChatMessage): void {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: "chat_message", sessionId: msg.sessionId, message: msg.message, sender: msg.sender, timestamp: msg.createdAt }),
-      }).catch(() => {});
+      }).catch(() => {/* fire-and-forget */});
     }
   }
 }
