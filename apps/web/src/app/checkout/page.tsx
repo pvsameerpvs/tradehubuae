@@ -179,24 +179,52 @@ export default function CheckoutPage() {
 
   return (
     <div className="mx-auto max-w-[1120px] px-4 py-8 pb-24 md:px-6 md:pb-8">
-      <div className="mb-10 flex items-center justify-center gap-0">
-        {STEPS.map((s, i) => (
-          <div key={s} className="flex items-center">
-            <div className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
-              i === currentIdx ? "bg-ink text-white" : i < currentIdx ? "bg-brand text-white" : "bg-bg2 text-ink-3"
-            }`}>
-              {i < currentIdx ? <CheckCircle2 className="h-4 w-4" strokeWidth={2.5} /> : i + 1}
+      <div className="mb-12">
+        <div className="mx-auto flex max-w-md items-center justify-center">
+          {STEPS.map((s, i) => (
+            <div key={s} className="flex items-center">
+              <div className="flex flex-col items-center gap-2.5">
+                <div
+                  className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-semibold transition-all duration-300 ${
+                    i === currentIdx
+                      ? "bg-ink text-white ring-4 ring-ink/10"
+                      : i < currentIdx
+                        ? "bg-brand text-white"
+                        : "bg-bg2 text-ink-3"
+                  }`}
+                >
+                  {i < currentIdx ? (
+                    <CheckCircle2 className="h-5 w-5" strokeWidth={2.5} />
+                  ) : (
+                    i + 1
+                  )}
+                </div>
+                <span
+                  className={`text-[11px] font-bold uppercase tracking-[0.08em] transition-colors ${
+                    i === currentIdx
+                      ? "text-ink"
+                      : i < currentIdx
+                        ? "text-brand"
+                        : "text-ink-3"
+                  }`}
+                >
+                  {s === "address"
+                    ? "Delivery"
+                    : s === "payment"
+                      ? "Payment"
+                      : "Confirm"}
+                </span>
+              </div>
+              {i < STEPS.length - 1 && (
+                <div
+                  className={`mx-4 h-0.5 w-12 sm:w-20 ${
+                    i < currentIdx ? "bg-brand" : "bg-line"
+                  }`}
+                />
+              )}
             </div>
-            <span className={`ml-2 mr-4 hidden text-sm sm:inline ${
-              i === currentIdx ? "font-semibold text-ink" : i < currentIdx ? "text-brand" : "text-ink-3"
-            }`}>
-              {s === "address" ? "Address" : s === "payment" ? "Payment" : "Confirm"}
-            </span>
-            {i < STEPS.length - 1 && (
-              <div className={`mr-4 h-px w-8 sm:w-12 ${i < currentIdx ? "bg-brand" : "bg-line"}`} />
-            )}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       <div className="grid gap-10 lg:grid-cols-3">
@@ -371,12 +399,12 @@ export default function CheckoutPage() {
               <h2 className="text-[22px] font-semibold leading-[26px] text-ink" style={{ letterSpacing: "-0.01em" }}>Review your order</h2>
               <p className="mt-1 mb-8 text-sm text-ink-2">Please confirm everything looks right.</p>
               <div className="space-y-3">
-                <div className="flex items-center gap-3 rounded-xl border border-line p-4">
-                  <Truck className="h-5 w-5 flex-shrink-0 text-ink" strokeWidth={1.75} />
-                  <div>
+                <div className="flex items-start gap-3 rounded-xl border border-line p-4">
+                  <Truck className="mt-0.5 h-5 w-5 shrink-0 text-ink" strokeWidth={1.75} />
+                  <div className="min-w-0">
                     <p className="text-base font-semibold text-ink">{name}</p>
                     <p className="text-sm text-ink-2">{phone}</p>
-                    <p className="text-sm text-ink-2">{address}</p>
+                    <p className="break-words text-sm text-ink-2">{address}</p>
                   </div>
                 </div>
                 {payment === "cod" ? (
@@ -423,61 +451,61 @@ export default function CheckoutPage() {
 
         {/* Order Summary Sidebar */}
         <div className="lg:col-span-1">
-          <div className="rounded-xl border border-line bg-white p-6 shadow-panel">
-            <h2 className="mb-4 text-lg font-semibold text-ink">Order Summary</h2>
-            <div className="space-y-3 border-b border-line pb-4">
+          <div className="overflow-hidden rounded-xl border border-line bg-white shadow-panel">
+            <h2 className="px-5 pt-5 pb-0 text-lg font-semibold text-ink">Order Summary</h2>
+            <div className="space-y-3 border-b border-line px-5 pb-4 pt-5">
               {items.map((item) => (
-                <div key={item.slug} className="flex justify-between text-sm">
-                  <span className="truncate pr-2 text-ink-2">{item.name} &times; {item.quantity}</span>
-                  <span className="whitespace-nowrap font-medium text-ink">AED {(item.price * item.quantity).toLocaleString()}</span>
+                <div key={item.slug} className="flex justify-between gap-2 text-sm">
+                  <span className="min-w-0 truncate text-ink-2">{item.name} &times; {item.quantity}</span>
+                  <span className="shrink-0 font-medium text-ink">AED {(item.price * item.quantity).toLocaleString()}</span>
                 </div>
               ))}
             </div>
-            <div className="mt-4 space-y-2 text-sm">
+            <div className="space-y-2 px-5 pb-5 pt-4 text-sm">
               <div className="flex justify-between">
                 <span className="text-ink-2">Subtotal</span>
-                <span className="text-ink">AED {subtotal.toLocaleString()}</span>
+                <span className="shrink-0 text-ink">AED {subtotal.toLocaleString()}</span>
               </div>
               {savingsBreakdown.map((s) => (
-                <div key={s.label} className="flex justify-between text-brand">
-                  <span className="flex items-center gap-1">
-                    {s.label === "Bulk discount" && <Package className="h-3.5 w-3.5" strokeWidth={2} />}
-                    {s.label.startsWith("Promo") && <Tag className="h-3.5 w-3.5" strokeWidth={2} />}
-                    {s.label === "Combo savings" && <Gift className="h-3.5 w-3.5" strokeWidth={2} />}
-                    {s.label}
+                <div key={s.label} className="flex justify-between gap-2 text-brand">
+                  <span className="flex min-w-0 items-center gap-1.5">
+                    {s.label === "Bulk discount" && <Package className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />}
+                    {s.label.startsWith("Promo") && <Tag className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />}
+                    {s.label === "Combo savings" && <Gift className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />}
+                    <span className="truncate">{s.label}</span>
                   </span>
-                  <span>-AED {s.amount.toLocaleString()}</span>
+                  <span className="shrink-0">-AED {s.amount.toLocaleString()}</span>
                 </div>
               ))}
               {totalSavings > 0 && (
                 <div className="flex justify-between border-t border-line pt-2 text-xs text-ink-3">
                   <span>You save</span>
-                  <span className="font-medium text-brand">AED {totalSavings.toLocaleString()}</span>
+                  <span className="shrink-0 font-medium text-brand">AED {totalSavings.toLocaleString()}</span>
                 </div>
               )}
               <div className="flex justify-between">
                 <span className="text-ink-2">Shipping</span>
-                <span className={shipping === 0 ? "font-medium text-brand" : "text-ink"}>
+                <span className={shipping === 0 ? "shrink-0 font-medium text-brand" : "shrink-0 text-ink"}>
                   {shipping === 0 ? "Free" : `AED ${shipping}`}
                 </span>
               </div>
               <div className="flex justify-between border-t border-line pt-2 text-base font-semibold">
                 <span className="text-ink">Total</span>
-                <span className="text-ink">AED {grandTotal.toLocaleString()}</span>
+                <span className="shrink-0 text-ink">AED {grandTotal.toLocaleString()}</span>
               </div>
             </div>
 
             {/* Promo Code */}
-            <div className="mt-5 border-t border-line pt-5">
+            <div className="border-t border-line px-5 pb-5 pt-5">
               <label className="text-[10px] font-bold uppercase tracking-[0.04em] text-ink-2">Promo Code</label>
               {activePromo ? (
-                <div className="mt-1.5 flex items-center justify-between rounded-lg border border-brand/30 bg-brand/5 px-4 py-2.5">
-                  <div className="flex items-center gap-2">
-                    <Percent className="h-4 w-4 text-brand" strokeWidth={2} />
-                    <span className="text-sm font-semibold text-brand">{activePromo.code}</span>
-                    <span className="text-xs text-ink-2">{activePromo.description}</span>
+                <div className="mt-1.5 flex items-center gap-2 rounded-lg border border-brand/30 bg-brand/5 px-4 py-2.5">
+                  <div className="flex min-w-0 flex-1 items-center gap-2">
+                    <Percent className="h-4 w-4 shrink-0 text-brand" strokeWidth={2} />
+                    <span className="shrink-0 text-sm font-semibold text-brand">{activePromo.code}</span>
+                    <span className="truncate text-xs text-ink-2">{activePromo.description}</span>
                   </div>
-                  <button onClick={removePromoCode} className="text-ink-3 hover:text-sale transition-colors" aria-label="Remove promo code">
+                  <button onClick={removePromoCode} className="shrink-0 text-ink-3 hover:text-sale transition-colors" aria-label="Remove promo code">
                     <X className="h-4 w-4" strokeWidth={2} />
                   </button>
                 </div>
@@ -485,11 +513,11 @@ export default function CheckoutPage() {
                 <div className="mt-1.5 flex gap-2">
                   <input value={promoInput} onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
                     onKeyDown={(e) => { if (e.key === "Enter" && promoInput.trim()) applyPromoCode(promoInput.trim()); }}
-                    className="flex h-10 flex-1 rounded-lg border border-line bg-white px-3 text-sm text-ink placeholder:text-ink-3 focus-visible:outline-2 focus-visible:outline-ink/40 focus-visible:outline-offset-2"
+                    className="flex h-10 min-w-0 flex-1 rounded-lg border border-line bg-white px-3 text-sm text-ink placeholder:text-ink-3 focus-visible:outline-2 focus-visible:outline-ink/40 focus-visible:outline-offset-2"
                     placeholder="Enter code" />
                   <button type="button" onClick={() => { if (promoInput.trim()) applyPromoCode(promoInput.trim()); }}
                     disabled={!promoInput.trim()}
-                    className="flex h-10 items-center rounded-lg border border-ink bg-white px-4 text-sm font-semibold text-ink transition-colors hover:bg-bg3 disabled:opacity-40">
+                    className="flex h-10 shrink-0 items-center rounded-lg border border-ink bg-white px-4 text-sm font-semibold text-ink transition-colors hover:bg-bg3 disabled:opacity-40">
                     Apply
                   </button>
                 </div>
@@ -502,12 +530,12 @@ export default function CheckoutPage() {
       </div>
 
       {/* Mobile bottom bar — step buttons */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-line bg-white px-4 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-line bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] shadow-[0_-4px_12px_rgba(0,0,0,0.05)] md:hidden">
         <div className="flex gap-3">
           {step !== "address" && (
             <button
               type="button"
-              onClick={() => setStep(STEPS[currentIdx - 1])}
+              onClick={() => setStep(STEPS[currentIdx - 1]!)}
               className="flex h-12 items-center gap-1.5 rounded-lg border border-ink bg-white px-6 text-base font-semibold text-ink transition-colors hover:bg-bg3"
             >
               <ChevronLeft className="h-4 w-4" strokeWidth={1.75} /> Back
