@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 208.6 73.4% 28%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 208.6 73.4% 28%;
+    --radius: 0.5rem;
+
+    --brand: 208.6 73.4% 28%;
+    --brand-dark: 208.6 67% 23%;
+    --ink: 221 47% 11%;
+    --ink-2: 215 19% 35%;
+    --ink-3: 215 14% 65%;
+    --line: 214 32% 91%;
+    --line-soft: 210 40% 96%;
+    --bg-2: 210 40% 98%;
+    --bg-3: 210 40% 96%;
+
+    --chat-user-bg: 208.6 73.4% 28%;
+    --chat-user-text: 0 0% 100%;
+    --chat-admin-bg: 0 0% 95%;
+    --chat-admin-text: 222.2 84% 4.9%;
+    --chat-system-text: 215.4 16.3% 46.9%;
+    --chat-sidebar-bg: 0 0% 100%;
+    --chat-panel-bg: 210 40% 96%;
+    --chat-header-bg: 210 40% 98%;
+    --chat-input-bg: 0 0% 100%;
+    --chat-unread-badge: 208.6 73.4% 28%;
+    --chat-online: 142 76% 36%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground overflow-hidden;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer utilities {
+  .btn-brand {
+    background: linear-gradient(90deg, #1A5A8C 0%, #134A7C 50%, #103E68 100%);
+    color: white;
+  }
+  .btn-brand:hover {
+    opacity: 0.9;
+  }
+  .btn-brand:active {
+    opacity: 1;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--ink-3));
+    border-radius: 999px;
+  }
+}

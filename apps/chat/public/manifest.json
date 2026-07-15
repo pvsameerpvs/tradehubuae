@@ -1,0 +1,17 @@
+{
+  "name": "TradeHub Chat",
+  "short_name": "Chat",
+  "description": "Customer support chat for TradeHub UAE",
+  "start_url": "/chats",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e40af",
+  "scope": "/",
+  "categories": ["business", "communication"],
+  "prefer_related_applications": false,
+  "icons": [
+    { "src": "/icons/logo-mob.png", "sizes": "196x138", "type": "image/png" },
+    { "src": "/icons/chat-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/chat-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
