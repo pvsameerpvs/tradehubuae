@@ -1,38 +1,4 @@
-import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
 import type { Role, Permission } from "@tradehubuae/config";
-
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
-  ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = (user as any).role ?? "CUSTOMER";
-        token.permissions = (user as any).permissions ?? [];
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      session.user.id = token.sub!;
-      (session.user as any).role = token.role;
-      (session.user as any).permissions = token.permissions;
-      return session;
-    },
-  },
-  pages: {
-    signIn: "/auth/login",
-    error: "/auth/error",
-  },
-  session: {
-    strategy: "jwt",
-    maxAge: 7 * 24 * 60 * 60,
-  },
-});
 
 export function hasPermission(
   userPermissions: Permission[],
@@ -55,5 +21,14 @@ export function hasAllPermissions(
   return requiredPermissions.every((p) => userPermissions.includes(p));
 }
 
+export function getUserRole(userPermissions: Permission[]): Role {
+  if (hasPermission(userPermissions, "users:manage")) return "SUPER_ADMIN";
+  if (hasPermission(userPermissions, "settings:manage")) return "ADMIN";
+  if (hasPermission(userPermissions, "inventory:read")) return "INVENTORY_MANAGER";
+  if (hasPermission(userPermissions, "orders:read")) return "SALES_MANAGER";
+  if (hasPermission(userPermissions, "blog:create")) return "CONTENT_MANAGER";
+  if (hasPermission(userPermissions, "seo:manage")) return "SEO_MANAGER";
+  return "CUSTOMER";
+}
+
 export type { Role, Permission };
-export { NextAuth };

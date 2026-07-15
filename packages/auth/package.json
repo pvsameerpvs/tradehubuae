@@ -13,19 +13,10 @@
     "@tradehubuae/database": "workspace:*",
     "@tradehubuae/config": "workspace:*",
     "@tradehubuae/types": "workspace:*",
-    "@tradehubuae/logger": "workspace:*",
-    "next": "^15.1.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next-auth": "^5.0.0-beta.25",
-    "bcryptjs": "^2.4.3"
+    "@tradehubuae/logger": "workspace:*"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22.10.0",
     "typescript": "^5.7.2"
-  },
-  "peerDependencies": {
-    "next": "^15.0.0"
   }
 }

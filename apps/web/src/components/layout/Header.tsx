@@ -18,6 +18,7 @@ import {
   Wallet,
   ShieldCheck,
 } from "lucide-react";
+import { useAuth } from "@/lib/supabase/provider";
 import { useCart } from "@/lib/cart-context";
 
 const NAV_LINKS = [
@@ -38,7 +39,13 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { user, signOut } = useAuth();
   const { count } = useCart();
+
+  const handleSignOut = async () => {
+    await signOut();
+    setOpen(false);
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -117,7 +124,7 @@ export function Header() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1 flex-shrink-0">
             <Link
               href="/cart"
               aria-label="Shopping cart"
@@ -170,14 +177,34 @@ export function Header() {
                       })}
                     </div>
                     <hr className="mx-2 my-2 border-line" />
-                    <Link
-                      href="/account"
-                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-bg3"
-                      onClick={() => setOpen(false)}
-                    >
-                      <User className="h-4 w-4 text-ink-2" strokeWidth={1.5} />
-                      My Account
-                    </Link>
+                    {user ? (
+                      <>
+                        <Link
+                          href="/account"
+                          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-bg3"
+                          onClick={() => setOpen(false)}
+                        >
+                          <User className="h-4 w-4 text-ink-2" strokeWidth={1.5} />
+                          My Account
+                        </Link>
+                        <button
+                          onClick={handleSignOut}
+                          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-bg3"
+                        >
+                          <User className="h-4 w-4 text-ink-2" strokeWidth={1.5} />
+                          Sign Out
+                        </button>
+                      </>
+                    ) : (
+                      <Link
+                        href="/auth"
+                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-brand transition-colors hover:bg-bg3"
+                        onClick={() => setOpen(false)}
+                      >
+                        <User className="h-4 w-4" strokeWidth={1.5} />
+                        Sign In
+                      </Link>
+                    )}
                     <Link
                       href="/wishlist"
                       className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-bg3"
