@@ -36,6 +36,26 @@ export function getDisplayName(session: {
   return session.userName || session.userEmail || session.userPhone || "Unknown";
 }
 
+const AVATAR_COLORS = [
+  "bg-blue-600", "bg-emerald-600", "bg-purple-600", "bg-orange-600",
+  "bg-pink-600", "bg-teal-600", "bg-indigo-600", "bg-rose-600",
+  "bg-cyan-600", "bg-amber-600", "bg-violet-600", "bg-lime-600",
+];
+
+function hashString(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+export function getAvatarColor(name: string, email: string): string {
+  const key = name || email || "?";
+  return AVATAR_COLORS[hashString(key) % AVATAR_COLORS.length] || "bg-brand";
+}
+
 export function getContactInfo(session: {
   userEmail: string;
   userPhone?: string;

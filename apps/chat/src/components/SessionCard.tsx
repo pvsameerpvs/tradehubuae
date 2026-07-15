@@ -3,9 +3,22 @@
 import { memo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useChatStore } from "@/lib/store";
-import { getInitials, getContactInfo, formatShortTime } from "@/lib/utils";
+import { getInitials, getContactInfo, formatShortTime, getAvatarColor } from "@/lib/utils";
 import { cn } from "@tradehubuae/ui";
 import type { ChatSession } from "@/types";
+import { Circle } from "lucide-react";
+
+const STATUS_DOT: Record<string, string> = {
+  new: "text-green-500",
+  in_progress: "text-amber-500",
+  closed: "text-gray-400",
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  new: "New",
+  in_progress: "In Progress",
+  closed: "Closed",
+};
 
 function SessionCardComponent({ session, isActive }: { session: ChatSession; isActive: boolean }) {
   const router = useRouter();
@@ -20,6 +33,7 @@ function SessionCardComponent({ session, isActive }: { session: ChatSession; isA
 
   const contactInfo = getContactInfo(session);
   const initials = getInitials(session.userName || session.userEmail || "?");
+  const color = session.avatarColor || getAvatarColor(session.userName, session.userEmail);
 
   return (
     <button
@@ -30,9 +44,13 @@ function SessionCardComponent({ session, isActive }: { session: ChatSession; isA
       )}
     >
       <div className="relative flex-shrink-0">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">
-          {initials}
-        </div>
+        {session.avatarUrl ? (
+          <img src={session.avatarUrl} alt="" className="h-12 w-12 rounded-full object-cover" />
+        ) : (
+          <div className={cn("flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold text-white", color)}>
+            {initials}
+          </div>
+        )}
         {session.unreadCount > 0 && (
           <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brand px-1 text-[11px] font-bold text-white">
             {session.unreadCount > 99 ? "99+" : session.unreadCount}
@@ -55,18 +73,8 @@ function SessionCardComponent({ session, isActive }: { session: ChatSession; isA
         )}
 
         <div className="flex items-center gap-2">
-          {session.source && session.source !== "web" && (
-            <span className="flex-shrink-0 text-xs text-ink-3">
-              {session.source === "whatsapp" ? "🟢" : "📧"}
-            </span>
-          )}
-          <span className="truncate text-xs text-ink-2">
-            {session.unreadCount > 0 ? (
-              <span className="font-medium text-ink">New messages</span>
-            ) : (
-              "No messages yet"
-            )}
-          </span>
+          <Circle className={cn("h-2.5 w-2.5 fill-current", STATUS_DOT[session.status] || "text-gray-400")} />
+          <span className="text-xs text-ink-3">{STATUS_LABEL[session.status] || session.status}</span>
         </div>
       </div>
     </button>

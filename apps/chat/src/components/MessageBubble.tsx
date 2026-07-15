@@ -7,7 +7,7 @@ import type { ChatMessage } from "@/types";
 import { CheckCheck, Check } from "lucide-react";
 
 function MessageBubbleComponent({ message }: { message: ChatMessage }) {
-  const isUser = message.senderType === "user";
+  const isMe = message.senderType === "admin";
   const isSystem = message.senderType === "system";
   const isBot = message.senderType === "bot";
 
@@ -22,11 +22,11 @@ function MessageBubbleComponent({ message }: { message: ChatMessage }) {
   }
 
   return (
-    <div className={cn("flex px-4 py-0.5", isUser ? "justify-end" : "justify-start")}>
+    <div className={cn("flex px-4 py-0.5", isMe ? "justify-end" : "justify-start")}>
       <div
         className={cn(
           "relative max-w-[75%] rounded-2xl px-4 py-2 text-sm leading-relaxed",
-          isUser
+          isMe
             ? "bg-brand text-white rounded-br-md"
             : isBot
               ? "bg-blue-50 text-ink rounded-bl-md"
@@ -62,12 +62,12 @@ function MessageBubbleComponent({ message }: { message: ChatMessage }) {
 
         <div className={cn(
           "mt-1 flex items-center justify-end gap-1",
-          isUser ? "text-white/70" : "text-ink-3"
+          isMe ? "text-white/70" : "text-ink-3"
         )}>
           <span className="text-[10px] leading-none">
             {formatMessageTime(message.createdAt)}
           </span>
-          {isUser && (
+          {isMe && (
             message.readAt ? (
               <CheckCheck className="h-3 w-3 text-blue-300" />
             ) : (

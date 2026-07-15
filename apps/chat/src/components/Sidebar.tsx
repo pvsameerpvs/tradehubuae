@@ -1,9 +1,11 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useChatStore } from "@/lib/store";
 import { SessionCard } from "./SessionCard";
 import { SearchInput } from "./SearchInput";
 import { StatusToggle } from "./StatusToggle";
+import { Settings } from "lucide-react";
 import { useMemo } from "react";
 
 function sortSessions(
@@ -25,13 +27,14 @@ function sortSessions(
     (a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
   );
 
-  const active = sorted.filter((s) => s.status === "active");
+  const active = sorted.filter((s) => s.status === "new" || s.status === "in_progress");
   const closed = sorted.filter((s) => s.status === "closed");
 
   return { active, closed };
 }
 
 export function Sidebar() {
+  const router = useRouter();
   const sessions = useChatStore((s) => s.sessions);
   const activeSessionId = useChatStore((s) => s.activeSessionId);
   const searchQuery = useChatStore((s) => s.searchQuery);
@@ -45,7 +48,16 @@ export function Sidebar() {
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-line px-4 py-3">
         <h1 className="text-lg font-bold text-ink">Chats</h1>
-        <StatusToggle />
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => router.push("/settings")}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-2 hover:bg-bg2 hover:text-ink transition-colors"
+            title="Settings"
+          >
+            <Settings className="h-4 w-4" />
+          </button>
+          <StatusToggle />
+        </div>
       </div>
 
       <SearchInput />

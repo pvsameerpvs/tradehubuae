@@ -1,6 +1,6 @@
 export type SenderType = "user" | "admin" | "bot" | "system";
 export type MessageType = "text" | "image" | "file" | "system";
-export type SessionStatus = "active" | "closed";
+export type SessionStatus = "new" | "in_progress" | "closed";
 export type OnlineStatus = "online" | "away" | "offline";
 export type Source = "web" | "whatsapp" | "email";
 
@@ -40,6 +40,8 @@ export interface ChatSession {
   lastMessageAt: string;
   closedAt?: string;
   unreadCount: number;
+  avatarUrl?: string;
+  avatarColor?: string;
   pinned?: boolean;
 }
 
