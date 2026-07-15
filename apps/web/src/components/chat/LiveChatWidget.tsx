@@ -12,10 +12,12 @@ import {
   getProductContext,
   clearProductContext,
   markSessionRead,
+  getUnreadCount,
   type ChatMessage,
   type ChatSession,
   type ProductContext,
 } from "@/lib/chat-store";
+import { ChatBubbleFilled } from "@/components/icons";
 
 function genId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -83,8 +85,10 @@ export function LiveChatWidget() {
   const [settings, setSettings] = useState(getSettings());
   const [productCtx, setProductCtx] = useState<ProductContext | null>(null);
   const [showProductChip, setShowProductChip] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const unreadPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -122,6 +126,20 @@ export function LiveChatWidget() {
       if (pollRef.current) clearInterval(pollRef.current);
     };
   }, [started, session]);
+
+  useEffect(() => {
+    if (open) {
+      setUnreadCount(0);
+      return;
+    }
+    setUnreadCount(getUnreadCount());
+    unreadPollRef.current = setInterval(() => {
+      setUnreadCount(getUnreadCount());
+    }, 5000);
+    return () => {
+      if (unreadPollRef.current) clearInterval(unreadPollRef.current);
+    };
+  }, [open]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -361,13 +379,26 @@ export function LiveChatWidget() {
       ) : (
         /* FAB BUTTON */
         <div className="flex justify-end p-4 sm:p-0">
-          <button
-            onClick={openWithProduct}
-            aria-label="Open live chat"
-            className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white shadow-panel transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
-          >
-            <MessageSquareMore className="h-7 w-7 transition-transform duration-200 group-hover:scale-110" strokeWidth={1.75} />
-          </button>
+          <div className="group relative">
+            <button
+              onClick={openWithProduct}
+              aria-label="Open live chat"
+              className="relative flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white shadow-panel transition-all duration-200 hover:scale-105 hover:shadow-lg active:scale-95"
+            >
+              {unreadCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex min-w-[22px] items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[11px] font-bold leading-none text-white shadow-sm">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+              {unreadCount > 0 && (
+                <span className="absolute inset-0 animate-ping rounded-full bg-brand/40" />
+              )}
+              <ChatBubbleFilled className="h-6 w-6 transition-transform duration-200 group-hover:scale-110" />
+            </button>
+            <span className="absolute right-16 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-lg bg-ink px-3 py-1.5 text-xs text-white opacity-0 shadow-sm transition-all duration-200 group-hover:opacity-100">
+              Chat with us
+            </span>
+          </div>
         </div>
       )}
     </div>
