@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, Logger } from "@nestjs/common";
 import { DrizzleService } from "../../database/drizzle.service";
-import { products, productImages, brands, productCategories, productVariants, reviews } from "@tradehubuae/database";
+import { products, productImages, brands, uses, productCategories, categories, productVariants, reviews } from "@tradehubuae/database";
 import { eq, and, like, or, sql, asc, desc, count } from "drizzle-orm";
 import type { CreateProductDto } from "./dto/create-product.dto";
 import type { UpdateProductDto } from "./dto/update-product.dto";
@@ -24,7 +24,7 @@ export class ProductsService {
   constructor(private drizzle: DrizzleService) {}
 
   async findAll(query: QueryProductDto) {
-    const { page = 1, limit = 20, sort = "createdAt", order = "desc", q, category, brand, minPrice, maxPrice, condition, inStock } = query;
+    const { page = 1, limit = 20, sort = "createdAt", order = "desc", q, category, brand, use, minPrice, maxPrice, condition, inStock } = query;
 
     const conditions: (typeof sql.arguments[number] | undefined)[] = [
       eq(products.isActive, true),
@@ -43,6 +43,16 @@ export class ProductsService {
 
     if (brand) {
       conditions.push(sql`EXISTS (SELECT 1 FROM ${brands} WHERE ${brands.slug} = ${brand} AND ${brands.id} = ${products.brandId})`);
+    }
+
+    if (use) {
+      conditions.push(sql`EXISTS (SELECT 1 FROM ${uses} WHERE ${uses.slug} = ${use} AND ${uses.id} = ${products.useId})`);
+    }
+
+    if (category) {
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM ${productCategories} pc JOIN ${categories} c ON c.id = pc.category_id WHERE pc.product_id = ${products.id} AND c.slug = ${category})`,
+      );
     }
 
     if (minPrice !== undefined) conditions.push(sql`${products.price} >= ${minPrice}`);
@@ -158,6 +168,7 @@ export class ProductsService {
         compareAtPrice: dto.compareAtPrice?.toString(),
         costPrice: dto.costPrice?.toString(),
         brandId: dto.brandId,
+        useId: dto.useId,
         isActive: dto.isActive ?? true,
         isFeatured: dto.isFeatured ?? false,
         seoTitle: dto.seoTitle,
@@ -193,6 +204,7 @@ export class ProductsService {
     if (dto.compareAtPrice !== undefined) updateData.compareAtPrice = dto.compareAtPrice?.toString();
     if (dto.costPrice !== undefined) updateData.costPrice = dto.costPrice?.toString();
     if (dto.brandId !== undefined) updateData.brandId = dto.brandId;
+    if (dto.useId !== undefined) updateData.useId = dto.useId;
     if (dto.isActive !== undefined) updateData.isActive = dto.isActive;
     if (dto.isFeatured !== undefined) updateData.isFeatured = dto.isFeatured;
     if (dto.seoTitle !== undefined) updateData.seoTitle = dto.seoTitle;

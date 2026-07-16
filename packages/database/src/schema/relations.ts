@@ -6,6 +6,7 @@ import { activityLogs } from "./users";
 import { addresses } from "./addresses";
 import { categories, categoryAttributes } from "./categories";
 import { brands } from "./brands";
+import { uses } from "./uses";
 import {
   products, productCategories, productImages, productSpecs, productVariants,
 } from "./products";
@@ -46,8 +47,13 @@ export const brandsRelations = relations(brands, ({ many }) => ({
   products: many(products),
 }));
 
+export const usesRelations = relations(uses, ({ many }) => ({
+  products: many(products),
+}));
+
 export const productsRelations = relations(products, ({ one, many }) => ({
   brand: one(brands, { fields: [products.brandId], references: [brands.id] }),
+  use: one(uses, { fields: [products.useId], references: [uses.id] }),
   categories: many(productCategories),
   images: many(productImages),
   specs: many(productSpecs),

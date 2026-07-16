@@ -99,5 +99,3 @@ export async function getComboSavings(cartItemSlugs: string[]): Promise<{
   }
   return { applicableCombo: null, savings: 0 };
 }
-
-export const comboOffers: ComboOffer[] = [];

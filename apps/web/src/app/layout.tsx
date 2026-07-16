@@ -6,6 +6,7 @@ import { cn } from "@tradehubuae/ui";
 import { AuthProvider } from "@/lib/supabase/provider";
 import { CartProvider } from "@/lib/cart-context";
 import { CartFlyProvider } from "@/lib/cart-fly-context";
+import { WishlistProvider } from "@/lib/wishlist-context";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
@@ -52,13 +53,15 @@ export default function RootLayout({
       </head>
       <body className={cn("min-h-screen flex flex-col bg-white antialiased", inter.variable)}>
         <AuthProvider>
-          <CartProvider>
-            <CartFlyProvider>
-              <Header />
-              <main className="flex-1">{children}</main>
-              <Footer />
-            </CartFlyProvider>
-          </CartProvider>
+          <WishlistProvider>
+            <CartProvider>
+              <CartFlyProvider>
+                <Header />
+                <main className="flex-1">{children}</main>
+                <Footer />
+              </CartFlyProvider>
+            </CartProvider>
+          </WishlistProvider>
         </AuthProvider>
       </body>
     </html>

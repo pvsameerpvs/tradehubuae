@@ -1,3 +1,5 @@
+import { getUses, getUseBySlug as getUseBySlugApi } from "@/lib/actions/uses";
+
 export interface Use {
   id: string;
   name: string;
@@ -5,18 +7,23 @@ export interface Use {
   image: string;
 }
 
-export const uses: Use[] = [
-  { id: "1", name: "Gaming", slug: "gaming", image: "" },
-  { id: "2", name: "Office", slug: "office", image: "" },
-  { id: "3", name: "Student", slug: "student", image: "" },
-  { id: "4", name: "Content Creation", slug: "content-creation", image: "" },
-  { id: "5", name: "Business", slug: "business", image: "" },
-];
+export async function fetchUses(): Promise<Use[]> {
+  const uses = await getUses();
+  return uses.map((u) => ({
+    id: u.id,
+    name: u.name,
+    slug: u.slug,
+    image: u.image ?? "",
+  }));
+}
 
-export function getUse(id: string): Use | undefined {
+export async function getUse(id: string): Promise<Use | undefined> {
+  const uses = await fetchUses();
   return uses.find((u) => u.id === id);
 }
 
-export function getUseBySlug(slug: string): Use | undefined {
-  return uses.find((u) => u.slug === slug);
+export async function getUseBySlug(slug: string): Promise<Use | undefined> {
+  const data = await getUseBySlugApi(slug);
+  if (!data) return undefined;
+  return { id: data.id, name: data.name, slug: data.slug, image: data.image ?? "" };
 }

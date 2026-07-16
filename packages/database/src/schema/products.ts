@@ -2,6 +2,7 @@ import { pgTable, uuid, varchar, text, numeric, integer, boolean, timestamp } fr
 import { conditionEnum } from "./enums";
 import { brands } from "./brands";
 import { categories } from "./categories";
+import { uses } from "./uses";
 
 export const products = pgTable("products", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -21,6 +22,7 @@ export const products = pgTable("products", {
   height: numeric("height", { precision: 8, scale: 2 }),
   depth: numeric("depth", { precision: 8, scale: 2 }),
   brandId: uuid("brand_id").references(() => brands.id),
+  useId: uuid("use_id").references(() => uses.id),
   isActive: boolean("is_active").default(true).notNull(),
   isFeatured: boolean("is_featured").default(false).notNull(),
   isBundle: boolean("is_bundle").default(false).notNull(),

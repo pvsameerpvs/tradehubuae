@@ -9,6 +9,7 @@ import {
   Users,
   Building2,
   Tags,
+  Percent,
   FileText,
   Image,
   Search,
@@ -46,6 +47,7 @@ export const navSections: NavSection[] = [
     items: [
       { label: "Inventory", href: "/inventory", icon: Warehouse },
       { label: "Combo Offers", href: "/combo-offers", icon: Tags },
+      { label: "Promo Codes", href: "/coupons", icon: Percent },
       { label: "Bulk Sales", href: "/bulk-sales", icon: Building2 },
       { label: "Media", href: "/media", icon: Image },
       { label: "Blog", href: "/blog", icon: FileText },

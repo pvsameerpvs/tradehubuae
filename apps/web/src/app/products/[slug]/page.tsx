@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Heart, Share2, Truck, RotateCcw, CheckCircle2, ShieldCheck, MapPin, Gift, TrendingDown, ChevronRight } from "lucide-react";
+import { Share2, Truck, RotateCcw, CheckCircle2, ShieldCheck, MapPin, Gift, TrendingDown, ChevronRight } from "lucide-react";
+import { WishlistButton } from "@/components/products/WishlistButton";
 import { ChatProductButton } from "@/components/chat/ChatProductButton";
-import { searchProducts, defaultSpecs, comboOffers, defaultBulkTiers } from "@/data";
+import { fetchProductBySlug, fetchProducts, fetchComboOffers } from "@/data";
+import { defaultBulkTiers } from "@/data/bulkPricing";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { ProductRow } from "@/components/home";
 import { BuyButtons } from "@/components/products/BuyButtons";
@@ -17,22 +19,30 @@ interface ProductPageProps {
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
+  const product = await fetchProductBySlug(slug);
+  if (!product) {
+    return {
+      title: slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+    };
+  }
   return {
-    title: slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-    description: `View product details for ${slug.replace(/-/g, " ")} at TradeHub UAE`,
+    title: `${product.name} | TradeHub UAE`,
+    description: `View product details for ${product.name} at TradeHub UAE`,
   };
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const product = searchProducts.find((p) => p.slug === slug);
+  const product = await fetchProductBySlug(slug);
   if (!product) notFound();
 
   const productName = product.name;
-  const relatedProducts = searchProducts.filter(
-    (p) => p.category === product.category && p.slug !== slug,
-  ).slice(0, 6);
-
+  const relatedRes = await fetchProducts({
+    category: product.categorySlug,
+    limit: 7,
+  });
+  const relatedProducts = relatedRes.products.filter((p) => p.slug !== slug).slice(0, 6);
+  const comboOffers = await fetchComboOffers();
   const matchingCombos = comboOffers.filter((c) =>
     c.items.some((i) => i.slug === slug),
   );
@@ -44,7 +54,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           items={[
             { label: "Home", href: "/" },
             { label: "Categories", href: "/categories" },
-            { label: product.category, href: `/categories/${product.category.toLowerCase().replace(/\s+/g, "-")}` },
+            { label: product.categoryName, href: `/categories/${product.categorySlug}` },
             { label: productName },
           ]}
         />
@@ -59,15 +69,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <button type="button" aria-label="Share" className="flex h-9 w-9 items-center justify-center rounded-lg text-ink transition-colors hover:bg-bg3">
             <Share2 className="h-4 w-4" strokeWidth={1.75} />
           </button>
-          <button type="button" aria-label="Save" className="flex h-9 w-9 items-center justify-center rounded-lg text-ink transition-colors hover:bg-bg3">
-            <Heart className="h-4 w-4" strokeWidth={1.75} />
-          </button>
+          <WishlistButton slug={product.slug} />
         </div>
       </div>
 
       <div className="mt-4 grid md:grid-cols-[1fr_360px] md:gap-4">
         <div>
-          <ProductGallery badge={product.badge} />
+          <ProductGallery badge={product.badge} images={product.images} />
 
           {product.specs && (
             <div className="mt-6 flex flex-wrap gap-2">
@@ -90,7 +98,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <div>
               <h2 className="text-base font-semibold text-ink">Key specifications</h2>
               <div className="mt-2">
-                <SpecsTable specs={product.detailedSpecs ?? defaultSpecs} />
+                <SpecsTable specs={product.detailedSpecs ?? []} />
               </div>
             </div>
 
@@ -297,9 +305,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
       {relatedProducts.length > 0 && (
         <div className="mt-12 border-t border-line pt-12">
           <ProductRow
-            title={`More in ${product.category}`}
+            title={`More in ${product.categoryName}`}
             products={relatedProducts}
-            href={`/categories/${product.category.toLowerCase().replace(/\s+/g, "-")}`}
+            href={`/categories/${product.categorySlug}`}
           />
         </div>
       )}

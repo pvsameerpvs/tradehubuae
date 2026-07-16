@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@tradehubuae/ui";
 import type { Category } from "@/data";
@@ -10,6 +13,7 @@ import {
   Wifi,
   HardDrive,
   Code2,
+  Watch,
   type LucideIcon,
 } from "lucide-react";
 
@@ -26,12 +30,22 @@ const categoryIcons: Record<string, LucideIcon> = {
 
 export function CategoryCard({ category, href }: { category: Category; href?: string }) {
   const Icon = categoryIcons[category.name];
+  const [imgError, setImgError] = useState(false);
 
   return (
     <Link href={href ?? `/categories/${category.slug}`} className="flex-1 min-w-0">
       <Card className="overflow-hidden rounded-xl border-0 bg-white shadow-none transition-shadow duration-200 hover:shadow-card">
-        <div className="flex aspect-[1/1] items-center justify-center bg-bg2">
-          {Icon && <Icon className="h-6 w-6 text-ink" strokeWidth={1.75} />}
+        <div className="relative flex aspect-[1/1] items-center justify-center overflow-hidden bg-bg2">
+          {category.image && !imgError ? (
+            <img
+              src={category.image}
+              alt={category.name}
+              className="h-full w-full object-cover"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            Icon && <Icon className="h-6 w-6 text-ink" strokeWidth={1.75} />
+          )}
         </div>
         <CardContent className="px-1 pb-1.5 pt-1 text-center">
           <h3 className="text-[11px] font-semibold leading-[14px] text-ink">

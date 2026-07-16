@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { organizationSchema } from "@tradehubuae/seo";
-import { aboutStats } from "@/data";
+import { aboutStats } from "@/data/benefits";
 
 export const metadata: Metadata = {
   title: "About Us",

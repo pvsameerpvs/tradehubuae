@@ -1,26 +1,43 @@
-import type { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
 import { Heart } from "lucide-react";
-import { wishlistItems } from "@/data";
+import { useEffect, useState } from "react";
+import { fetchProducts } from "@/data";
+import type { Product } from "@/data";
 import { WishlistCard } from "@/components/shared/ProductCard";
 import { EmptyState } from "@/components/shared/EmptyState";
-
-export const metadata: Metadata = {
-  title: "My Wishlist",
-  description: "View and manage your wishlist at TradeHub UAE",
-};
+import { useWishlist } from "@/lib/wishlist-context";
 
 export default function WishlistPage() {
+  const { slugs } = useWishlist();
+  const [items, setItems] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (slugs.length === 0) {
+      setItems([]);
+      setLoading(false);
+      return;
+    }
+    fetchProducts({ limit: 100 })
+      .then((res) => setItems(res.products.filter((p) => slugs.includes(p.slug))))
+      .catch(() => setItems([]))
+      .finally(() => setLoading(false));
+  }, [slugs]);
+
   return (
     <div className="mx-auto max-w-[1760px] px-6 py-8 md:px-10 lg:px-20">
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-[26px] font-semibold leading-[30px] text-ink" style={{ letterSpacing: "-0.01em" }}>
           My Wishlist
         </h1>
-        <span className="text-sm text-ink-2">{wishlistItems.length} items</span>
+        <span className="text-sm text-ink-2">{items.length} items</span>
       </div>
 
-      {wishlistItems.length === 0 ? (
+      {loading ? (
+        <div className="flex items-center justify-center py-20 text-sm text-ink-3">Loading...</div>
+      ) : items.length === 0 ? (
         <EmptyState
           icon={Heart}
           title="Your wishlist is empty"
@@ -29,7 +46,7 @@ export default function WishlistPage() {
         />
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {wishlistItems.map((item) => (
+          {items.map((item) => (
             <WishlistCard key={item.slug} product={item} />
           ))}
         </div>

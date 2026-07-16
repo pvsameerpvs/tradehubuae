@@ -1,142 +1,208 @@
-# Frontend Routes (apps/web)
+# TradeHub UAE — Frontend API Integration Map
 
-Base URL: `http://localhost:3000`
-
-Framework: Next.js (App Router)
+> Generated: 2026-07-16 | Backend: NestJS `/api/v1` | Web: Next.js 15 (port 3000) | Admin: Next.js 15 (port 3001) | Chat: Next.js PWA (port 3003)
 
 ---
 
-## Public Pages
+## 1. Architecture
 
-| Route | File | Type |
-|-------|------|------|
-| `/` | `src/app/page.tsx` | Home page |
-| `/about` | `src/app/about/page.tsx` | Static page |
-| `/blog` | `src/app/blog/page.tsx` | Static page |
-| `/brands` | `src/app/brands/page.tsx` | Static page |
-| `/bulk-sales` | `src/app/bulk-sales/page.tsx` | Static page |
-| `/cart` | `src/app/cart/page.tsx` | Static page |
-| `/categories` | `src/app/categories/page.tsx` | Static page |
-| `/categories/[slug]` | `src/app/categories/[slug]/page.tsx` | Dynamic page |
-| `/checkout` | `src/app/checkout/page.tsx` | Static page |
-| `/combo-offers` | `src/app/combo-offers/page.tsx` | Static page |
-| `/compare` | `src/app/compare/page.tsx` | Static page |
-| `/contact` | `src/app/contact/page.tsx` | Static page |
-| `/orders` | `src/app/orders/page.tsx` | Static page |
-| `/products/[slug]` | `src/app/products/[slug]/page.tsx` | Dynamic page |
-| `/search` | `src/app/search/page.tsx` | Static page |
-| `/wishlist` | `src/app/wishlist/page.tsx` | Static page |
+```
+Web (3000) ──Server Actions──► API (4000/api/v1)      ◄── Admin (3001) Client fetch
+Chat PWA (3003) ──REST + WS──────► (no backend yet)
+```
 
-## Auth
-
-| Route | File | Type |
-|-------|------|------|
-| `/auth` | `src/app/auth/page.tsx` | Auth page (layout wrapper) |
-
-## Account
-
-| Route | File | Type |
-|-------|------|------|
-| `/account` | `src/app/account/page.tsx` | User account page (layout wrapper) |
-
-## Track Order
-
-| Route | File | Type |
-|-------|------|------|
-| `/track-order` | `src/app/track-order/page.tsx` | Track order page (layout wrapper) |
-
-## User Dashboard (inside main web app)
-
-| Route | File | Type |
-|-------|------|------|
-| `/dashboard` | `src/app/dashboard/page.tsx` | Data overview |
-| `/dashboard/orders` | `src/app/dashboard/orders/page.tsx` | Orders list |
-| `/dashboard/orders/[id]` | `src/app/dashboard/orders/[id]/page.tsx` | Order detail |
-
-## Layouts & Special Files
-
-| File | Purpose |
-|------|---------|
-| `src/app/layout.tsx` | Root layout |
-| `src/app/not-found.tsx` | 404 page |
-| `src/app/auth/layout.tsx` | Auth layout wrapper |
-| `src/app/account/layout.tsx` | Account layout wrapper |
-| `src/app/track-order/layout.tsx` | Track order layout wrapper |
+**Auth:** JWT in localStorage. Admin uses role guards.
 
 ---
 
-**Total: 22 pages (+ 4 layouts + 1 not-found)**
+## 2. COMPLETE API ENDPOINT LIST — 47 Backend Endpoints
+
+### 2.1 Auth — `POST /auth/register` | `POST /auth/login` | `GET /auth/me`
+- Web: ✅ login, register, getMe
+- `/auth/me` requires JWT (uses `@CurrentUser`)
+
+### 2.2 Products — `@Controller("products")`
+| Method | Endpoint | Auth | Web | Admin |
+|--------|----------|------|-----|-------|
+| GET | `/products` | Public | ✅ | ✅ |
+| GET | `/products/search?q=&limit=` | Public | ✅ | — |
+| GET | `/products/{slug}` | Public | ✅ | — |
+| GET | `/products/{id}` | ADMIN/CONTENT | — | ✅ |
+| POST | `/products` | ADMIN/CONTENT | — | ✅ |
+| PUT | `/products/{id}` | ADMIN/CONTENT | — | ✅ |
+| DELETE | `/products/{id}` | ADMIN/SUPER | — | ❌ No UI |
+
+### 2.3 Categories — `@Controller("categories")`
+| Method | Endpoint | Auth | Web | Admin |
+|--------|----------|------|-----|-------|
+| GET | `/categories` | Public | ✅ | ✅ |
+| GET | `/categories/tree` | Public | ✅ | — |
+| GET | `/categories/{id}` | Public | ✅ | ✅ |
+| POST | `/categories` | ADMIN/CONTENT | — | ✅ |
+| PUT | `/categories/{id}` | ADMIN/CONTENT | — | ✅ |
+| DELETE | `/categories/{id}` | ADMIN/SUPER | — | ❌ No UI |
+
+### 2.4 Brands — `@Controller("brands")`
+| Method | Endpoint | Auth | Web | Admin |
+|--------|----------|------|-----|-------|
+| GET | `/brands` | Public | ✅ | ✅ |
+| GET | `/brands/{id}` | Public | ✅ | ✅ |
+| POST | `/brands` | ADMIN/CONTENT | — | ✅ |
+| PUT | `/brands/{id}` | ADMIN/CONTENT | — | ✅ |
+| DELETE | `/brands/{id}` | ADMIN/SUPER | — | ❌ No UI |
+
+### 2.5 Orders — `@Controller("orders")`
+| Method | Endpoint | Auth | Web | Admin |
+|--------|----------|------|-----|-------|
+| GET | `/orders` | ADMIN/SALES | — | ✅ |
+| GET | `/orders/my-orders` | Auth (JWT) | ✅ | — |
+| GET | `/orders/track/{orderNumber}` | Public | ✅ | — |
+| GET | `/orders/{id}` | ADMIN/SALES | — | ✅ |
+| POST | `/orders` | Auth (JWT) | ✅ | — |
+| PUT | `/orders/{id}/status` | ADMIN/SALES | ✅ | ✅ |
+
+### 2.6 Inventory — `@Controller("inventory")`
+| Method | Endpoint | Auth | Admin |
+|--------|----------|------|-------|
+| GET | `/inventory` | ADMIN/INVENTORY | ✅ |
+| GET | `/inventory/low-stock` | ADMIN/INVENTORY | ❌ No UI |
+| GET | `/inventory/product/{productId}` | ADMIN/INVENTORY | ❌ No UI |
+| POST | `/inventory/adjust/{id}` | ADMIN/INVENTORY | ❌ No UI |
+| POST | `/inventory/transfer` | ADMIN/SUPER | ❌ No UI |
+
+### 2.7 Media — `@Controller("media")`
+| Method | Endpoint | Auth | Admin |
+|--------|----------|------|-------|
+| POST | `/media/upload` | ADMIN/CONTENT | ✅ ImageUpload component |
+
+### 2.8 Combo Offers — `@Controller("combo-offers")`
+| Method | Endpoint | Auth | Web | Admin |
+|--------|----------|------|-----|-------|
+| GET | `/combo-offers` | Public | — | ✅ |
+| GET | `/combo-offers/active` | Public | ✅ | — |
+| GET | `/combo-offers/{id}` | Public | — | ✅ |
+| POST | `/combo-offers` | ADMIN/SALES | — | ✅ |
+| PUT | `/combo-offers/{id}` | ADMIN/SALES | — | ✅ |
+| DELETE | `/combo-offers/{id}` | ADMIN/SUPER | — | ❌ No UI |
+
+### 2.9 Analytics — `@Controller("analytics")`
+| Method | Endpoint | Auth | Admin |
+|--------|----------|------|-------|
+| GET | `/analytics/overview?range=` | ADMIN/SEO | ✅ |
+| GET | `/analytics/top-products?range=&limit=` | ADMIN/SEO | ✅ |
+| GET | `/analytics/search-terms?range=&limit=` | ADMIN/SEO | ✅ |
+| GET | `/analytics/devices?range=` | ADMIN/SEO | ✅ |
+| GET | `/analytics/seo-stats` | ADMIN/SEO | ✅ |
+| GET | `/analytics/weekly-trend?days=` | ADMIN/SEO | ✅ |
+
+### 2.10 SEO — `@Controller("seo")`
+| Method | Endpoint | Auth | Admin |
+|--------|----------|------|-------|
+| GET | `/seo?entityType=` | ADMIN/SEO | ✅ |
+| GET | `/seo/stats` | ADMIN/SEO | ❌ No UI |
+| GET | `/seo/{entityType}/{entityId}` | ADMIN/SEO | ❌ No UI |
+| POST | `/seo` | ADMIN/SEO | ✅ |
+| POST | `/seo/generate` | ADMIN/SUPER | ✅ |
+| DELETE | `/seo/{id}` | ADMIN/SEO | ❌ No UI |
+
+### 2.11 AI — `@Controller("ai")`
+| Method | Endpoint | Auth | Admin |
+|--------|----------|------|-------|
+| POST | `/ai/generate-product` | ADMIN/CONTENT | ❌ No UI (needs API key) |
+| POST | `/ai/analyze-image` | ADMIN/CONTENT | ❌ No UI (needs API key) |
+| POST | `/ai/generate-seo` | ADMIN/SEO | ❌ No UI (needs API key) |
 
 ---
 
-## 🔍 Deep Audit: Issues Found
+## 3. 🚫 DEAD FRONTEND CALLS — No Backend Controller
 
-### ❌ BROKEN LINKS (point to non-existent pages)
+These frontend endpoints hit **nothing** — backend doesn't have a controller:
 
-| Link | Source | Issue |
+| Frontend File | Endpoint | Notes |
+|--------------|----------|-------|
+| `web/actions/addresses.ts` | `GET/POST/PUT/DELETE /addresses*` | No AddressModule in API |
+| `web/actions/blog.ts` | `GET /blog`, `GET /blog/{slug}` | No BlogModule in API |
+| `web/actions/uses.ts` | `GET /uses`, `GET /uses/{slug}` | No Uses controller in API |
+| `admin/blog/page.tsx` | `GET /blog` | No BlogModule in API |
+| `admin/uses/*` | `GET/POST/PUT /uses*` | No Uses controller in API |
+| `admin/users/*` | `GET /users*` | UsersModule has NO controller |
+| `admin/bulk-sales/page.tsx` | `GET /bulk-sales` | No BulkSalesModule in API |
+| `admin/products/product-form.tsx` | `GET /uses` | No Uses controller in API |
+
+**6 backend modules exist as stubs (module + DTOs only, NO controller):**
+`UsersModule`, `CustomersModule`, `ReviewsModule`, `CouponsModule`, `NotificationsModule`, `ReportsModule`
+
+**4 backend modules don't exist at all:**
+`BulkSales`, `Blog`, `Addresses`, `Wishlist`, `Uses`
+
+---
+
+## 4. ✅ WEB FRONTEND — ALL HARDCODED DATA REMOVED
+
+All web `data/` barrel exports are now API-backed or removed. Static marketing content kept as direct imports (not via barrel):
+
+| File | Status | Notes |
 |------|--------|-------|
-| `/brands/dell` | `DiscoveryGrid.tsx:21` | ✅ Exists — `/brands/[slug]` is implemented |
-| `/brands/hp` | `DiscoveryGrid.tsx:22` | ✅ Exists — `/brands/[slug]` is implemented |
-| `/brands/lenovo` | `DiscoveryGrid.tsx:23` | ✅ Exists |
-| `/brands/apple` | `DiscoveryGrid.tsx:24` | ✅ Exists |
-| `/brands/asus` | `DiscoveryGrid.tsx:25` | ✅ Exists |
-| `/brands/samsung` | `DiscoveryGrid.tsx:26` | ✅ Exists |
-| `#` (placeholder) | `checkout/page.tsx:494,501` | Inert link, scrolls to top |
+| `data/products.ts` | ✅ API fetch | `GET /products` |
+| `data/categories.ts` | ✅ API fetch | `GET /categories` |
+| `data/brands.ts` | ✅ API fetch | `GET /brands` |
+| `data/blog.ts` | ✅ API fetch | `GET /blog` (dead endpoint — silently returns `[]`) |
+| `data/uses.ts` | ✅ API fetch | `GET /uses` (dead endpoint — silently returns `[]`) |
+| `data/comboOffers.ts` | ✅ API fetch | `GET /combo-offers/active` |
+| `data/offers.ts` | ✅ API fetch | Delegates to `fetchComboOffers()` |
+| `data/orders.ts` | ✅ Clean | Deleted fake orders array, kept utility helpers |
+| `data/index.ts` | ✅ Clean barrel | Only exports API-backed functions |
+| `DiscoveryGrid.tsx` | ✅ Brands from API | Fetches `GET /brands`, renders `brand.image` logos |
+| `promoCodes.ts` | 📁 Static content | Direct import in `cart-context.tsx` (no coupon API yet) |
+| `bulkPricing.ts` | 📁 Static defaults | Direct import in cart + pages (no bulk pricing API) |
+| `benefits.ts` | 📁 Marketing copy | Direct import in `about/` + `bulk-sales/` |
 
-### ❌ MISSING PAGES (referenced but not implemented)
+### Admin App — Still Has Hardcoded Stubs
+| File | Issue |
+|------|-------|
+| `admin/seo/sitemap/page.tsx` | 6 hardcoded URLs, no-op Generate |
+| `admin/seo/redirects/page.tsx` | 3 hardcoded redirects, no API |
+| `admin/seo/reports/page.tsx` | Hardcoded radar chart data |
+| `admin/settings/integrations/page.tsx` | 6 integrations, no-op Save |
 
-| Route | Referenced From | Notes |
-|-------|----------------|-------|
-| `/brands/[slug]` | DiscoveryGrid (6 brands), Header, Footer | ✅ Exists — brand detail page is implemented |
-| `/blog/[slug]` | Blog listing implicitly expects detail links | ❌ Missing — only `/blog` list page exists, no detail route |
+---
 
-### ❌ DATA ARCHITECTURE: Static Data vs API
+## 5. 🔍 Discover Section — How It Works
 
-Most pages use **hardcoded static data arrays** instead of calling the backend API:
+**File:** `web/src/components/home/DiscoveryGrid.tsx`
 
-| Page | Data Source | Format | Should Be |
-|------|-------------|--------|-----------|
-| Products (`/products/[slug]`) | `src/data/products.ts` | Static array | API `GET /products/:slug` |
-| Categories (`/categories`, `/categories/[slug]`) | `src/data/categories.ts` | Static array | API `GET /categories/:slug` |
-| Brands (`/brands`) | `src/data/brands.ts` | Static array | API `GET /brands` |
-| Orders (`/orders`, `/dashboard/orders`) | `src/data/orders.ts` | Static array | API `GET /orders/my-orders` |
-| Blog (`/blog`) | `src/data/blog.ts` | Static array | API `GET /blog` |
-| Search (`/search`) | `src/data/products.ts` | Static search | API `GET /products/search` |
-| Wishlist (`/wishlist`) | `src/data/products.ts` | Static array | API (needs backend) |
-| Cart (`/cart`) | `React Context + localStorage` | Client-only | — |
-| Compare (`/compare`) | — | Likely static | — |
+All three tabs are now **fully API-driven** (no hardcoded data):
 
-**Only 2 features actually hit the API:**
-- Orders server actions (`src/lib/actions/orders.ts`) → calls `/orders/*` endpoints
-- Combo offers on home page (`data/comboOffers.ts`, `data/offers.ts`) → calls `GET /combo-offers/active`
+| Tab | Data Source | Links To | Empty State |
+|-----|-------------|----------|-------------|
+| **By Budget** | ✅ `GET /products` → computes 5 dynamic price ranges from actual product prices | `/search?minPrice=X&maxPrice=Y` | "No products available yet" |
+| **By Brand** | ✅ `GET /brands` → renders `brand.image` logo (fallback: first letter) | `/brands/{slug}` | "No brands available yet" |
+| **By Use** | ✅ `GET /uses` (falls back to static if API unavailable) → renders label + image | `/uses/{slug}` | "No use cases available yet" |
 
-### ✅ API BASE URL — FIXED
+**Dynamic budget ranges:** Computed from actual product prices using equal-width segmentation. Tags show item count or "Popular". Only ranges with products are shown.
 
-| File | Base URL | Expected | Status |
-|------|----------|----------|--------|
-| `src/lib/api.ts:1` | `http://localhost:4000/api/v1` | `/api/v1` | ✅ Fixed |
-| `src/data/comboOffers.ts:20` | `http://localhost:4000/api/v1` | `/api/v1` | ✅ Correct |
-| `.env` | `NEXT_PUBLIC_API_URL=http://localhost:4000` | — | ⚠️ Set to `http://localhost:4000/api/v1` |
+---
 
-### ❌ AUTHENTICATION DISCONNECTED
+## 6. 💬 Chat PWA — Current State
 
-| Issue | Details |
-|-------|---------|
-| **No login API call** | `/auth` page has login/register UI but never calls `POST /auth/login` or `POST /auth/register` — uses no API at all |
-| **No JWT management** | No token storage (cookies/localStorage), no token refresh, no auth state management |
-| **No protected routes** | No middleware or guard on any route — no auth check anywhere in web app |
+| Component | Data | Status |
+|-----------|------|--------|
+| Web LiveChatWidget | localStorage (`@tradehubuae/chat`) | ✅ Works client-only |
+| Chat PWA sessions | demo-data.ts → localStorage | ❌ No backend |
+| Chat PWA messages | demo-data.ts → localStorage | ❌ No backend |
+| Chat PWA WebSocket | `ws://localhost:4000/chat` | ❌ No server |
 
-### ❌ WEBSOCKET UNUSED
+**Needs:** NestJS ChatModule with REST + WebSocket + database persistence.
 
-| Detail | Value |
-|--------|-------|
-| Env var | `NEXT_PUBLIC_WS_URL="ws://localhost:4000"` |
-| Actual usage | **Nowhere** — no websocket client code, no connection |
-| Impact | Live chat widget is UI shell only — no real messaging |
+---
 
-### ✅ ALL LINKS VERIFIED (non-exhaustive)
+## 7. Quick Reference — What Needs Building
 
-The following internal links all resolve to existing pages:
-`/`, `/about`, `/account`, `/auth`, `/blog`, `/brands` (listing), `/bulk-sales`, `/cart`, `/categories`, `/categories/[slug]`, `/checkout`, `/combo-offers`, `/compare`, `/contact`, `/dashboard`, `/dashboard/orders`, `/dashboard/orders/[id]`, `/orders`, `/products/[slug]`, `/search` (all query variants), `/track-order`, `/wishlist`
-
-All footer nav links, header nav links, breadcrumbs, and product card links resolve to existing routes.
+| Priority | What | Why |
+|----------|------|-----|
+| 🔴 High | Admin has no delete UIs for products/categories/brands/combo-offers/seo | Backend has the DELETE endpoints |
+| 🔴 High | AI endpoints have no admin UI | Backend + `@tradehubuae/ai` are ready, just need API key in .env |
+| 🟡 Medium | Chat needs backend (REST + WS) | Full PWA is built, no server exists |
+| 🟡 Medium | `/uses`, `/blog`, `/addresses` need backend controllers | Frontend calls hit 404 |
+| 🟢 Low | Inventory stock adjust/transfer UI | Backend endpoints exist |
+| 🟢 Low | Coupons, reviews, customers, notifications, reports controllers | Backend has scaffold modules |

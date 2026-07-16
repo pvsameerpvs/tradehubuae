@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Upload, X } from "lucide-react";
+import { api } from "@/lib/api";
 
 interface ImageUploadProps {
   value?: string;
@@ -37,21 +38,8 @@ export default function ImageUpload({ value, onChange, label = "Image", folder =
     setUploading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1"}/media/upload`,
-        { method: "POST", body: formData },
-      );
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message ?? "Upload failed");
-      }
-
-      const data = await res.json();
-      onChange(data.url);
+      const url = await api.upload(file, folder);
+      onChange(url);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Upload failed");
       setPreview(value ?? "");

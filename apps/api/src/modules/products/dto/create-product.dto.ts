@@ -19,6 +19,10 @@ export class CreateProductDto {
   @IsUUID()
   brandId?: string;
 
+  @IsOptional()
+  @IsUUID()
+  useId?: string;
+
   @IsEnum(["New", "Like_New", "Excellent", "Good", "Fair"])
   condition!: string;
 

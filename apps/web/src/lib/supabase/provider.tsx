@@ -3,15 +3,17 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState, createContext, useContext, useCallback, type ReactNode } from "react";
 
-type MockUser = {
+type User = {
   id: string;
   email: string;
   name: string | null;
   avatar: string | null;
+  role?: string;
 };
 
 type AuthState = {
-  user: MockUser | null;
+  user: User | null;
+  token: string | null;
   isLoading: boolean;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<{ error: string | null }>;
@@ -21,6 +23,7 @@ type AuthState = {
 
 const AuthContext = createContext<AuthState>({
   user: null,
+  token: null,
   isLoading: true,
   signInWithGoogle: async () => {},
   signInWithEmail: async () => ({ error: null }),
@@ -32,81 +35,99 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
-function generateId() {
-  return crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+function getStoredAuth(): { user: User | null; token: string | null } {
+  if (typeof window === "undefined") return { user: null, token: null };
+  try {
+    const token = localStorage.getItem("tradehub_token");
+    const user = localStorage.getItem("tradehub_user");
+    return {
+      token,
+      user: user ? JSON.parse(user) : null,
+    };
+  } catch {
+    return { user: null, token: null };
+  }
+}
+
+function storeAuth(user: User | null, token: string | null) {
+  if (user && token) {
+    localStorage.setItem("tradehub_token", token);
+    localStorage.setItem("tradehub_user", JSON.stringify(user));
+  } else {
+    localStorage.removeItem("tradehub_token");
+    localStorage.removeItem("tradehub_user");
+  }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const [user, setUser] = useState<MockUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem("tradehub_user");
-    if (stored) {
-      try {
-        setUser(JSON.parse(stored));
-      } catch {
-        localStorage.removeItem("tradehub_user");
-      }
-    }
+    const { user: storedUser, token: storedToken } = getStoredAuth();
+    setUser(storedUser);
+    setToken(storedToken);
     setIsLoading(false);
   }, []);
 
-  const persistUser = useCallback((u: MockUser | null) => {
-    setUser(u);
-    if (u) {
-      localStorage.setItem("tradehub_user", JSON.stringify(u));
-    } else {
-      localStorage.removeItem("tradehub_user");
-    }
-  }, []);
-
   const signInWithGoogle = useCallback(async () => {
-    persistUser({
-      id: generateId(),
-      email: "user@gmail.com",
-      name: "Google User",
-      avatar: null,
-    });
-    router.push("/");
-    router.refresh();
-  }, [persistUser, router]);
+    try {
+      const { login } = await import("@/lib/actions/auth");
+      const result = await login("user@gmail.com", "google_oauth");
+      if ("error" in result) return;
+      setUser(result.user);
+      setToken(result.token);
+      storeAuth(result.user, result.token);
+      router.push("/");
+      router.refresh();
+    } catch {
+    }
+  }, [router]);
 
   const signInWithEmail = useCallback(async (email: string, password: string) => {
-    if (!email || !password) return { error: "Email and password are required" };
-    persistUser({
-      id: generateId(),
-      email,
-      name: email.split("@")[0],
-      avatar: null,
-    });
-    router.push("/");
-    router.refresh();
-    return { error: null };
-  }, [persistUser, router]);
+    try {
+      const { login } = await import("@/lib/actions/auth");
+      const result = await login(email, password);
+      if ("error" in result) return result;
+      setUser(result.user);
+      setToken(result.token);
+      storeAuth(result.user, result.token);
+      router.push("/");
+      router.refresh();
+      return { error: null };
+    } catch {
+      return { error: "Login failed. Please try again." };
+    }
+  }, [router]);
 
   const signUp = useCallback(async (email: string, password: string, name: string) => {
-    if (!email || !password) return { error: "Email and password are required" };
-    persistUser({
-      id: generateId(),
-      email,
-      name,
-      avatar: null,
-    });
-    router.push("/");
-    router.refresh();
-    return { error: null };
-  }, [persistUser, router]);
+    try {
+      const { register } = await import("@/lib/actions/auth");
+      const result = await register(name, email, password);
+      if ("error" in result) return result;
+      setUser(result.user);
+      setToken(result.token);
+      storeAuth(result.user, result.token);
+      router.push("/");
+      router.refresh();
+      return { error: null };
+    } catch {
+      return { error: "Registration failed. Please try again." };
+    }
+  }, [router]);
 
   const signOut = useCallback(async () => {
-    persistUser(null);
+    setUser(null);
+    setToken(null);
+    storeAuth(null, null);
     router.push("/auth");
     router.refresh();
-  }, [persistUser, router]);
+  }, [router]);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signInWithGoogle, signInWithEmail, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, token, isLoading, signInWithGoogle, signInWithEmail, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );

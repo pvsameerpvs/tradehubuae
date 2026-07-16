@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { brands } from "@/data";
+import { fetchBrands } from "@/data";
 import { BrandCard } from "@/components/shared/BrandCard";
 
 export const metadata: Metadata = {
@@ -7,7 +7,9 @@ export const metadata: Metadata = {
   description: "Browse top IT brands available at TradeHub UAE - Dell, HP, Lenovo, Apple, ASUS, and more",
 };
 
-export default function BrandsPage() {
+export default async function BrandsPage() {
+  const brands = await fetchBrands();
+
   return (
     <div className="container mx-auto px-4 py-12">
       <h1 className="mb-4 text-3xl font-bold md:text-4xl">Brands We Carry</h1>

@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ShoppingCart, Minus, Plus, AlertTriangle } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { useCartFly } from "@/lib/cart-fly-context";
 import { Button } from "@tradehubuae/ui";
-import { searchProducts } from "@/data";
 import type { Product } from "@/data";
 
 function QtySelector({ qty, onChange, compact, max }: { qty: number; onChange: (d: number) => void; compact?: boolean; max?: number }) {
@@ -42,23 +41,10 @@ function QtySelector({ qty, onChange, compact, max }: { qty: number; onChange: (
 }
 
 function AnimatedPrice({ amount, label }: { amount: number; label?: string }) {
-  const [bounce, setBounce] = useState(false);
-  const prev = useRef(amount);
-
-  useEffect(() => {
-    if (prev.current === amount) return;
-    setBounce(true);
-    prev.current = amount;
-    const t = setTimeout(() => setBounce(false), 300);
-    return () => clearTimeout(t);
-  }, [amount]);
-
   return (
     <div className="text-right">
       {label && <p className="text-xs text-ink-2">{label}</p>}
-      <p
-        className={`text-lg font-bold text-ink transition-all duration-200 ${bounce ? "scale-110 text-brand" : "scale-100"}`}
-      >
+      <p className="text-lg font-bold text-ink">
         AED {amount.toLocaleString()}
       </p>
     </div>
@@ -72,8 +58,7 @@ export function BuyButtons({ product }: { product: Product }) {
   const imageRef = useRef<HTMLDivElement>(null);
   const [qty, setQty] = useState(1);
 
-  const productData = searchProducts.find((p) => p.slug === product.slug);
-  const maxStock = productData?.stock ?? 99;
+  const maxStock = product.stock ?? 99;
 
   const handleQtyChange = (delta: number) => {
     setQty((prev) => Math.max(1, Math.min(maxStock, prev + delta)));

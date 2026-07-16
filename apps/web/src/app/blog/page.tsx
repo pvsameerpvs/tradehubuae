@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Badge } from "@tradehubuae/ui";
 import { FileText } from "@/components/icons";
-import { blogPosts } from "@/data";
+import { fetchBlogPosts } from "@/data";
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const blogPosts = await fetchBlogPosts();
+
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="mb-10">

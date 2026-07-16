@@ -17,7 +17,9 @@ import { AnalyticsModule } from "./modules/analytics/analytics.module";
 import { AIModule } from "./modules/ai/ai.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { ReportsModule } from "./modules/reports/reports.module";
+import { UsesModule } from "./modules/uses/uses.module";
 import { ComboOffersModule } from "./modules/combo-offers/combo-offers.module";
+import { ContactModule } from "./modules/contact/contact.module";
 import { DrizzleModule } from "./database/drizzle.module";
 
 @Module({
@@ -49,7 +51,9 @@ import { DrizzleModule } from "./database/drizzle.module";
     AIModule,
     NotificationsModule,
     ReportsModule,
+    UsesModule,
     ComboOffersModule,
+    ContactModule,
   ],
 })
 export class AppModule {}

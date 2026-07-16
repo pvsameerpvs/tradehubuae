@@ -15,6 +15,10 @@ export class QueryProductDto {
   brand?: string;
 
   @IsOptional()
+  @IsString()
+  use?: string;
+
+  @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)

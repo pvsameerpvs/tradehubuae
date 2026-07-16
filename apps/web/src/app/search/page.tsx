@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Search } from "lucide-react";
-import { searchProducts, searchCategories } from "@/data";
+import { searchProducts } from "@/data";
 import { ProductCard } from "@/components/shared/ProductCard";
 
 export const metadata: Metadata = {
@@ -9,35 +9,25 @@ export const metadata: Metadata = {
 };
 
 interface Props {
-  searchParams: Promise<{ minPrice?: string; maxPrice?: string; q?: string }>;
+  searchParams: Promise<{ minPrice?: string; maxPrice?: string; q?: string; category?: string }>;
 }
 
 export default async function SearchPage({ searchParams }: Props) {
-  const { minPrice, maxPrice, q } = await searchParams;
+  const { minPrice, maxPrice, q, category } = await searchParams;
 
-  let products = searchProducts;
+  const products = await searchProducts(q ?? "", { limit: 50, category });
 
-  if (q) {
-    const query = q.toLowerCase();
-    products = products.filter(
-      (p) =>
-        p.name.toLowerCase().includes(query) ||
-        p.category.toLowerCase().includes(query) ||
-        p.slug.toLowerCase().includes(query),
-    );
-  }
-
+  let filtered = products;
   if (minPrice) {
     const min = parseFloat(minPrice);
-    if (!isNaN(min)) products = products.filter((p) => p.price >= min);
+    if (!isNaN(min)) filtered = filtered.filter((p) => p.price >= min);
   }
-
   if (maxPrice) {
     const max = parseFloat(maxPrice);
-    if (!isNaN(max)) products = products.filter((p) => p.price <= max);
+    if (!isNaN(max)) filtered = filtered.filter((p) => p.price <= max);
   }
 
-  const showCount = products.length;
+  const categories = [...new Set(products.map((p) => p.categoryName).filter(Boolean))];
 
   return (
     <div className="mx-auto max-w-[1760px] px-6 py-8 md:px-10 lg:px-20">
@@ -57,20 +47,22 @@ export default async function SearchPage({ searchParams }: Props) {
           />
         </form>
 
-        <div className="mt-6 flex flex-wrap gap-2">
-          {searchCategories.map((cat) => (
-            <button
-              key={cat}
-              className={`rounded-full border border-line px-4 py-1.5 text-sm transition hover:bg-bg3 ${
-                cat === "All"
-                  ? "bg-ink text-white hover:bg-ink"
-                  : "text-ink-2 hover:text-ink"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+        {categories.length > 0 && (
+          <div className="mt-6 flex flex-wrap gap-2">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                className={`rounded-full border border-line px-4 py-1.5 text-sm transition hover:bg-bg3 ${
+                  cat === category || (!category && cat === categories[0])
+                    ? "bg-ink text-white hover:bg-ink"
+                    : "text-ink-2 hover:text-ink"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="mt-8">
@@ -78,12 +70,12 @@ export default async function SearchPage({ searchParams }: Props) {
           {minPrice || maxPrice ? (
             <>Filtered by price{minPrice ? ` from AED ${minPrice}` : ""}{maxPrice ? ` to AED ${maxPrice}` : ""} · </>
           ) : null}
-          Showing {showCount} {showCount === 1 ? "result" : "results"}
+          Showing {filtered.length} {filtered.length === 1 ? "result" : "results"}
         </p>
 
-        {showCount > 0 ? (
+        {filtered.length > 0 ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {products.map((product) => (
+            {filtered.map((product) => (
               <ProductCard key={product.slug} product={product} />
             ))}
           </div>

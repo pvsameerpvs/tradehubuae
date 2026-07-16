@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { uses, searchProducts } from "@/data";
+import { fetchUses, fetchProducts } from "@/data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { ProductCard } from "@/components/shared/ProductCard";
 
@@ -10,22 +10,22 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const use = uses.find((u) => u.slug === slug);
-  if (!use) return { title: "Use Not Found" };
+  const uses = await fetchUses();
+  const useItem = uses.find((u) => u.slug === slug);
+  if (!useItem) return { title: "Use Not Found" };
   return {
-    title: `${use.name} | TradeHub UAE`,
-    description: `Browse products for ${use.name.toLowerCase()} use case at TradeHub UAE.`,
+    title: `${useItem.name} | TradeHub UAE`,
+    description: `Browse products for ${useItem.name.toLowerCase()} use case at TradeHub UAE.`,
   };
 }
 
 export default async function UseSlugPage({ params }: Props) {
   const { slug } = await params;
-  const use = uses.find((u) => u.slug === slug);
-  if (!use) notFound();
+  const uses = await fetchUses();
+  const useItem = uses.find((u) => u.slug === slug);
+  if (!useItem) notFound();
 
-  const products = searchProducts.filter((p) =>
-    p.name.toLowerCase().includes(use.name.toLowerCase()),
-  );
+  const { products } = await fetchProducts({ limit: 100, use: slug });
   const showCount = products.length;
 
   return (
@@ -35,17 +35,17 @@ export default async function UseSlugPage({ params }: Props) {
           items={[
             { label: "Home", href: "/" },
             { label: "Uses", href: "/uses" },
-            { label: use.name },
+            { label: useItem.name },
           ]}
         />
       </div>
 
       <div className="border-b border-line pb-8">
         <h1 className="text-[26px] font-semibold leading-[30px] text-ink" style={{ letterSpacing: "-0.01em" }}>
-          {use.name}
+          {useItem.name}
         </h1>
         <p className="mt-1.5 text-[14px] leading-[18px] text-ink-2">
-          Products for {use.name.toLowerCase()} use
+          Products for {useItem.name.toLowerCase()} use
         </p>
       </div>
 
@@ -63,7 +63,7 @@ export default async function UseSlugPage({ params }: Props) {
         ) : (
           <div className="flex flex-col items-center justify-center rounded-xl border border-line py-20">
             <p className="text-sm font-semibold text-ink">No products found</p>
-            <p className="mt-1 text-sm text-ink-2">No products for {use.name.toLowerCase()} use case yet.</p>
+            <p className="mt-1 text-sm text-ink-2">No products for {useItem.name.toLowerCase()} use case yet.</p>
           </div>
         )}
       </div>

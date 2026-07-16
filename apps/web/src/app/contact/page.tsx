@@ -1,13 +1,34 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useState } from "react";
 import { Button, Input } from "@tradehubuae/ui";
 import { MapPin, Mail, Phone } from "@/components/icons";
-
-export const metadata: Metadata = {
-  title: "Contact Us",
-  description: "Get in touch with TradeHub UAE. We're here to help with your IT equipment needs.",
-};
+import { submitContact } from "@/lib/actions/contact";
 
 export default function ContactPage() {
+  const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await submitContact(form);
+    if (result.success) setSubmitted(true);
+  };
+
+  if (submitted) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="mx-auto max-w-lg text-center">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-brand/10">
+            <Mail className="h-10 w-10 text-brand" />
+          </div>
+          <h1 className="mb-4 text-3xl font-bold">Message Sent!</h1>
+          <p className="text-lg text-ink-2">Thank you for reaching out. We&apos;ll get back to you within 24 hours.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="mx-auto max-w-4xl">
@@ -21,29 +42,36 @@ export default function ContactPage() {
         <div className="grid gap-8 md:grid-cols-2">
           <div className="rounded-xl border bg-white p-6">
             <h2 className="mb-6 text-xl font-semibold">Send Us a Message</h2>
-            <form className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium">Name</label>
-                  <Input placeholder="Your name" />
+                  <label className="mb-1.5 block text-sm font-medium">Name *</label>
+                  <Input required placeholder="Your name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium">Email</label>
-                  <Input type="email" placeholder="your@email.com" />
+                  <label className="mb-1.5 block text-sm font-medium">Email *</label>
+                  <Input required type="email" placeholder="your@email.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
                 </div>
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium">Subject</label>
-                <Input placeholder="How can we help?" />
+                <label className="mb-1.5 block text-sm font-medium">Phone</label>
+                <Input placeholder="+971 XX XXX XXXX" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium">Message</label>
+                <label className="mb-1.5 block text-sm font-medium">Subject *</label>
+                <Input required placeholder="How can we help?" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">Message *</label>
                 <textarea
+                  required
                   className="flex min-h-[120px] w-full rounded-md border border-line bg-white px-3 py-2 text-sm"
                   placeholder="Tell us more about your inquiry..."
+                  value={form.message}
+                  onChange={(e) => setForm({ ...form, message: e.target.value })}
                 />
               </div>
-              <Button size="lg">Send Message</Button>
+              <Button type="submit" size="lg">Send Message</Button>
             </form>
           </div>
 

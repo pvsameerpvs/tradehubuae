@@ -12,6 +12,7 @@ export * from "./marketing";
 export * from "./blog";
 export * from "./seo";
 export * from "./notifications";
+export * from "./uses";
 export * from "./bulk-sales";
 export * from "./analytics";
 export * from "./relations";

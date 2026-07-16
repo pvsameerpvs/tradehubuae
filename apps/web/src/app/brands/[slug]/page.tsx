@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { brands, searchProducts } from "@/data";
+import { fetchBrands, fetchProducts } from "@/data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { ProductCard } from "@/components/shared/ProductCard";
 
@@ -10,6 +10,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const brands = await fetchBrands();
   const brand = brands.find((b) => b.slug === slug);
   if (!brand) return { title: "Brand Not Found" };
   return {
@@ -20,12 +21,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BrandSlugPage({ params }: Props) {
   const { slug } = await params;
+  const brands = await fetchBrands();
   const brand = brands.find((b) => b.slug === slug);
   if (!brand) notFound();
 
-  const products = searchProducts.filter((p) =>
-    p.name.toLowerCase().includes(brand.name.toLowerCase()),
-  );
+  const { products } = await fetchProducts({ brand: brand.name, limit: 100 });
   const showCount = products.length;
 
   return (

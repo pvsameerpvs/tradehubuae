@@ -12,7 +12,8 @@ import {
   Headphones,
   ShieldCheck,
 } from "lucide-react";
-import { bulkBenefits, industries, defaultBulkTiers } from "@/data";
+import { bulkBenefits, industries } from "@/data/benefits";
+import { defaultBulkTiers } from "@/data/bulkPricing";
 
 const benefitIcons: Record<string, typeof Check> = {
   shield: ShieldCheck,

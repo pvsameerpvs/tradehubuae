@@ -54,15 +54,15 @@ async function request<T>(endpoint: string, options: FetchOptions = {}): Promise
 }
 
 export const api = {
-  get: <T>(endpoint: string, params?: Record<string, string | number | boolean | undefined>) =>
-    request<T>(endpoint, { params }),
+  get: <T>(endpoint: string, params?: Record<string, string | number | boolean | undefined>, options?: RequestInit) =>
+    request<T>(endpoint, { params, ...options }),
 
-  post: <T>(endpoint: string, body: unknown) =>
-    request<T>(endpoint, { method: "POST", body: JSON.stringify(body) }),
+  post: <T>(endpoint: string, body: unknown, options?: RequestInit) =>
+    request<T>(endpoint, { method: "POST", body: JSON.stringify(body), ...options }),
 
-  put: <T>(endpoint: string, body: unknown) =>
-    request<T>(endpoint, { method: "PUT", body: JSON.stringify(body) }),
+  put: <T>(endpoint: string, body: unknown, options?: RequestInit) =>
+    request<T>(endpoint, { method: "PUT", body: JSON.stringify(body), ...options }),
 
-  delete: <T>(endpoint: string) =>
-    request<T>(endpoint, { method: "DELETE" }),
+  delete: <T>(endpoint: string, options?: RequestInit) =>
+    request<T>(endpoint, { method: "DELETE", ...options }),
 };

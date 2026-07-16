@@ -1,17 +1,57 @@
 import { HeroSection, ProductRow, ProductRowScroll, DiscoveryGrid, LatestArrivalsRow, OfferSection } from "@/components/home";
 import { LiveChatWidget } from "@/components/chat/LiveChatWidget";
-import { searchProducts, categories } from "@/data";
+import { fetchProducts, fetchCategoryTree } from "@/data";
 import { CategoryCard } from "@/components/shared/CategoryCard";
+import type { CategoryTree, Category } from "@/data";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
-const laptops = searchProducts.filter((p) => p.category === "Laptops");
-const gaming = searchProducts.filter((p) => p.category === "Gaming PCs");
-const accessories = searchProducts.filter((p) => p.category === "Accessories");
-const desktops = searchProducts.filter((p) => p.category === "Desktop PCs");
-const bulkEligible = searchProducts.filter((p) => p.stock !== undefined && p.stock >= 10);
+function flattenTree(nodes: CategoryTree[]): Category[] {
+  const result: Category[] = [];
+  for (const n of nodes) {
+    result.push({
+      id: n.id,
+      name: n.name,
+      slug: n.slug,
+      desc: n.description ?? "",
+      count: n.productCount ? `${n.productCount}+ products` : "",
+      image: n.image,
+      parentId: n.parentId,
+    });
+    result.push(...flattenTree(n.children));
+  }
+  return result;
+}
 
-export default function HomePage() {
+function collectChildSlugs(node: CategoryTree): string[] {
+  const slugs: string[] = [];
+  for (const child of node.children) {
+    slugs.push(child.slug);
+    slugs.push(...collectChildSlugs(child));
+  }
+  return slugs;
+}
+
+export default async function HomePage() {
+  const [productRes, tree] = await Promise.all([
+    fetchProducts({ limit: 200 }),
+    fetchCategoryTree(),
+  ]);
+
+  const all = productRes.products;
+  const flatCats = flattenTree(tree);
+  const rootCats = tree.filter((n) => n.children.length > 0 || all.some((p) => p.categorySlug === n.slug));
+
+  const productsBySlug: Record<string, typeof all> = {};
+  for (const p of all) {
+    const slug = p.categorySlug;
+    if (!slug) continue;
+    if (!productsBySlug[slug]) productsBySlug[slug] = [];
+    productsBySlug[slug].push(p);
+  }
+
+  const bulkEligible = all.filter((p) => p.stock !== undefined && p.stock >= 10);
+
   return (
     <>
       <HeroSection />
@@ -19,54 +59,55 @@ export default function HomePage() {
 
       <div className="mx-auto max-w-[1760px] px-6 md:px-10 lg:px-20">
         <div className="space-y-16 pb-16">
-          <CategoryRow />
+          <CategoryRow categories={flatCats} />
 
-          
+          <LatestArrivalsRow products={all.slice(0, 7)} />
+          <OfferSection />
 
-          <LatestArrivalsRow products={laptops.slice(0, 7)} />
-<OfferSection />
-          <ProductRow
-            title="All laptops"
-            products={laptops.slice(0, 6)}
-            href="/search?category=laptops"
-          />
+          {rootCats.map((root) => {
+            const childSlugs = collectChildSlugs(root);
+            const rootProducts = [...(productsBySlug[root.slug] ?? [])];
+            for (const childSlug of childSlugs) {
+              const childProds = productsBySlug[childSlug] ?? [];
+              rootProducts.push(...childProds);
+            }
+            if (rootProducts.length === 0) return null;
 
-          <ProductRowScroll
-            title="Gaming"
-            products={gaming}
-            href="/categories/gaming-pcs"
-          />
+            const scrollSection = rootProducts.length > 6;
+
+            return scrollSection ? (
+              <ProductRowScroll
+                key={root.id}
+                title={root.name}
+                products={rootProducts}
+                href={`/categories/${root.slug}`}
+              />
+            ) : (
+              <ProductRow
+                key={root.id}
+                title={root.name}
+                products={rootProducts}
+                href={`/categories/${root.slug}`}
+              />
+            );
+          })}
 
           {bulkEligible.length > 0 && (
             <ProductRowScroll
-              title="Wholesale &amp; bulk deals"
+              title="Wholesale & bulk deals"
               products={bulkEligible}
               href="/bulk-sales"
             />
           )}
 
           <DiscoveryGrid />
-
-          <div className="border-t border-line pt-16">
-            <ProductRow
-              title="Accessories & peripherals"
-              products={accessories}
-              href="/categories/accessories"
-            />
-          </div>
-
-          <ProductRow
-            title="Desktop PCs"
-            products={desktops}
-            href="/categories/desktop-pcs"
-          />
         </div>
       </div>
     </>
   );
 }
 
-function CategoryRow() {
+function CategoryRow({ categories }: { categories: Category[] }) {
   return (
     <section className="group/section pt-8">
       <div className="mb-6 flex items-center justify-between">

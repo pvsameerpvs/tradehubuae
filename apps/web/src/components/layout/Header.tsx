@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/supabase/provider";
 import { useCart } from "@/lib/cart-context";
+import { useWishlist } from "@/lib/wishlist-context";
 
 const NAV_LINKS = [
   { label: "Categories", href: "/categories", icon: Monitor },
@@ -41,6 +42,7 @@ export function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, signOut } = useAuth();
   const { count } = useCart();
+  const { count: wishlistCount } = useWishlist();
 
   const handleSignOut = async () => {
     await signOut();
@@ -125,6 +127,21 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-1 flex-shrink-0">
+            <Link
+              href="/wishlist"
+              aria-label="Wishlist"
+              className="relative flex h-12 w-12 items-center justify-center text-ink transition-colors hover:text-ink/70"
+            >
+              <Heart className="h-6 w-6" strokeWidth={1.75} />
+              {wishlistCount > 0 && (
+                <span
+                  key={wishlistCount}
+                  className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-ink px-1 text-[11px] font-bold text-white"
+                >
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
             <Link
               href="/cart"
               aria-label="Shopping cart"

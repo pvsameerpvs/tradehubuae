@@ -10,18 +10,20 @@ import {
   type ReactNode,
 } from "react";
 import type { Product } from "@/data";
-import { searchProducts } from "@/data";
 import type { ComboOffer } from "@/data";
-import type { PromoCode } from "@/data/promoCodes";
-import {
-  validatePromoCode,
-  calculatePromoDiscount,
-} from "@/data/promoCodes";
+import { api } from "@/lib/api";
 import { getBulkDiscountPercent } from "@/data/bulkPricing";
 import { fetchComboOffers } from "@/data/comboOffers";
 
 export interface CartItem extends Product {
   quantity: number;
+}
+
+export interface ActivePromo {
+  code: string;
+  description?: string;
+  type: string;
+  discount: number;
 }
 
 export interface SavingsEntry {
@@ -41,7 +43,7 @@ interface CartContextType {
   shipping: number;
   bulkSavings: number;
   comboDiscount: number;
-  activePromo: PromoCode | null;
+  activePromo: ActivePromo | null;
   promoDiscount: number;
   promoError: string;
   applyPromoCode: (code: string) => void;
@@ -73,9 +75,30 @@ const CartContext = createContext<CartContextType>({
   savingsBreakdown: [],
 });
 
+const CART_KEY = "tradehub_cart";
+
+function loadCart(): CartItem[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(CART_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveCart(items: CartItem[]) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(CART_KEY, JSON.stringify(items));
+  } catch {
+    /* quota exceeded, silently ignore */
+  }
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [activePromo, setActivePromo] = useState<PromoCode | null>(null);
+  const [items, setItems] = useState<CartItem[]>(loadCart);
+  const [activePromo, setActivePromo] = useState<ActivePromo | null>(null);
   const [promoError, setPromoError] = useState("");
   const [comboOffersList, setComboOffersList] = useState<ComboOffer[]>([]);
 
@@ -83,15 +106,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
     fetchComboOffers().then(setComboOffersList);
   }, []);
 
-  function getAvailableStock(slug: string): number {
-    const product = searchProducts.find((p) => p.slug === slug);
-    return product?.stock ?? 99;
-  }
+  useEffect(() => {
+    saveCart(items);
+  }, [items]);
+
+  const getAvailableStock = useCallback((slug: string): number => {
+    const item = items.find((i) => i.slug === slug);
+    return item?.stock ?? 99;
+  }, [items]);
 
   const addItem = useCallback((product: Product) => {
     setItems((prev) => {
       const existing = prev.find((item) => item.slug === product.slug);
-      const maxStock = getAvailableStock(product.slug);
+      const maxStock = product.stock ?? 99;
       if (existing) {
         if (existing.quantity >= maxStock) return prev;
         return prev.map((item) =>
@@ -113,13 +140,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
         if (existing) {
           existing.quantity += ci.quantity;
         } else {
-          const product = searchProducts.find((p) => p.slug === ci.slug);
           next.push({
             name: ci.name,
-            price: product?.price ?? 0,
-            category: product?.category ?? "",
+            price: 0,
+            categoryName: "",
+            categorySlug: "",
             slug: ci.slug,
             quantity: ci.quantity,
+            stock: 99,
           });
         }
       }
@@ -145,7 +173,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           : item,
       ),
     );
-  }, []);
+  }, [getAvailableStock]);
 
   const clearCart = useCallback(() => {
     setItems([]);
@@ -154,18 +182,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const applyPromoCode = useCallback(
-    (code: string) => {
+    async (code: string) => {
       const rawSubtotal = items.reduce(
         (sum, item) => sum + item.price * item.quantity,
         0,
       );
-      const result = validatePromoCode(code, rawSubtotal);
-      if (result.valid && result.promo) {
-        setActivePromo(result.promo);
-        setPromoError("");
-      } else {
+      try {
+        const result = await api.get<{ valid: boolean; promo?: ActivePromo; error?: string }>(
+          `/coupons/validate/${encodeURIComponent(code)}`,
+          { orderTotal: rawSubtotal },
+        );
+        if (result.valid && result.promo) {
+          setActivePromo({ code: result.promo.code, description: result.promo.description, type: result.promo.type, discount: result.promo.discount });
+          setPromoError("");
+        } else {
+          setActivePromo(null);
+          setPromoError(result.error ?? "Invalid code");
+        }
+      } catch {
         setActivePromo(null);
-        setPromoError(result.error ?? "Invalid code");
+        setPromoError("Failed to validate code");
       }
     },
     [items],
@@ -209,8 +245,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const promoDiscount = useMemo(() => {
     if (!activePromo) return 0;
-    const base = subtotalAfterBulk - comboDiscount;
-    return calculatePromoDiscount(activePromo, base);
+    return Math.min(activePromo.discount, Math.max(0, subtotalAfterBulk - comboDiscount));
   }, [activePromo, subtotalAfterBulk, comboDiscount]);
 
   const totalAfterDiscounts =
