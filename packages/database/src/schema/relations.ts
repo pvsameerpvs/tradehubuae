@@ -150,6 +150,11 @@ export const bulkRequestsRelations = relations(bulkRequests, ({ many }) => ({
   items: many(bulkRequestItems),
 }));
 
+export const bulkRequestItemsRelations = relations(bulkRequestItems, ({ one }) => ({
+  request: one(bulkRequests, { fields: [bulkRequestItems.bulkRequestId], references: [bulkRequests.id] }),
+  product: one(products, { fields: [bulkRequestItems.productId], references: [products.id] }),
+}));
+
 export const notificationsRelations = relations(notifications, ({ one }) => ({
   user: one(users, { fields: [notifications.userId], references: [users.id] }),
   order: one(orders, { fields: [notifications.orderId], references: [orders.id] }),

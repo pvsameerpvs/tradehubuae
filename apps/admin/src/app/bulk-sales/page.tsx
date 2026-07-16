@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { api, type PaginatedResponse } from "@/lib/api";
-import { Building2, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { Building2 } from "lucide-react";
 
 interface BulkRequest {
   id: string;
@@ -15,13 +16,14 @@ interface BulkRequest {
 }
 
 const statusStyles: Record<string, string> = {
-  pending: "bg-amber-50 text-amber-700",
-  quoted: "bg-blue-50 text-blue-700",
-  approved: "bg-emerald-50 text-emerald-700",
-  rejected: "bg-red-50 text-red-700",
+  PENDING: "bg-amber-50 text-amber-700",
+  QUOTED: "bg-blue-50 text-blue-700",
+  APPROVED: "bg-emerald-50 text-emerald-700",
+  REJECTED: "bg-red-50 text-red-700",
 };
 
 export default function BulkSalesPage() {
+  const router = useRouter();
   const [data, setData] = useState<PaginatedResponse<BulkRequest> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +58,7 @@ export default function BulkSalesPage() {
           <>
             <div className="divide-y divide-line sm:hidden">
               {data.data.map((req) => (
-                <div key={req.id} className="px-4 py-3">
+                <div key={req.id} onClick={() => router.push(`/bulk-sales/${req.id}`)} className="cursor-pointer px-4 py-3 transition-colors hover:bg-bg2">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-ink">{req.companyName}</p>
                     <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${statusStyles[req.status] ?? "bg-bg2 text-ink-3"}`}>
@@ -80,7 +82,7 @@ export default function BulkSalesPage() {
               </thead>
               <tbody>
                 {data.data.map((req) => (
-                  <tr key={req.id} className="border-b last:border-0 transition-colors hover:bg-bg2">
+                  <tr key={req.id} onClick={() => router.push(`/bulk-sales/${req.id}`)} className="cursor-pointer border-b last:border-0 transition-colors hover:bg-bg2">
                     <td className="p-4 text-sm font-medium text-ink">{req.companyName}</td>
                     <td className="p-4">
                       <p className="text-sm text-ink">{req.contactName}</p>

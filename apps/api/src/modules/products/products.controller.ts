@@ -24,14 +24,12 @@ export class ProductsController {
 
   @Public()
   @Get(":slug")
-  async findBySlug(@Param("slug") slug: string) {
-    return this.productsService.findBySlug(slug);
-  }
-
-  @Roles("ADMIN", "SUPER_ADMIN", "CONTENT_MANAGER")
-  @Get(":id")
-  async findById(@Param("id") id: string) {
-    return this.productsService.findById(id);
+  async findBySlugOrId(@Param("slug") slugOrId: string) {
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (uuidPattern.test(slugOrId)) {
+      return this.productsService.findById(slugOrId);
+    }
+    return this.productsService.findBySlug(slugOrId);
   }
 
   @Roles("ADMIN", "SUPER_ADMIN", "CONTENT_MANAGER")

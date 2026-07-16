@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, Logger } from "@nestjs/common";
 import { DrizzleService } from "../../database/drizzle.service";
-import { products, productImages, brands, uses, productCategories, categories, productVariants, reviews } from "@tradehubuae/database";
+import { products, productImages, brands, uses, productCategories, categories, productVariants, reviews, productSpecs } from "@tradehubuae/database";
 import { eq, and, like, or, sql, asc, desc, count } from "drizzle-orm";
 import type { CreateProductDto } from "./dto/create-product.dto";
 import type { UpdateProductDto } from "./dto/update-product.dto";
@@ -15,6 +15,14 @@ const productSortColumns: Record<string, any> = {
   viewCount: products.viewCount,
   saleCount: products.saleCount,
   updatedAt: products.updatedAt,
+};
+
+const sortQueryToColumn: Record<string, string> = {
+  price_asc: "price",
+  price_desc: "price",
+  newest: "createdAt",
+  popular: "saleCount",
+  rating: "viewCount",
 };
 
 @Injectable()
@@ -69,7 +77,7 @@ export class ProductsService {
         brand: true,
         categories: { with: { category: true } },
       },
-      orderBy: order === "desc" ? desc(productSortColumns[sort] ?? products.createdAt) : asc(productSortColumns[sort] ?? products.createdAt),
+      orderBy: order === "desc" ? desc(productSortColumns[sortQueryToColumn[sort] ?? sort] ?? products.createdAt) : asc(productSortColumns[sortQueryToColumn[sort] ?? sort] ?? products.createdAt),
       offset: (page - 1) * limit,
       limit,
     });
@@ -183,6 +191,17 @@ export class ProductsService {
         .values({ productId: product!.id, categoryId: dto.categoryId, isPrimary: true });
     }
 
+    if (dto.specs?.length) {
+      await this.drizzle.db.insert(productSpecs).values(
+        dto.specs.map((s, i) => ({
+          productId: product!.id,
+          label: s.label,
+          value: s.value,
+          sortOrder: i,
+        })),
+      );
+    }
+
     const result = await this.findById(product!.id);
 
     this.logger.log(`Product created: ${result.name} (${result.sku})`);
@@ -205,6 +224,29 @@ export class ProductsService {
     if (dto.costPrice !== undefined) updateData.costPrice = dto.costPrice?.toString();
     if (dto.brandId !== undefined) updateData.brandId = dto.brandId;
     if (dto.useId !== undefined) updateData.useId = dto.useId;
+    if (dto.categoryId !== undefined) {
+      await this.drizzle.db
+        .delete(productCategories)
+        .where(eq(productCategories.productId, id));
+      await this.drizzle.db
+        .insert(productCategories)
+        .values({ productId: id, categoryId: dto.categoryId, isPrimary: true });
+    }
+    if (dto.specs !== undefined) {
+      await this.drizzle.db
+        .delete(productSpecs)
+        .where(eq(productSpecs.productId, id));
+      if (dto.specs.length) {
+        await this.drizzle.db.insert(productSpecs).values(
+          dto.specs.map((s, i) => ({
+            productId: id,
+            label: s.label,
+            value: s.value,
+            sortOrder: i,
+          })),
+        );
+      }
+    }
     if (dto.isActive !== undefined) updateData.isActive = dto.isActive;
     if (dto.isFeatured !== undefined) updateData.isFeatured = dto.isFeatured;
     if (dto.seoTitle !== undefined) updateData.seoTitle = dto.seoTitle;
@@ -236,7 +278,7 @@ export class ProductsService {
   }
 
   async searchFullText(query: string, limit: number = 20) {
-    return this.drizzle.db.query.products.findMany({
+    const data = await this.drizzle.db.query.products.findMany({
       where: and(
         eq(products.isActive, true),
         or(
@@ -252,5 +294,6 @@ export class ProductsService {
       orderBy: desc(products.viewCount),
       limit,
     });
+    return { data };
   }
 }

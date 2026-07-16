@@ -2,27 +2,38 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { api } from "@/lib/api";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@tradehubuae/ui";
+
+const ROLES = [
+  { value: "ADMIN", label: "Admin" },
+  { value: "SUPER_ADMIN", label: "Super Admin" },
+  { value: "CONTENT_MANAGER", label: "Content Manager" },
+  { value: "SALES_MANAGER", label: "Sales Manager" },
+  { value: "INVENTORY_MANAGER", label: "Inventory Manager" },
+  { value: "SEO_MANAGER", label: "SEO Manager" },
+];
 
 export default function NewUserPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    role: "staff",
-  });
+  const [error, setError] = useState<string | null>(null);
+  const [form, setForm] = useState({ name: "", email: "", password: "", role: "ADMIN" });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setError(null);
+    try {
+      await api.post("/users", form);
       router.push("/users");
       router.refresh();
-    }, 500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create user");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,55 +46,35 @@ export default function NewUserPage() {
         <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>Create User</h1>
         <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Add a new team member</p>
       </div>
+      {error && <div className="rounded-lg border border-sale/30 bg-sale/5 px-4 py-3 text-sm text-sale">{error}</div>}
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="mb-1 block text-sm font-medium text-ink">Name *</label>
-          <input
-            required
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-3 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-          />
+          <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+            className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-3 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium text-ink">Email *</label>
-          <input
-            required
-            type="email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-3 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-          />
+          <input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
+            className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-3 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium text-ink">Password *</label>
-          <input
-            required
-            type="password"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-            className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-3 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-          />
+          <input required type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
+            className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-3 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium text-ink">Role</label>
-          <select
-            value={form.role}
-            onChange={(e) => setForm({ ...form, role: e.target.value })}
-            className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-          >
-            <option value="staff">Staff</option>
-            <option value="admin">Admin</option>
-            <option value="manager">Manager</option>
+          <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}
+            className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand">
+            {ROLES.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
           </select>
         </div>
         <div className="flex gap-4 pt-2">
           <Button type="submit" disabled={loading}>
-            {loading ? "Creating..." : "Create User"}
+            {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating...</> : "Create User"}
           </Button>
-          <Button type="button" variant="secondary" onClick={() => router.push("/users")}>
-            Cancel
-          </Button>
+          <Button type="button" variant="outline" onClick={() => router.push("/users")}>Cancel</Button>
         </div>
       </form>
     </div>

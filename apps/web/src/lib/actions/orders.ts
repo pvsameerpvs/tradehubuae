@@ -78,6 +78,7 @@ export async function createOrder(data: {
   discountAmount: number;
   total: number;
   items: Array<{
+    productId?: string;
     name: string;
     sku: string;
     quantity: number;

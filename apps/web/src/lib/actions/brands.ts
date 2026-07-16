@@ -7,7 +7,7 @@ export interface BrandData {
   name: string;
   slug: string;
   description?: string;
-  image?: string;
+  logo?: string;
   sortOrder?: number;
   productCount?: number;
 }

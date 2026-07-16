@@ -2,6 +2,7 @@ import { getProducts, getProductBySlug, searchProducts as searchProductsApi } fr
 import type { ProductData } from "@/lib/actions/products";
 
 export interface Product {
+  id: string;
   name: string;
   price: number;
   originalPrice?: number;
@@ -32,6 +33,7 @@ export interface CompareSpec {
 
 function toProduct(data: ProductData): Product {
   return {
+    id: data.id,
     name: data.name,
     price: data.price,
     originalPrice: data.originalPrice,

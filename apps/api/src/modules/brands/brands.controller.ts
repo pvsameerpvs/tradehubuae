@@ -17,9 +17,13 @@ export class BrandsController {
   }
 
   @Public()
-  @Get(":id")
-  async findById(@Param("id") id: string) {
-    return this.brandsService.findById(id);
+  @Get(":slug")
+  async findBySlugOrId(@Param("slug") slugOrId: string) {
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (uuidPattern.test(slugOrId)) {
+      return this.brandsService.findById(slugOrId);
+    }
+    return this.brandsService.findBySlug(slugOrId);
   }
 
   @Roles("ADMIN", "SUPER_ADMIN", "CONTENT_MANAGER")

@@ -12,6 +12,7 @@ export interface Offer {
   href: string;
   coverGradient: string;
   coverIcon: string;
+  image?: string;
   details: string;
   cta: string;
 }
@@ -33,10 +34,11 @@ function toOffer(combo: ComboOffer, idx: number): Offer {
     title: combo.name,
     description: combo.description || "Curated bundle for every need",
     type: "bundle" as OfferType,
-    badge: combo.badge.startsWith("-") ? combo.badge : "Bundle Deal",
+    badge: combo.badge,
     href: "/combo-offers",
     coverGradient: gradients[idx % gradients.length] ?? "from-brand to-brand-dark",
     coverIcon: icons[idx % icons.length] ?? "laptop",
+    image: combo.image || undefined,
     details: combo.savings > 0 ? `Save up to AED ${Math.round(combo.savings).toLocaleString()}` : "Great value bundle",
     cta: "Shop bundles",
   };

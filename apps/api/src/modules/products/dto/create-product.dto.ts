@@ -67,4 +67,7 @@ export class CreateProductDto {
   @IsOptional()
   @IsString()
   metaKeywords?: string;
+
+  @IsOptional()
+  specs?: { label: string; value: string }[];
 }

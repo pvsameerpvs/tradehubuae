@@ -1,8 +1,20 @@
-import { Injectable, NotFoundException, Logger } from "@nestjs/common";
+import { Injectable, NotFoundException, BadRequestException, Logger } from "@nestjs/common";
 import { DrizzleService } from "../../database/drizzle.service";
-import { orders, orderItems } from "@tradehubuae/database";
-import { eq, and, count, desc } from "drizzle-orm";
+import { orders, orderItems, products } from "@tradehubuae/database";
+import { eq, and, count, desc, sql } from "drizzle-orm";
 import { generateOrderNumber } from "@tradehubuae/utils";
+import { ORDER_STATUS, type OrderStatus } from "@tradehubuae/config";
+
+const STATUS_FLOW: Record<string, string[]> = {
+  [ORDER_STATUS.PENDING]: [ORDER_STATUS.CONFIRMED, ORDER_STATUS.CANCELLED],
+  [ORDER_STATUS.CONFIRMED]: [ORDER_STATUS.PROCESSING, ORDER_STATUS.CANCELLED],
+  [ORDER_STATUS.PROCESSING]: [ORDER_STATUS.SHIPPED, ORDER_STATUS.CANCELLED],
+  [ORDER_STATUS.SHIPPED]: [ORDER_STATUS.DELIVERED, ORDER_STATUS.CANCELLED],
+  [ORDER_STATUS.DELIVERED]: [],
+  [ORDER_STATUS.CANCELLED]: [],
+  [ORDER_STATUS.RETURNED]: [],
+  [ORDER_STATUS.REFUNDED]: [],
+};
 
 @Injectable()
 export class OrdersService {
@@ -68,10 +80,10 @@ export class OrdersService {
       with: {
         items: {
           with: {
-            product: { columns: { name: true } },
+            product: { columns: { name: true, slug: true } },
           },
         },
-        user: { columns: { name: true, email: true, phone: true } },
+        user: { columns: { id: true, name: true, email: true, phone: true, image: true } },
         payment: true,
         shippingAddress: true,
         billingAddress: true,
@@ -113,7 +125,7 @@ export class OrdersService {
       .values({
         orderNumber,
         userId,
-        status: "PENDING",
+        status: ORDER_STATUS.PENDING,
         subtotal: dto.subtotal.toString(),
         shippingCost: (dto.shippingCost ?? 0).toString(),
         taxAmount: (dto.taxAmount ?? 0).toString(),
@@ -142,6 +154,19 @@ export class OrdersService {
           image: item.image,
         })),
       );
+
+      for (const item of dto.items) {
+        if (item.productId) {
+          await this.drizzle.db
+            .update(products)
+            .set({
+              availableStock: sql`${products.availableStock} - ${item.quantity}`,
+              totalStock: sql`${products.totalStock} - ${item.quantity}`,
+              saleCount: sql`${products.saleCount} + ${item.quantity}`,
+            })
+            .where(eq(products.id, item.productId));
+        }
+      }
     }
 
     const result = await this.findById(order!.id);
@@ -151,9 +176,16 @@ export class OrdersService {
   }
 
   async updateStatus(id: string, status: string) {
-    await this.findById(id);
+    const existing = await this.findById(id);
 
-    const updateData: Record<string, any> = { status };
+    const validNext = STATUS_FLOW[existing.status] ?? [];
+    if (!validNext.includes(status)) {
+      throw new BadRequestException(
+        `Cannot transition from ${existing.status} to ${status}. Valid transitions: ${validNext.join(", ") || "none"}`,
+      );
+    }
+
+    const updateData: Record<string, any> = { status: status as OrderStatus };
     if (status === "SHIPPED") updateData.shippedAt = new Date();
     if (status === "DELIVERED") updateData.deliveredAt = new Date();
 
@@ -163,6 +195,7 @@ export class OrdersService {
       .where(eq(orders.id, id))
       .returning();
 
+    this.logger.log(`Order ${existing.orderNumber} status: ${existing.status} → ${status}`);
     return order!;
   }
 }

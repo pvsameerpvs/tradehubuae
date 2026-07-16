@@ -15,7 +15,7 @@ export async function fetchBrands(): Promise<Brand[]> {
       name: b.name,
       slug: b.slug,
       description: b.description ?? "",
-      image: b.image,
+      image: b.logo,
     }));
   } catch {
     return [];

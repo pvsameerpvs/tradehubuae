@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { api, type PaginatedResponse } from "@/lib/api";
+import { Plus } from "lucide-react";
+import { Button } from "@tradehubuae/ui";
 
 interface User {
   id: string;
@@ -13,6 +16,7 @@ interface User {
 }
 
 export default function UsersPage() {
+  const router = useRouter();
   const [data, setData] = useState<PaginatedResponse<User> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +32,9 @@ export default function UsersPage() {
     SUPER_ADMIN: "bg-purple-50 text-purple-700",
     ADMIN: "bg-brand/10 text-brand",
     CONTENT_MANAGER: "bg-blue-50 text-blue-700",
+    SALES_MANAGER: "bg-cyan-50 text-cyan-700",
+    INVENTORY_MANAGER: "bg-amber-50 text-amber-700",
+    SEO_MANAGER: "bg-rose-50 text-rose-700",
     CUSTOMER: "bg-bg2 text-ink-2",
   };
 
@@ -38,6 +45,10 @@ export default function UsersPage() {
           <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>Users & Roles</h1>
           <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Manage admin accounts and permissions</p>
         </div>
+        <Button onClick={() => router.push("/users/new")}>
+          <Plus className="mr-1.5 h-4 w-4" strokeWidth={2} />
+          Add User
+        </Button>
       </div>
       <div className="overflow-hidden rounded-xl border border-line bg-white">
         {loading ? (
@@ -53,7 +64,7 @@ export default function UsersPage() {
           <>
             <div className="divide-y divide-line sm:hidden">
               {data.data.map((user) => (
-                <div key={user.id} className="flex items-center gap-3 px-4 py-3">
+                <div key={user.id} onClick={() => router.push(`/users/${user.id}`)} className="flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors hover:bg-bg2">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10">
                     <span className="text-xs font-bold text-brand">{user.name.charAt(0)}</span>
                   </div>
@@ -80,7 +91,7 @@ export default function UsersPage() {
               </thead>
               <tbody>
                 {data.data.map((user) => (
-                  <tr key={user.id} className="border-b last:border-0 transition-colors hover:bg-bg2">
+                  <tr key={user.id} onClick={() => router.push(`/users/${user.id}`)} className="cursor-pointer border-b last:border-0 transition-colors hover:bg-bg2">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10">

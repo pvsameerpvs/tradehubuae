@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button, Input, Badge } from "@tradehubuae/ui";
 import {
   Check,
@@ -21,7 +22,52 @@ const benefitIcons: Record<string, typeof Check> = {
   briefcase: TrendingDown,
 };
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
+
 export default function BulkSalesPage() {
+  const [form, setForm] = useState({ companyName: "", contactName: "", email: "", phone: "", message: "" });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_BASE}/bulk-sales`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ message: "Request failed" }));
+        throw new Error(err.message ?? "Something went wrong");
+      }
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
+        <div className="mx-auto max-w-lg rounded-xl border border-line bg-white p-8 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
+            <Check className="h-6 w-6 text-emerald-600" strokeWidth={2} />
+          </div>
+          <h2 className="text-xl font-semibold text-ink" style={{ letterSpacing: "-0.01em" }}>Inquiry Submitted</h2>
+          <p className="mt-2 text-sm text-ink-2">
+            Thank you! Our sales team will review your request and get back to you within 24 hours.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6">
       <div className="mx-auto max-w-3xl text-center">
@@ -111,39 +157,36 @@ export default function BulkSalesPage() {
           <h2 className="mb-6 text-[22px] font-semibold leading-[26px] text-ink" style={{ letterSpacing: "-0.01em" }}>
             Request a Quote
           </h2>
-          <form className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && <div className="rounded-lg border border-sale/30 bg-sale/5 px-4 py-3 text-sm text-sale">{error}</div>}
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="text-[10px] font-bold uppercase tracking-[0.04em] text-ink-2">
                   Company Name
                 </label>
-                <Input placeholder="Your company" className="mt-1.5" />
+                <Input required placeholder="Your company" className="mt-1.5" value={form.companyName}
+                  onChange={(e) => setForm({ ...form, companyName: e.target.value })} />
               </div>
               <div>
                 <label className="text-[10px] font-bold uppercase tracking-[0.04em] text-ink-2">
                   Contact Name
                 </label>
-                <Input placeholder="Full name" className="mt-1.5" />
+                <Input required placeholder="Full name" className="mt-1.5" value={form.contactName}
+                  onChange={(e) => setForm({ ...form, contactName: e.target.value })} />
               </div>
               <div>
                 <label className="text-[10px] font-bold uppercase tracking-[0.04em] text-ink-2">
                   Email
                 </label>
-                <Input
-                  type="email"
-                  placeholder="email@company.com"
-                  className="mt-1.5"
-                />
+                <Input required type="email" placeholder="email@company.com" className="mt-1.5" value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })} />
               </div>
               <div>
                 <label className="text-[10px] font-bold uppercase tracking-[0.04em] text-ink-2">
                   Phone
                 </label>
-                <Input
-                  type="tel"
-                  placeholder="+971 5X XXX XXXX"
-                  className="mt-1.5"
-                />
+                <Input required type="tel" placeholder="+971 5X XXX XXXX" className="mt-1.5" value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })} />
               </div>
             </div>
             <div>
@@ -152,11 +195,11 @@ export default function BulkSalesPage() {
               </label>
               <textarea
                 className="mt-1.5 flex min-h-[120px] w-full rounded-lg border border-line bg-white px-4 py-3 text-base text-ink placeholder:text-ink-3 focus-visible:outline-2 focus-visible:outline-ink/40 focus-visible:outline-offset-2"
-                placeholder="Products, quantities, timeline, budget..."
-              />
+                placeholder="Products, quantities, timeline, budget..." value={form.message}
+                onChange={(e) => setForm({ ...form, message: e.target.value })} />
             </div>
-            <Button size="lg" className="btn-brand w-full border-0 text-white">
-              Submit Inquiry
+            <Button type="submit" size="lg" className="btn-brand w-full border-0 text-white" disabled={submitting}>
+              {submitting ? "Submitting..." : "Submit Inquiry"}
             </Button>
           </form>
         </div>

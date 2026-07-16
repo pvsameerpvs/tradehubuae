@@ -207,30 +207,56 @@ export default function ComboOfferForm({ id }: { id?: string }) {
             + Add Product
           </button>
         </div>
-        {items.map((item, idx) => (
-          <div key={idx} className="mb-2 flex items-center gap-3">
-            <select
-              value={item.productId}
-              onChange={(e) => updateItem(idx, "productId", e.target.value)}
-              className="flex-1 rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-            >
-              <option value="">Select product...</option>
-              {products.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
-            <input
-              type="number"
-              min={1}
-              value={item.quantity}
-              onChange={(e) => updateItem(idx, "quantity", parseInt(e.target.value) || 1)}
-              className="w-20 rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-            />
-            <button type="button" onClick={() => removeItem(idx)} className="text-sm font-semibold text-sale hover:underline">
-              Remove
-            </button>
+
+        {items.length > 0 && (
+          <div className="mb-3 rounded-lg border border-line bg-bg2 p-3">
+            <p className="mb-2 text-xs font-medium text-ink-2">
+              Select multiple products at once:
+            </p>
+            <div className="max-h-40 overflow-y-auto space-y-1">
+              {products
+                .filter((p) => !items.some((i) => i.productId === p.id))
+                .map((p) => (
+                  <label key={p.id} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm hover:bg-white">
+                    <input
+                      type="checkbox"
+                      value={p.id}
+                      className="rounded border-line"
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setItems([...items, { productId: p.id, quantity: 1, product: p }]);
+                        } else {
+                          setItems(items.filter((i) => i.productId !== p.id));
+                        }
+                      }}
+                    />
+                    {p.name}
+                  </label>
+                ))}
+            </div>
           </div>
-        ))}
+        )}
+
+        {items.map((item, idx) => {
+          const prod = products.find((p) => p.id === item.productId);
+          return (
+            <div key={item.productId || idx} className="mb-2 flex items-center gap-3">
+              <span className="flex-1 truncate text-sm text-ink">
+                {prod ? prod.name : "Unknown product"}
+              </span>
+              <input
+                type="number"
+                min={1}
+                value={item.quantity}
+                onChange={(e) => updateItem(idx, "quantity", parseInt(e.target.value) || 1)}
+                className="w-20 rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+              />
+              <button type="button" onClick={() => removeItem(idx)} className="text-sm font-semibold text-sale hover:underline">
+                Remove
+              </button>
+            </div>
+          );
+        })}
       </div>
 
       <div className="flex gap-4 pt-2">

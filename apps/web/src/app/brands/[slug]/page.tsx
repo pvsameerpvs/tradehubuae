@@ -25,7 +25,7 @@ export default async function BrandSlugPage({ params }: Props) {
   const brand = brands.find((b) => b.slug === slug);
   if (!brand) notFound();
 
-  const { products } = await fetchProducts({ brand: brand.name, limit: 100 });
+  const { products } = await fetchProducts({ brand: slug, limit: 100 });
   const showCount = products.length;
 
   return (

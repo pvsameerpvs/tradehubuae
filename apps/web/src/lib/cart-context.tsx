@@ -141,8 +141,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
           existing.quantity += ci.quantity;
         } else {
           next.push({
+            id: ci.id ?? ci.slug,
             name: ci.name,
-            price: 0,
+            price: ci.price,
             categoryName: "",
             categorySlug: "",
             slug: ci.slug,

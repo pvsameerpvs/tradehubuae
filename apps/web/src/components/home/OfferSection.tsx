@@ -37,9 +37,20 @@ function OfferCard({ offer }: { offer: Offer }) {
   return (
     <Link
       href={offer.href}
-      className={`group relative flex min-h-[280px] flex-col justify-end overflow-hidden rounded-xl bg-gradient-to-br ${offer.coverGradient} transition-shadow duration-200 hover:shadow-card`}
+      className={`group relative flex min-h-[280px] flex-col justify-end overflow-hidden rounded-xl transition-shadow duration-200 hover:shadow-card ${offer.image ? "" : `bg-gradient-to-br ${offer.coverGradient}`}`}
     >
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+      {offer.image ? (
+        <>
+          <img
+            src={offer.image}
+            alt={offer.title}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+        </>
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+      )}
 
       <div className="absolute right-4 top-4 flex items-center gap-2">
         <span className="rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold text-ink shadow-chip backdrop-blur-sm">

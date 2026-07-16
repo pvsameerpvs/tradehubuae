@@ -82,6 +82,23 @@ export class BrandsService {
     return { ...brand, _count: { products: Number(productCount?.total ?? 0) } };
   }
 
+  async findBySlug(slug: string) {
+    const [brand] = await this.drizzle.db
+      .select()
+      .from(brands)
+      .where(eq(brands.slug, slug))
+      .limit(1);
+
+    if (!brand) throw new NotFoundException("Brand not found");
+
+    const [productCount] = await this.drizzle.db
+      .select({ total: count() })
+      .from(products)
+      .where(eq(products.brandId, brand.id));
+
+    return { ...brand, _count: { products: Number(productCount?.total ?? 0) } };
+  }
+
   async create(dto: CreateBrandDto) {
     const slug = slugify(dto.name, { lower: true, strict: true });
 

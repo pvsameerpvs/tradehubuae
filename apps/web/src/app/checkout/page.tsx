@@ -136,20 +136,22 @@ export default function CheckoutPage() {
         discountAmount: totalSavings,
         total: grandTotal,
         items: items.map((item) => ({
+          productId: item.id,
           name: item.name,
           sku: item.slug,
           quantity: item.quantity,
           unitPrice: item.price,
+          image: item.image,
         })),
       });
       setOrderNumber(result.orderNumber);
+      sessionStorage.removeItem(CHECKOUT_KEY);
+      setPlaced(true);
+      clearCart();
     } catch {
-      const num = "TH" + Date.now().toString(36).toUpperCase();
-      setOrderNumber(num);
+      alert("Failed to place order. Please try again.");
+      return;
     }
-    sessionStorage.removeItem(CHECKOUT_KEY);
-    setPlaced(true);
-    clearCart();
   };
 
   if (placed) {

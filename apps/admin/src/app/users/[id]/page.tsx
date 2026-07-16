@@ -17,9 +17,13 @@ interface User {
 }
 
 const roleColors: Record<string, string> = {
-  admin: "bg-violet-50 text-violet-700",
-  manager: "bg-blue-50 text-blue-700",
-  staff: "bg-amber-50 text-amber-700",
+  SUPER_ADMIN: "bg-purple-50 text-purple-700",
+  ADMIN: "bg-brand/10 text-brand",
+  CONTENT_MANAGER: "bg-blue-50 text-blue-700",
+  SALES_MANAGER: "bg-cyan-50 text-cyan-700",
+  INVENTORY_MANAGER: "bg-amber-50 text-amber-700",
+  SEO_MANAGER: "bg-rose-50 text-rose-700",
+  CUSTOMER: "bg-bg2 text-ink-2",
 };
 
 export default function UserDetailPage() {

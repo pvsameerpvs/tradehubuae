@@ -20,6 +20,8 @@ import { ReportsModule } from "./modules/reports/reports.module";
 import { UsesModule } from "./modules/uses/uses.module";
 import { ComboOffersModule } from "./modules/combo-offers/combo-offers.module";
 import { ContactModule } from "./modules/contact/contact.module";
+import { AddressesModule } from "./modules/addresses/addresses.module";
+import { BulkSalesModule } from "./modules/bulk-sales/bulk-sales.module";
 import { DrizzleModule } from "./database/drizzle.module";
 
 @Module({
@@ -54,6 +56,8 @@ import { DrizzleModule } from "./database/drizzle.module";
     UsesModule,
     ComboOffersModule,
     ContactModule,
+    AddressesModule,
+    BulkSalesModule,
   ],
 })
 export class AppModule {}

@@ -13,6 +13,23 @@ import { Sparkles } from "lucide-react";
 interface Category {
   id: string;
   name: string;
+  parentId?: string | null;
+  children?: Category[];
+}
+
+interface CategoryOption {
+  id: string;
+  name: string;
+  depth: number;
+}
+
+function flattenTree(nodes: Category[], depth = 0): CategoryOption[] {
+  const result: CategoryOption[] = [];
+  for (const n of nodes) {
+    result.push({ id: n.id, name: n.name, depth });
+    if (n.children) result.push(...flattenTree(n.children, depth + 1));
+  }
+  return result;
 }
 
 interface Brand {
@@ -37,6 +54,11 @@ interface ProductCategory {
   isPrimary: boolean;
 }
 
+interface ProductSpec {
+  label: string;
+  value: string;
+}
+
 interface ExistingProduct {
   name: string;
   description: string | null;
@@ -49,14 +71,7 @@ interface ExistingProduct {
   isActive: boolean;
   isFeatured: boolean;
   totalStock: number;
-  specProcessor: string | null;
-  specRam: string | null;
-  specStorage: string | null;
-  specDisplay: string | null;
-  specGpu: string | null;
-  specBattery: string | null;
-  specWeight: string | null;
-  specWarranty: string | null;
+  specs: ProductSpec[];
   images: ProductImage[];
   categories: ProductCategory[];
 }
@@ -77,14 +92,6 @@ const productSchema = z.object({
   brandId: z.string().optional(),
   useId: z.string().optional(),
   badge: z.string().optional(),
-  specProcessor: z.string().optional(),
-  specRam: z.string().optional(),
-  specStorage: z.string().optional(),
-  specDisplay: z.string().optional(),
-  specGpu: z.string().optional(),
-  specBattery: z.string().optional(),
-  specWeight: z.string().optional(),
-  specWarranty: z.string().optional(),
   isActive: z.boolean(),
   isFeatured: z.boolean(),
 });
@@ -101,17 +108,20 @@ const defaultValues: ProductFormValues = {
   brandId: "",
   useId: "",
   badge: "",
-  specProcessor: "",
-  specRam: "",
-  specStorage: "",
-  specDisplay: "",
-  specGpu: "",
-  specBattery: "",
-  specWeight: "",
-  specWarranty: "",
   isActive: true,
   isFeatured: false,
 };
+
+const specLabels = [
+  { label: "Processor", placeholder: "e.g. Apple M2" },
+  { label: "RAM", placeholder: "e.g. 16GB DDR5" },
+  { label: "Storage", placeholder: "e.g. 512GB SSD" },
+  { label: "Display", placeholder: 'e.g. 15.6" FHD+' },
+  { label: "GPU", placeholder: "e.g. NVIDIA RTX 4060" },
+  { label: "Battery", placeholder: "e.g. Up to 10 hours" },
+  { label: "Weight", placeholder: "e.g. 1.8 kg" },
+  { label: "Warranty", placeholder: "e.g. 2 Years" },
+];
 
 export default function ProductForm({ id }: { id?: string }) {
   const router = useRouter();
@@ -121,6 +131,7 @@ export default function ProductForm({ id }: { id?: string }) {
   const [uses, setUses] = useState<UseItem[]>([]);
   const [fetching, setFetching] = useState(!!id);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [specs, setSpecs] = useState<{ label: string; value: string }[]>([]);
   const [generating, setGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
 
@@ -138,12 +149,12 @@ export default function ProductForm({ id }: { id?: string }) {
 
   useEffect(() => {
     Promise.all([
-      api.get<PaginatedResponse<Category>>("/categories", { limit: 200, sort: "name", order: "asc" }),
+      api.get<Category[]>("/categories/tree"),
       api.get<PaginatedResponse<Brand>>("/brands", { limit: 200, sort: "name", order: "asc" }),
       api.get<PaginatedResponse<UseItem>>("/uses", { limit: 200, sort: "name", order: "asc" }),
     ])
-      .then(([cats, brs, us]) => {
-        setCategories(cats.data);
+      .then(([tree, brs, us]) => {
+        setCategories(tree);
         setBrands(brs.data);
         setUses(us.data);
       })
@@ -155,6 +166,9 @@ export default function ProductForm({ id }: { id?: string }) {
     setFetching(true);
     api.get<ExistingProduct>(`/products/${id}`)
       .then((p) => {
+        const parsedSpecs = p.specs ?? [];
+        setSpecs(parsedSpecs);
+        const specMap = new Map(parsedSpecs.map((s) => [s.label.toLowerCase(), s.value]));
         reset({
           name: p.name,
           description: p.description ?? "",
@@ -165,14 +179,6 @@ export default function ProductForm({ id }: { id?: string }) {
           brandId: p.brandId ?? "",
           useId: p.useId ?? "",
           badge: p.badge ?? "",
-          specProcessor: p.specProcessor ?? "",
-          specRam: p.specRam ?? "",
-          specStorage: p.specStorage ?? "",
-          specDisplay: p.specDisplay ?? "",
-          specGpu: p.specGpu ?? "",
-          specBattery: p.specBattery ?? "",
-          specWeight: p.specWeight ?? "",
-          specWarranty: p.specWarranty ?? "",
           isActive: p.isActive,
           isFeatured: p.isFeatured,
         });
@@ -195,7 +201,7 @@ export default function ProductForm({ id }: { id?: string }) {
   const onSubmit = async (data: ProductFormValues) => {
     setSubmitError(null);
     try {
-      const payload = {
+      const payload: Record<string, unknown> = {
         name: data.name,
         description: data.description || undefined,
         condition: data.condition,
@@ -205,14 +211,7 @@ export default function ProductForm({ id }: { id?: string }) {
         brandId: data.brandId || undefined,
         useId: data.useId || undefined,
         badge: data.badge || undefined,
-        specProcessor: data.specProcessor || undefined,
-        specRam: data.specRam || undefined,
-        specStorage: data.specStorage || undefined,
-        specDisplay: data.specDisplay || undefined,
-        specGpu: data.specGpu || undefined,
-        specBattery: data.specBattery || undefined,
-        specWeight: data.specWeight || undefined,
-        specWarranty: data.specWarranty || undefined,
+        specs: specs.filter((s) => s.value.trim()),
         isActive: data.isActive,
         isFeatured: data.isFeatured,
       };
@@ -325,8 +324,10 @@ export default function ProductForm({ id }: { id?: string }) {
                 className="flex h-12 w-full rounded-lg border border-line bg-white px-4 text-base text-ink transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink/40"
               >
                 <option value="">Select category...</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                {flattenTree(categories).map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {"\u00A0".repeat(cat.depth * 4)}{cat.depth > 0 ? "─ " : ""}{cat.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -397,38 +398,28 @@ export default function ProductForm({ id }: { id?: string }) {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="specProcessor">Processor</Label>
-              <Input id="specProcessor" placeholder="e.g. Apple M2" {...register("specProcessor")} />
-            </div>
-            <div>
-              <Label htmlFor="specRam">RAM</Label>
-              <Input id="specRam" placeholder="e.g. 16GB DDR5" {...register("specRam")} />
-            </div>
-            <div>
-              <Label htmlFor="specStorage">Storage</Label>
-              <Input id="specStorage" placeholder="e.g. 512GB SSD" {...register("specStorage")} />
-            </div>
-            <div>
-              <Label htmlFor="specDisplay">Display</Label>
-              <Input id="specDisplay" placeholder='e.g. 15.6" FHD+' {...register("specDisplay")} />
-            </div>
-            <div>
-              <Label htmlFor="specGpu">GPU</Label>
-              <Input id="specGpu" placeholder="e.g. NVIDIA RTX 4060" {...register("specGpu")} />
-            </div>
-            <div>
-              <Label htmlFor="specBattery">Battery</Label>
-              <Input id="specBattery" placeholder="e.g. Up to 10 hours" {...register("specBattery")} />
-            </div>
-            <div>
-              <Label htmlFor="specWeight">Weight</Label>
-              <Input id="specWeight" placeholder="e.g. 1.8 kg" {...register("specWeight")} />
-            </div>
-            <div>
-              <Label htmlFor="specWarranty">Warranty</Label>
-              <Input id="specWarranty" placeholder="e.g. 2 Years" {...register("specWarranty")} />
-            </div>
+            {specLabels.map((spec) => {
+              const existing = specs.find((s) => s.label === spec.label);
+              return (
+                <div key={spec.label}>
+                  <Label htmlFor={`spec-${spec.label}`}>{spec.label}</Label>
+                  <Input
+                    id={`spec-${spec.label}`}
+                    placeholder={spec.placeholder}
+                    value={existing?.value ?? ""}
+                    onChange={(e) => {
+                      setSpecs((prev) => {
+                        const next = prev.filter((s) => s.label !== spec.label);
+                        if (e.target.value.trim()) {
+                          next.push({ label: spec.label, value: e.target.value });
+                        }
+                        return next;
+                      });
+                    }}
+                  />
+                </div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>

@@ -1,6 +1,8 @@
 export interface ComboOfferItem {
+  id?: string;
   name: string;
   slug: string;
+  price: number;
   quantity: number;
 }
 
@@ -53,6 +55,7 @@ function toComboOfferItem(item: ApiComboOfferItem): ComboOfferItem {
   return {
     name: item.product?.name ?? "Unknown",
     slug: item.product?.slug ?? "",
+    price: Number(item.product?.price ?? 0),
     quantity: item.quantity,
   };
 }
