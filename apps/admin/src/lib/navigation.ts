@@ -1,7 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard,
-  MessageCircle,
   Package,
   FolderTree,
   Building,
@@ -45,7 +44,6 @@ export const navSections: NavSection[] = [
   {
     title: "More",
     items: [
-      { label: "Live Chat", href: "/dashboard/chats", icon: MessageCircle },
       { label: "Inventory", href: "/inventory", icon: Warehouse },
       { label: "Combo Offers", href: "/combo-offers", icon: Tags },
       { label: "Bulk Sales", href: "/bulk-sales", icon: Building2 },
