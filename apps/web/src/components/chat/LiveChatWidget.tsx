@@ -226,8 +226,16 @@ export function LiveChatWidget() {
     };
   }, [open]);
 
+  const messagesRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (!messagesRef.current) return;
+    const el = messagesRef.current;
+    const threshold = 50;
+    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+    if (isNearBottom) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
   const handleSend = useCallback(() => {
@@ -343,7 +351,7 @@ export function LiveChatWidget() {
           ) : (
             <>
               {/* MESSAGES */}
-              <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-3">
+              <div ref={messagesRef} className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-3">
                 <div className="space-y-2">
                   {messages.map((msg) => (
                     <div
