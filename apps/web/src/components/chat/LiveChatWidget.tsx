@@ -110,6 +110,7 @@ export function LiveChatWidget() {
   const [settings, setSettings] = useState(getSettings());
   const [productCtx, setProductCtx] = useState<ProductContext | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const lastMsgCount = useRef(0);
   const bottomRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const unreadPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -215,16 +216,21 @@ export function LiveChatWidget() {
   useEffect(() => {
     if (open) {
       setUnreadCount(0);
+      lastMsgCount.current = messages.length;
       return;
     }
-    setUnreadCount(getUnreadCount());
     unreadPollRef.current = setInterval(() => {
-      setUnreadCount(getUnreadCount());
+      if (!session) return;
+      apiGetMessages(session.id).then((msgs) => {
+        const newCount = msgs.length - lastMsgCount.current;
+        if (newCount > 0) setUnreadCount((c) => c + newCount);
+        lastMsgCount.current = msgs.length;
+      });
     }, 5000);
     return () => {
       if (unreadPollRef.current) clearInterval(unreadPollRef.current);
     };
-  }, [open]);
+  }, [open, session]);
 
   const messagesRef = useRef<HTMLDivElement>(null);
 
