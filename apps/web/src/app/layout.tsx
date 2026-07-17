@@ -9,6 +9,7 @@ import { CartFlyProvider } from "@/lib/cart-fly-context";
 import { WishlistProvider } from "@/lib/wishlist-context";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { Toaster } from "@/components/shared/Toaster";
 
 const inter = Inter({
   subsets: ["latin", "latin-ext"],
@@ -59,6 +60,7 @@ export default function RootLayout({
                 <Header />
                 <main className="flex-1">{children}</main>
                 <Footer />
+                <Toaster />
               </CartFlyProvider>
             </CartProvider>
           </WishlistProvider>

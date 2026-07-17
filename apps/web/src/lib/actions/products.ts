@@ -56,6 +56,24 @@ export async function getProductBySlug(slug: string): Promise<ProductData | null
   }
 }
 
+export async function deleteProduct(id: string): Promise<{ success: boolean; message: string }> {
+  try {
+    await api.delete(`/products/${encodeURIComponent(id)}`);
+    return { success: true, message: "Product deleted successfully" };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Failed to delete product";
+    return { success: false, message };
+  }
+}
+
+export async function getProductById(id: string): Promise<ProductData | null> {
+  try {
+    return await api.get<ProductData>(`/products/${encodeURIComponent(id)}/edit`);
+  } catch {
+    return null;
+  }
+}
+
 export async function searchProducts(query: string, params?: {
   limit?: number;
   category?: string;
