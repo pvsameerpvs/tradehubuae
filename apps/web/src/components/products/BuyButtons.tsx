@@ -10,29 +10,30 @@ import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { useAuth } from "@/lib/supabase/provider";
 import type { Product } from "@/data";
 
-function QtySelector({ qty, onChange, compact, max }: { qty: number; onChange: (d: number) => void; compact?: boolean; max?: number }) {
+function QtySelector({ qty, onChange, compact, max, disabled: outOfStock }: { qty: number; onChange: (d: number) => void; compact?: boolean; max?: number; disabled?: boolean }) {
   const size = compact ? "h-8 w-8" : "h-10 w-10";
   const iconSize = compact ? "h-3 w-3" : "h-4 w-4";
+  const atMin = qty <= 1;
   const atMax = max !== undefined && qty >= max;
 
   return (
-    <div className="inline-flex items-center rounded-lg border border-line bg-white">
+    <div className={`inline-flex items-center rounded-lg border ${outOfStock ? "border-line bg-bg2" : "border-line bg-white"}`}>
       <button
         type="button"
         onClick={() => onChange(-1)}
-        disabled={qty <= 1}
+        disabled={outOfStock || atMin}
         aria-label="Decrease quantity"
         className={`${size} flex items-center justify-center text-ink transition-all duration-150 hover:bg-bg3 active:scale-95 disabled:opacity-30 disabled:hover:bg-transparent`}
       >
         <Minus className={iconSize} strokeWidth={1.75} />
       </button>
-      <span className="min-w-[36px] text-center text-sm font-semibold text-ink select-none" aria-live="polite">
+      <span className={`min-w-[36px] text-center text-sm font-semibold select-none ${outOfStock ? "text-ink-3" : "text-ink"}`} aria-live="polite">
         {qty}
       </span>
       <button
         type="button"
         onClick={() => onChange(1)}
-        disabled={atMax}
+        disabled={outOfStock || atMax}
         aria-label="Increase quantity"
         className={`${size} flex items-center justify-center text-ink transition-all duration-150 hover:bg-bg3 active:scale-95 disabled:opacity-30 disabled:hover:bg-transparent`}
       >
@@ -59,14 +60,15 @@ export function BuyButtons({ product }: { product: Product }) {
   const { addItem, updateQuantity } = useCart();
   const { flyToCart } = useCartFly();
   const imageRef = useRef<HTMLDivElement>(null);
-  const [qty, setQty] = useState(1);
+  const stock = product.stock;
+  const outOfStock = stock === undefined || stock === 0;
+  const maxStock = outOfStock ? 0 : stock;
+  const [qty, setQty] = useState(outOfStock ? 0 : 1);
   const [showAuth, setShowAuth] = useState(false);
   const [pendingAction, setPendingAction] = useState<"cart" | "buy" | null>(null);
 
-  const maxStock = product.stock ?? 99;
-
   const handleQtyChange = (delta: number) => {
-    setQty((prev) => Math.max(1, Math.min(maxStock, prev + delta)));
+    setQty((prev) => Math.max(outOfStock ? 0 : 1, Math.min(maxStock, prev + delta)));
   };
 
   const addToCartWithQty = () => {
@@ -111,36 +113,36 @@ export function BuyButtons({ product }: { product: Product }) {
 
   return (
     <>
-      {maxStock <= 3 && maxStock > 0 && (
+      {!outOfStock && maxStock <= 3 && (
         <div className="flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2">
           <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" strokeWidth={1.75} />
           <span className="text-xs font-medium text-amber-700">Only {maxStock} left — order soon</span>
         </div>
       )}
-      {maxStock === 0 && (
+      {outOfStock && (
         <div className="rounded-lg bg-sale/10 px-3 py-2 text-center text-xs font-medium text-sale">
-          Currently out of stock
+          Out of stock
         </div>
       )}
 
       <div ref={imageRef} className="space-y-3">
-        <div className="flex items-center justify-between rounded-xl bg-bg2 p-3">
+        <div className={`flex items-center justify-between rounded-xl p-3 ${outOfStock ? "bg-bg2" : "bg-bg2"}`}>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-medium text-ink-2">Qty</span>
-            <QtySelector qty={qty} onChange={handleQtyChange} max={maxStock} />
-            {qty >= maxStock && (
+            <span className={`text-xs font-medium ${outOfStock ? "text-ink-3" : "text-ink-2"}`}>Qty</span>
+            <QtySelector qty={qty} onChange={handleQtyChange} max={maxStock} disabled={outOfStock} />
+            {!outOfStock && qty >= maxStock && (
               <span className="text-[10px] text-ink-3">Max</span>
             )}
           </div>
-          <AnimatedPrice amount={totalPrice} label="Total" />
+          <AnimatedPrice amount={outOfStock ? 0 : totalPrice} label="Total" />
         </div>
 
         <div className="hidden gap-2 md:flex">
-          <Button variant="secondary" size="lg" className="flex-1 transition-all duration-150 active:scale-[0.98]" onClick={handleAddToCart} disabled={maxStock === 0}>
+          <Button variant="secondary" size="lg" className="flex-1 transition-all duration-150 active:scale-[0.98]" onClick={handleAddToCart} disabled={outOfStock}>
             <ShoppingCart className="mr-2 h-4 w-4" strokeWidth={1.75} />
             Add to cart
           </Button>
-          <Button size="lg" className="flex-1 transition-all duration-150 active:scale-[0.98]" onClick={handleBuyNow} disabled={maxStock === 0}>
+          <Button size="lg" className="flex-1 transition-all duration-150 active:scale-[0.98]" onClick={handleBuyNow} disabled={outOfStock}>
             Buy now
           </Button>
         </div>
@@ -148,9 +150,9 @@ export function BuyButtons({ product }: { product: Product }) {
 
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-line bg-white px-4 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] md:hidden">
         <div className="flex items-center justify-between gap-2">
-          <AnimatedPrice amount={totalPrice} label="Total" />
-          <Button size="lg" onClick={handleBuyNow} className="min-w-[100px] transition-all duration-150 active:scale-[0.98]" disabled={maxStock === 0}>
-            Buy now
+          <AnimatedPrice amount={outOfStock ? 0 : totalPrice} label="Total" />
+          <Button size="lg" onClick={handleBuyNow} className="min-w-[100px] transition-all duration-150 active:scale-[0.98]" disabled={outOfStock}>
+            {outOfStock ? "Out of Stock" : "Buy now"}
           </Button>
         </div>
       </div>

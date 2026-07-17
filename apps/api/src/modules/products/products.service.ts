@@ -179,7 +179,7 @@ export class ProductsService {
         useId: dto.useId,
         isActive: dto.isActive ?? true,
         isFeatured: dto.isFeatured ?? false,
-
+        stock: dto.stock ?? 0,
       })
       .returning();
 
@@ -247,6 +247,7 @@ export class ProductsService {
     }
     if (dto.isActive !== undefined) updateData.isActive = dto.isActive;
     if (dto.isFeatured !== undefined) updateData.isFeatured = dto.isFeatured;
+    if (dto.stock !== undefined) updateData.stock = dto.stock;
 
 
     if ("name" in dto && dto.name && dto.name !== existing.name) {

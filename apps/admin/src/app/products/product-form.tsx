@@ -88,6 +88,7 @@ interface ExistingProduct {
   brandId: string | null;
   useId: string | null;
   badge: string | null;
+  stock: number | null;
   isActive: boolean;
   isFeatured: boolean;
   specs: ProductSpec[];
@@ -111,6 +112,10 @@ const productSchema = z.object({
   brandId: z.string().optional(),
   useId: z.string().optional(),
   badge: z.string().optional(),
+  stock: z.preprocess(
+    (v) => (v === "" ? undefined : Number(v)),
+    z.number().min(0).optional(),
+  ),
   isActive: z.boolean(),
   isFeatured: z.boolean(),
 });
@@ -129,6 +134,7 @@ const defaultValues: ProductFormValues = {
   brandId: "",
   useId: "",
   badge: "",
+  stock: undefined,
   isActive: true,
   isFeatured: false,
 };
@@ -202,6 +208,7 @@ export function ProductForm({ id }: { id?: string }) {
           brandId: p.brandId ?? "",
           useId: p.useId ?? "",
           badge: p.badge ?? "",
+          stock: p.stock ? Number(p.stock) : undefined,
           isActive: p.isActive,
           isFeatured: p.isFeatured,
         });
@@ -237,6 +244,7 @@ export function ProductForm({ id }: { id?: string }) {
         useId: data.useId || undefined,
         badge: data.badge || undefined,
         specs: specs.filter((s) => s.value.trim()),
+        stock: data.stock ?? 0,
         isActive: data.isActive,
         isFeatured: data.isFeatured,
       };
@@ -365,6 +373,36 @@ export function ProductForm({ id }: { id?: string }) {
                         type="number"
                         min={0}
                         step="0.01"
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Inventory</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <FormField
+                control={control}
+                name="stock"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Stock Quantity</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        step="1"
+                        placeholder="0"
                         {...field}
                         onChange={(e) => field.onChange(e.target.value)}
                       />

@@ -40,8 +40,8 @@ export class QueryProductDto {
   inStock?: boolean;
 
   @IsOptional()
-  @IsEnum(["price_asc", "price_desc", "newest", "popular", "rating"])
-  sort?: "price_asc" | "price_desc" | "newest" | "popular" | "rating";
+  @IsEnum(["price_asc", "price_desc", "newest", "popular", "rating", "name", "createdAt", "updatedAt", "viewCount", "saleCount", "price"])
+  sort?: string;
 
   @IsOptional()
   @Type(() => Number)

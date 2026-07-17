@@ -186,6 +186,7 @@ export class OrdersService {
             .update(products)
             .set({
               saleCount: sql`${products.saleCount} + ${item.quantity}`,
+              stock: sql`${products.stock} - ${item.quantity}`,
             })
             .where(eq(products.id, item.productId));
 
@@ -220,6 +221,32 @@ export class OrdersService {
     const updateData: Record<string, any> = { status: status as OrderStatus };
     if (status === "SHIPPED") updateData.shippedAt = new Date();
     if (status === "DELIVERED") updateData.deliveredAt = new Date();
+
+    if (status === ORDER_STATUS.CANCELLED || status === ORDER_STATUS.RETURNED || status === ORDER_STATUS.REFUNDED) {
+      const items = existing.items;
+      if (items?.length) {
+        for (const item of items) {
+          if (item.productId) {
+            await this.drizzle.db
+              .update(products)
+              .set({
+                stock: sql`${products.stock} + ${item.quantity}`,
+                saleCount: sql`GREATEST(${products.saleCount} - ${item.quantity}, 0)`,
+              })
+              .where(eq(products.id, item.productId));
+
+            if (item.variantId) {
+              await this.drizzle.db
+                .update(productVariants)
+                .set({
+                  stock: sql`${productVariants.stock} + ${item.quantity}`,
+                })
+                .where(eq(productVariants.id, item.variantId));
+            }
+          }
+        }
+      }
+    }
 
     const [order] = await this.drizzle.db
       .update(orders)

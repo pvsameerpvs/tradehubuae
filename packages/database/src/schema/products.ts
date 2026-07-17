@@ -28,6 +28,7 @@ export const products = catalog.table("products", {
   isFeatured: boolean("is_featured").default(false).notNull(),
   isBundle: boolean("is_bundle").default(false).notNull(),
   viewCount: integer("view_count").default(0).notNull(),
+  stock: integer("stock").default(0).notNull(),
   saleCount: integer("sale_count").default(0).notNull(),
   ratingAverage: numeric("rating_average", { precision: 3, scale: 2 }),
   ratingCount: integer("rating_count").default(0).notNull(),

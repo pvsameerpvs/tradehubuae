@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Package, AlertTriangle, Warehouse, Search } from "lucide-react";
-import { Card, CardContent } from "@tradehubuae/ui";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { AlertTriangle, Warehouse, Search, Plus, Minus, Loader2 } from "lucide-react";
+import { Card, CardContent, Switch } from "@tradehubuae/ui";
 import { api, type PaginatedResponse } from "@/lib/api";
 
 interface Brand {
@@ -20,9 +20,114 @@ interface InventoryProduct {
   id: string;
   name: string;
   sku: string;
+  stock: number;
   isActive: boolean;
   brand?: Brand | null;
   categories?: { category: Category }[];
+}
+
+function StockCell({ productId, stock: initialStock, saving, onSave }: {
+  productId: string;
+  stock: number;
+  saving: boolean;
+  onSave: (id: string, stock: number) => Promise<void>;
+}) {
+  const [value, setValue] = useState(initialStock);
+  const [dirty, setDirty] = useState(false);
+  const committing = useRef(false);
+
+  useEffect(() => {
+    setValue(initialStock);
+    setDirty(false);
+  }, [initialStock]);
+
+  const commit = useCallback(async () => {
+    if (committing.current || !dirty || value === initialStock) return;
+    committing.current = true;
+    await onSave(productId, value);
+    committing.current = false;
+    setDirty(false);
+  }, [dirty, value, initialStock, productId, onSave]);
+
+  const adjust = (delta: number) => {
+    setValue((prev) => Math.max(0, prev + delta));
+    setDirty(true);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = parseInt(e.target.value, 10);
+    if (!isNaN(v) && v >= 0) {
+      setValue(v);
+      setDirty(true);
+    }
+  };
+
+  const handleBlur = () => {
+    if (dirty) commit();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") commit();
+    if (e.key === "Escape") {
+      setValue(initialStock);
+      setDirty(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-1">
+      <button
+        type="button"
+        onClick={() => adjust(-1)}
+        disabled={value <= 0 || saving}
+        className="flex h-7 w-7 items-center justify-center rounded-md border border-line text-ink transition-colors hover:bg-bg3 disabled:opacity-30 disabled:cursor-not-allowed"
+        aria-label="Decrease stock"
+      >
+        <Minus className="h-3 w-3" strokeWidth={2} />
+      </button>
+      <div className="relative">
+        <input
+          type="number"
+          min={0}
+          value={value}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          disabled={saving}
+          className={`h-7 w-16 rounded-md border text-center text-sm font-semibold outline-none transition-colors [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${
+            dirty
+              ? "border-brand bg-brand/[0.03] text-brand"
+              : value === 0
+                ? "border-sale/30 bg-sale/[0.03] text-sale"
+                : "border-line bg-white text-ink"
+          }`}
+        />
+        {saving && (
+          <Loader2 className="absolute right-1 top-1/2 h-3 w-3 -translate-y-1/2 animate-spin text-ink-3" strokeWidth={2} />
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={() => adjust(1)}
+        disabled={saving}
+        className="flex h-7 w-7 items-center justify-center rounded-md border border-line text-ink transition-colors hover:bg-bg3 disabled:opacity-30 disabled:cursor-not-allowed"
+        aria-label="Increase stock"
+      >
+        <Plus className="h-3 w-3" strokeWidth={2} />
+      </button>
+      {dirty && (
+        <button
+          type="button"
+          onClick={commit}
+          disabled={saving}
+          onMouseDown={(e) => e.preventDefault()}
+          className="ml-1 rounded-md bg-brand px-2 py-1 text-[10px] font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-50"
+        >
+          Save
+        </button>
+      )}
+    </div>
+  );
 }
 
 export default function InventoryPage() {
@@ -32,6 +137,7 @@ export default function InventoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toggling, setToggling] = useState<string | null>(null);
+  const [savingStock, setSavingStock] = useState<string | null>(null);
 
   const [filterBrand, setFilterBrand] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
@@ -75,6 +181,24 @@ export default function InventoryPage() {
     }
   };
 
+  const handleStockSave = async (productId: string, stock: number) => {
+    setSavingStock(productId);
+    try {
+      await api.put(`/products/${productId}`, { stock });
+      setData((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          data: prev.data.map((p) => p.id === productId ? { ...p, stock } : p),
+        };
+      });
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to update stock");
+    } finally {
+      setSavingStock(null);
+    }
+  };
+
   const filtered = (data?.data ?? []).filter((p) => {
     if (searchQuery && !p.name.toLowerCase().includes(searchQuery.toLowerCase()) && !p.sku.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     if (filterBrand && p.brand?.id !== filterBrand) return false;
@@ -86,17 +210,16 @@ export default function InventoryPage() {
   });
 
   const totalStockItems = filtered.length;
-
-  const getCategoryName = (id: string) => categories.find((c) => c.id === id)?.name ?? id;
+  const outOfStockCount = filtered.filter((p) => !p.stock || p.stock === 0).length;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-lg font-semibold text-ink sm:text-2xl" style={{ letterSpacing: "-0.01em" }}>Inventory</h1>
-        <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Monitor stock levels across all products</p>
+        <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Monitor and update stock levels across all products</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-1">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Card>
           <CardContent className="p-5">
             <div className="flex items-start justify-between">
@@ -106,6 +229,19 @@ export default function InventoryPage() {
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand/5">
                 <Warehouse className="h-5 w-5 text-brand" strokeWidth={1.75} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm text-ink-2">Out of Stock</p>
+                <p className="mt-1.5 text-2xl font-semibold text-sale">{loading ? "..." : outOfStockCount}</p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sale/5">
+                <AlertTriangle className="h-5 w-5 text-sale" strokeWidth={1.75} />
               </div>
             </div>
           </CardContent>
@@ -194,18 +330,21 @@ export default function InventoryPage() {
                         <p className="mt-1 text-xs text-ink-3">
                           {p.categories?.map((pc) => pc.category.name).join(", ") ?? "—"}
                         </p>
+                        <div className="mt-2">
+                          <StockCell
+                            productId={p.id}
+                            stock={p.stock ?? 0}
+                            saving={savingStock === p.id}
+                            onSave={handleStockSave}
+                          />
+                        </div>
                       </div>
                       <div className="ml-3 flex flex-col items-end gap-2">
-                        <label className="relative inline-flex cursor-pointer items-center p-1.5 -m-1.5">
-                          <input
-                            type="checkbox"
-                            checked={p.isActive}
-                            onChange={() => toggleActive(p.id, p.isActive)}
-                            disabled={toggling === p.id}
-                            className="peer sr-only"
-                          />
-                          <div className="h-5 w-9 rounded-full bg-bg3 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-brand peer-checked:after:translate-x-full" />
-                        </label>
+                        <Switch
+                          checked={p.isActive}
+                          onCheckedChange={() => toggleActive(p.id, p.isActive)}
+                          disabled={toggling === p.id}
+                        />
                       </div>
                     </div>
                   </div>
@@ -217,6 +356,7 @@ export default function InventoryPage() {
                     <th className="p-4 font-medium">Product</th>
                     <th className="p-4 font-medium">Category</th>
                     <th className="p-4 font-medium">Brand</th>
+                    <th className="p-4 font-medium text-center">Stock</th>
                     <th className="p-4 font-medium text-center">Active</th>
                   </tr>
                 </thead>
@@ -232,16 +372,19 @@ export default function InventoryPage() {
                       </td>
                       <td className="p-4 text-sm text-ink-2">{p.brand?.name ?? "—"}</td>
                       <td className="p-4 text-center">
-                        <label className="relative inline-flex cursor-pointer items-center p-1">
-                          <input
-                            type="checkbox"
-                            checked={p.isActive}
-                            onChange={() => toggleActive(p.id, p.isActive)}
-                            disabled={toggling === p.id}
-                            className="peer sr-only"
-                          />
-                          <div className="h-5 w-9 rounded-full bg-bg3 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-brand peer-checked:after:translate-x-full disabled:opacity-50" />
-                        </label>
+                        <StockCell
+                          productId={p.id}
+                          stock={p.stock ?? 0}
+                          saving={savingStock === p.id}
+                          onSave={handleStockSave}
+                        />
+                      </td>
+                      <td className="p-4 text-center">
+                        <Switch
+                          checked={p.isActive}
+                          onCheckedChange={() => toggleActive(p.id, p.isActive)}
+                          disabled={toggling === p.id}
+                        />
                       </td>
                     </tr>
                   ))}
