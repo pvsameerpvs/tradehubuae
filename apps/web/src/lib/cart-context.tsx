@@ -12,6 +12,7 @@ import {
 import type { Product } from "@/data";
 import type { ComboOffer } from "@/data";
 import { api } from "@/lib/api";
+import { useAuth } from "@/lib/supabase/provider";
 import { getBulkDiscountPercent } from "@/data/bulkPricing";
 import { fetchComboOffers } from "@/data/comboOffers";
 
@@ -97,18 +98,44 @@ function saveCart(items: CartItem[]) {
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(loadCart);
+  const { user } = useAuth();
+  const [items, setItems] = useState<CartItem[]>([]);
   const [activePromo, setActivePromo] = useState<ActivePromo | null>(null);
   const [promoError, setPromoError] = useState("");
   const [comboOffersList, setComboOffersList] = useState<ComboOffer[]>([]);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     fetchComboOffers().then(setComboOffersList);
   }, []);
 
   useEffect(() => {
-    saveCart(items);
-  }, [items]);
+    if (initialized) return;
+    if (user) {
+      api.get<{ items: CartItem[] }>("/cart").then((res) => {
+        if (res.items && res.items.length > 0) {
+          setItems(res.items);
+        } else {
+          const local = loadCart();
+          if (local.length > 0) setItems(local);
+        }
+        setInitialized(true);
+      }).catch(() => {
+        setItems(loadCart());
+        setInitialized(true);
+      });
+    } else {
+      setItems(loadCart());
+      setInitialized(true);
+    }
+  }, [user, initialized]);
+
+  useEffect(() => {
+    if (!initialized) return;
+    if (!user) {
+      saveCart(items);
+    }
+  }, [items, user, initialized]);
 
   const getAvailableStock = useCallback((slug: string): number => {
     const item = items.find((i) => i.slug === slug);
@@ -119,18 +146,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => {
       const existing = prev.find((item) => item.slug === product.slug);
       const maxStock = product.stock ?? 99;
+      let newItems: CartItem[];
       if (existing) {
         if (existing.quantity >= maxStock) return prev;
-        return prev.map((item) =>
+        newItems = prev.map((item) =>
           item.slug === product.slug
             ? { ...item, quantity: Math.min(item.quantity + 1, maxStock) }
             : item,
         );
+      } else {
+        newItems = [...prev, { ...product, quantity: 1 }];
       }
-      return [...prev, { ...product, quantity: 1 }];
+      if (user) {
+        const updatedItem = newItems.find((i) => i.slug === product.slug);
+        if (updatedItem) {
+          api.post("/cart", { slug: product.slug, quantity: updatedItem.quantity }).catch((err) => console.error("[Cart] Sync failed:", err));
+        }
+      }
+      return newItems;
     });
     setActivePromo(null);
-  }, []);
+  }, [user]);
 
   const addComboToCart = useCallback((combo: ComboOffer) => {
     setItems((prev) => {
@@ -152,35 +188,59 @@ export function CartProvider({ children }: { children: ReactNode }) {
           });
         }
       }
+      if (user) {
+        for (const ci of combo.items) {
+          const updatedItem = next.find((i) => i.slug === ci.slug);
+          if (updatedItem) {
+            api.post("/cart", { slug: ci.slug, quantity: updatedItem.quantity }).catch((err) => console.error("[Cart] Sync failed:", err));
+          }
+        }
+      }
       return next;
     });
     setActivePromo(null);
-  }, []);
+  }, [user]);
 
   const removeItem = useCallback((slug: string) => {
-    setItems((prev) => prev.filter((item) => item.slug !== slug));
-  }, []);
+    setItems((prev) => {
+      if (user) {
+        api.delete(`/cart/${encodeURIComponent(slug)}`).catch((err) => console.error("[Cart] Sync failed:", err));
+      }
+      return prev.filter((item) => item.slug !== slug);
+    });
+  }, [user]);
 
   const updateQuantity = useCallback((slug: string, quantity: number) => {
     if (quantity <= 0) {
-      setItems((prev) => prev.filter((item) => item.slug !== slug));
+      setItems((prev) => {
+        if (user) {
+        api.delete(`/cart/${encodeURIComponent(slug)}`).catch((err) => console.error("[Cart] Sync failed:", err));
+        }
+        return prev.filter((item) => item.slug !== slug);
+      });
       return;
     }
     const maxStock = getAvailableStock(slug);
-    setItems((prev) =>
-      prev.map((item) =>
+    setItems((prev) => {
+      if (user) {
+        api.put(`/cart/${encodeURIComponent(slug)}`, { quantity: Math.min(quantity, maxStock) }).catch(() => {});
+      }
+      return prev.map((item) =>
         item.slug === slug
           ? { ...item, quantity: Math.min(quantity, maxStock) }
           : item,
-      ),
-    );
-  }, [getAvailableStock]);
+      );
+    });
+  }, [getAvailableStock, user]);
 
   const clearCart = useCallback(() => {
     setItems([]);
     setActivePromo(null);
     setPromoError("");
-  }, []);
+    if (user) {
+      api.delete("/cart").catch((err) => console.error("[Cart] Sync failed:", err));
+    }
+  }, [user]);
 
   const applyPromoCode = useCallback(
     async (code: string) => {

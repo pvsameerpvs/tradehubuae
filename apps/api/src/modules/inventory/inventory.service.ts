@@ -57,6 +57,7 @@ export class InventoryService {
       .returning();
 
     await this.drizzle.db.insert(stockHistory).values({
+      productId: stockRecord.productId,
       variantId: id,
       warehouseId: stockRecord.warehouseId,
       type,

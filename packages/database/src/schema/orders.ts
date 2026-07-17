@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, numeric, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { index, pgTable, uuid, varchar, text, numeric, integer, boolean, timestamp } from "drizzle-orm/pg-core";
 import { jsonb } from "drizzle-orm/pg-core";
 import { orderStatusEnum, paymentStatusEnum } from "./enums";
 import { users } from "./users";
@@ -35,7 +35,12 @@ export const orders = pgTable("orders", {
   deliveredAt: timestamp("delivered_at", { mode: "date" }),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
-});
+}, (t) => [
+  index("orders_user_id_idx").on(t.userId),
+  index("orders_status_idx").on(t.status),
+  index("orders_created_at_idx").on(t.createdAt),
+  index("orders_payment_status_idx").on(t.paymentStatus),
+]);
 
 export const orderItems = pgTable("order_items", {
   id: uuid("id").defaultRandom().primaryKey(),

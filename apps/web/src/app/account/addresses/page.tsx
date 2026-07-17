@@ -21,11 +21,12 @@ export default function AccountAddresses() {
   const [loading, setLoading] = useState(true);
   const [addressFormOpen, setAddressFormOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<AddressData | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     getAddresses()
       .then(setAddresses)
-      .catch(() => {/* ignore */})
+      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load addresses"))
       .finally(() => setLoading(false));
   }, []);
 
@@ -72,6 +73,8 @@ export default function AccountAddresses() {
           Add New
         </Button>
       </div>
+
+      {error && <div className="rounded-lg border border-sale/30 bg-sale/5 px-4 py-3 text-sm text-sale">{error}</div>}
 
       {loading ? (
         <div className="grid gap-3 sm:grid-cols-2">

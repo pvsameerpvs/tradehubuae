@@ -31,8 +31,10 @@ export function AddressForm({ open, onOpenChange, address, onSave }: AddressForm
   const [zipCode, setZipCode] = useState("");
   const [isDefault, setIsDefault] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    setError(null);
     if (address) {
       setFirstName(address.firstName);
       setLastName(address.lastName);
@@ -60,6 +62,7 @@ export function AddressForm({ open, onOpenChange, address, onSave }: AddressForm
     e.preventDefault();
     if (!firstName || !lastName || !phone || !addressLine1 || !city || !emirate) return;
     setSaving(true);
+    setError(null);
     try {
       await onSave({
         firstName,
@@ -73,6 +76,8 @@ export function AddressForm({ open, onOpenChange, address, onSave }: AddressForm
         isDefault,
       });
       onOpenChange(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save address");
     } finally {
       setSaving(false);
     }
@@ -89,6 +94,7 @@ export function AddressForm({ open, onOpenChange, address, onSave }: AddressForm
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && <div className="rounded-lg border border-sale/30 bg-sale/5 px-4 py-3 text-sm text-sale">{error}</div>}
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="text-[10px] font-bold uppercase tracking-[0.04em] text-ink-2">First Name</label>

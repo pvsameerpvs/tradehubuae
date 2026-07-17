@@ -1,6 +1,8 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from "react";
+import { useAuth } from "@/lib/supabase/provider";
+import { getWishlist, addToWishlist, removeFromWishlist } from "@/lib/actions/wishlist";
 
 const WISHLIST_KEY = "tradehub_wishlist";
 
@@ -42,23 +44,63 @@ const WishlistContext = createContext<WishlistContextType>({
 });
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
-  const [slugs, setSlugs] = useState<string[]>(loadWishlist);
+  const { user } = useAuth();
+  const [slugs, setSlugs] = useState<string[]>([]);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    saveWishlist(slugs);
-  }, [slugs]);
+    if (initialized) return;
+    if (user) {
+      getWishlist().then((serverSlugs) => {
+        if (serverSlugs.length > 0) {
+          setSlugs(serverSlugs);
+        } else {
+          const local = loadWishlist();
+          setSlugs(local);
+        }
+        setInitialized(true);
+      }).catch(() => {
+        setSlugs(loadWishlist());
+        setInitialized(true);
+      });
+    } else {
+      setSlugs(loadWishlist());
+      setInitialized(true);
+    }
+  }, [user, initialized]);
+
+  useEffect(() => {
+    if (!initialized) return;
+    if (!user) {
+      saveWishlist(slugs);
+    }
+  }, [slugs, user, initialized]);
 
   const add = useCallback((slug: string) => {
-    setSlugs((prev) => (prev.includes(slug) ? prev : [...prev, slug]));
-  }, []);
+    setSlugs((prev) => {
+      if (prev.includes(slug)) return prev;
+      if (user) addToWishlist(slug);
+      return [...prev, slug];
+    });
+  }, [user]);
 
   const remove = useCallback((slug: string) => {
-    setSlugs((prev) => prev.filter((s) => s !== slug));
-  }, []);
+    setSlugs((prev) => {
+      if (user) removeFromWishlist(slug);
+      return prev.filter((s) => s !== slug);
+    });
+  }, [user]);
 
   const toggle = useCallback((slug: string) => {
-    setSlugs((prev) => (prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]));
-  }, []);
+    setSlugs((prev) => {
+      if (prev.includes(slug)) {
+        if (user) removeFromWishlist(slug);
+        return prev.filter((s) => s !== slug);
+      }
+      if (user) addToWishlist(slug);
+      return [...prev, slug];
+    });
+  }, [user]);
 
   const isWishlisted = useCallback((slug: string) => slugs.includes(slug), [slugs]);
 

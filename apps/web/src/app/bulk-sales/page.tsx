@@ -15,14 +15,13 @@ import {
 } from "lucide-react";
 import { bulkBenefits, industries } from "@/data/benefits";
 import { defaultBulkTiers } from "@/data/bulkPricing";
+import { submitBulkInquiry } from "@/lib/actions/bulk-sales";
 
 const benefitIcons: Record<string, typeof Check> = {
   shield: ShieldCheck,
   truck: Package,
   briefcase: TrendingDown,
 };
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
 export default function BulkSalesPage() {
   const [form, setForm] = useState({ companyName: "", contactName: "", email: "", phone: "", message: "" });
@@ -34,22 +33,13 @@ export default function BulkSalesPage() {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
-    try {
-      const res = await fetch(`${API_BASE}/bulk-sales`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ message: "Request failed" }));
-        throw new Error(err.message ?? "Something went wrong");
-      }
+    const result = await submitBulkInquiry(form);
+    if (result.success) {
       setSubmitted(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setSubmitting(false);
+    } else {
+      setError(result.error ?? "Something went wrong");
     }
+    setSubmitting(false);
   };
 
   if (submitted) {

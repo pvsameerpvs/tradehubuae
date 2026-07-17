@@ -51,6 +51,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [seoStats, setSeoStats] = useState<SeoStats | null>(null);
   const [trendData, setTrendData] = useState<TrendPoint[]>([]);
+  const [hasErrors, setHasErrors] = useState(false);
 
   useEffect(() => {
     async function loadDashboard() {
@@ -65,6 +66,11 @@ export default function DashboardPage() {
         const products = productsRes.status === "fulfilled" ? productsRes.value.data : [];
         const totalProducts = productsRes.status === "fulfilled" ? (productsRes.value.meta?.total ?? 0) : 0;
         const activeOrders = ordersRes.status === "fulfilled" ? (ordersRes.value.meta?.total ?? 0) : 0;
+        const failedCount = [productsRes, ordersRes, seoRes, trendRes].filter(
+          (r) => r.status === "rejected"
+        ).length;
+
+        if (failedCount > 0) setHasErrors(true);
 
         setRecentProducts(products.slice(0, 5));
         setStats({
@@ -112,6 +118,14 @@ export default function DashboardPage() {
           <span className="hidden sm:inline">Add Product</span>
         </Link>
       </div>
+
+      {/* Error banner */}
+      {hasErrors && (
+        <div className="flex items-center gap-2 rounded-xl border border-sale/20 bg-sale/5 px-4 py-3 text-sm text-sale">
+          <AlertTriangle className="h-4 w-4 flex-shrink-0" strokeWidth={1.75} />
+          <span>Some dashboard data failed to load. Showing partial results.</span>
+        </div>
+      )}
 
       {/* Stat cards */}
       {loading ? (

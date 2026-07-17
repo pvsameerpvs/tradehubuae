@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, numeric, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { index, pgTable, uuid, varchar, text, numeric, integer, boolean, timestamp } from "drizzle-orm/pg-core";
 import { conditionEnum } from "./enums";
 import { brands } from "./brands";
 import { categories } from "./categories";
@@ -39,7 +39,13 @@ export const products = pgTable("products", {
   publishedAt: timestamp("published_at", { mode: "date" }),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
-});
+}, (t) => [
+  index("products_active_idx").on(t.isActive),
+  index("products_featured_idx").on(t.isFeatured),
+  index("products_created_at_idx").on(t.createdAt),
+  index("products_brand_id_idx").on(t.brandId),
+  index("products_name_idx").on(t.name),
+]);
 
 export const productCategories = pgTable("product_categories", {
   productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),

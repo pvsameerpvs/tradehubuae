@@ -17,6 +17,7 @@ import {
   Settings,
   Shield,
   Grid3X3,
+  Star,
 } from "lucide-react";
 
 export interface NavItem {
@@ -49,6 +50,7 @@ export const navSections: NavSection[] = [
       { label: "Combo Offers", href: "/combo-offers", icon: Tags },
       { label: "Promo Codes", href: "/coupons", icon: Percent },
       { label: "Bulk Sales", href: "/bulk-sales", icon: Building2 },
+      { label: "Reviews", href: "/reviews", icon: Star },
       { label: "Media", href: "/media", icon: Image },
       { label: "Blog", href: "/blog", icon: FileText },
       { label: "Uses", href: "/uses", icon: Grid3X3 },

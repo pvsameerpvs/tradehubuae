@@ -5,7 +5,27 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Button, Input, Card, CardHeader, CardTitle, CardContent } from "@tradehubuae/ui";
+import {
+  Button,
+  Input,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  Textarea,
+  Switch,
+} from "@tradehubuae/ui";
 import { api, type PaginatedResponse } from "@/lib/api";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Sparkles } from "lucide-react";
@@ -79,7 +99,7 @@ interface ExistingProduct {
 const productSchema = z.object({
   name: z.string().min(1, "Product name is required").max(500),
   description: z.string().optional(),
-  condition: z.enum(["New", "Like_New", "Excellent", "Good", "Fair"]),
+  condition: z.enum(["New", "Like New", "Excellent", "Good", "Fair"]),
   price: z.preprocess(
     (v) => (v === "" ? undefined : Number(v)),
     z.number({ required_error: "Price is required" }).min(0, "Must be non-negative"),
@@ -98,11 +118,13 @@ const productSchema = z.object({
 
 type ProductFormValues = z.infer<typeof productSchema>;
 
+const NONE_VALUE = "__none__";
+
 const defaultValues: ProductFormValues = {
   name: "",
   description: "",
   condition: "New",
-  price: undefined as unknown as number,
+  price: "" as unknown as number,
   compareAtPrice: undefined,
   categoryId: "",
   brandId: "",
@@ -135,17 +157,17 @@ export function ProductForm({ id }: { id?: string }) {
   const [generating, setGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    getValues,
-    setValue,
-    formState: { errors, isSubmitting, isDirty },
-  } = useForm<ProductFormValues>({
+  const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues,
   });
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting },
+  } = form;
 
   useEffect(() => {
     Promise.all([
@@ -158,24 +180,26 @@ export function ProductForm({ id }: { id?: string }) {
         setBrands(brs.data);
         setUses(us.data);
       })
-      .catch(() => { /* TODO: show error toast */ });
+      .catch(() => {
+        /* TODO: show error toast */
+      });
   }, []);
 
   useEffect(() => {
     if (!id) return;
     setFetching(true);
-    api.get<ExistingProduct>(`/products/${id}`)
+    api
+      .get<ExistingProduct>(`/products/${id}`)
       .then((p) => {
         const parsedSpecs = p.specs ?? [];
         setSpecs(parsedSpecs);
-        const specMap = new Map(parsedSpecs.map((s) => [s.label.toLowerCase(), s.value]));
         reset({
           name: p.name,
           description: p.description ?? "",
           condition: p.condition as ProductFormValues["condition"],
           price: Number(p.price),
           compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : undefined,
-          categoryId: (p.categories?.find((c) => c.isPrimary)?.categoryId ?? p.categories?.[0]?.categoryId) ?? "",
+          categoryId: p.categories?.find((c) => c.isPrimary)?.categoryId ?? p.categories?.[0]?.categoryId ?? "",
           brandId: p.brandId ?? "",
           useId: p.useId ?? "",
           badge: p.badge ?? "",
@@ -184,7 +208,9 @@ export function ProductForm({ id }: { id?: string }) {
         });
         setImages(p.images?.filter((img) => img?.url).map((img) => img.url) ?? []);
       })
-      .catch(() => { /* TODO: show error toast */ })
+      .catch(() => {
+        /* TODO: show error toast */
+      })
       .finally(() => setFetching(false));
   }, [id, reset]);
 
@@ -237,271 +263,453 @@ export function ProductForm({ id }: { id?: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
-      {submitError && (
-        <div className="rounded-lg border border-sale/30 bg-sale/5 px-4 py-3 text-sm text-sale">
-          {submitError}
+    <Form {...form}>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
+        {submitError && (
+          <div className="rounded-lg border border-sale/30 bg-sale/5 px-4 py-3 text-sm text-sale">
+            {submitError}
+          </div>
+        )}
+
+        {/* AI Auto-fill */}
+        <div className="flex flex-col items-start gap-3 rounded-xl border border-brand/20 bg-brand/[0.03] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-ink">Auto-fill with AI</p>
+            <p className="mt-0.5 text-xs text-ink-2">
+              Upload images or type any details, then click generate to auto-fill all fields
+            </p>
+          </div>
+          <Button type="button" onClick={handleAiGenerate} disabled={generating}>
+            <Sparkles className="mr-1.5 h-4 w-4" strokeWidth={1.75} />
+            {generating ? "Generating..." : "Generate"}
+          </Button>
         </div>
-      )}
-
-      {/* AI Auto-fill */}
-      <div className="flex flex-col items-start gap-3 rounded-xl border border-brand/20 bg-brand/[0.03] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm font-semibold text-ink">Auto-fill with AI</p>
-          <p className="mt-0.5 text-xs text-ink-2">
-            Upload images or type any details, then click generate to auto-fill all fields
-          </p>
-        </div>
-        <Button
-          type="button"
-          onClick={handleAiGenerate}
-          disabled={generating}
-        >
-          <Sparkles className="mr-1.5 h-4 w-4" strokeWidth={1.75} />
-          {generating ? "Generating..." : "Generate"}
-        </Button>
-      </div>
-      {generationError && (
-        <div className="rounded-lg border border-sale/30 bg-sale/5 px-4 py-3 text-sm text-sale">
-          {generationError}
-        </div>
-      )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Basic Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <Label htmlFor="name">Name *</Label>
-              <Input id="name" {...register("name")} />
-              {errors.name && <FieldError>{errors.name.message}</FieldError>}
-            </div>
-            <div className="col-span-2">
-              <Label htmlFor="description">Description</Label>
-              <textarea
-                id="description"
-                rows={5}
-                {...register("description")}
-                className="flex w-full rounded-lg border border-line bg-white px-4 py-3 text-base text-ink placeholder:text-ink-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink/40"
-              />
-            </div>
+        {generationError && (
+          <div className="rounded-lg border border-sale/30 bg-sale/5 px-4 py-3 text-sm text-sale">
+            {generationError}
           </div>
-        </CardContent>
-      </Card>
+        )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Pricing</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="price">Price (AED) *</Label>
-              <Input id="price" type="number" min={0} step="0.01" {...register("price")} />
-              {errors.price && <FieldError>{errors.price.message}</FieldError>}
-            </div>
-            <div>
-              <Label htmlFor="compareAtPrice">Compare At</Label>
-              <Input id="compareAtPrice" type="number" min={0} step="0.01" {...register("compareAtPrice")} />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Classification</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="categoryId">Category</Label>
-              <select
-                id="categoryId"
-                {...register("categoryId")}
-                className="flex h-12 w-full rounded-lg border border-line bg-white px-4 text-base text-ink transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink/40"
-              >
-                <option value="">Select category...</option>
-                {flattenTree(categories).map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {"\u00A0".repeat(cat.depth * 4)}{cat.depth > 0 ? "─ " : ""}{cat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <Label htmlFor="brandId">Brand</Label>
-              <select
-                id="brandId"
-                {...register("brandId")}
-                className="flex h-12 w-full rounded-lg border border-line bg-white px-4 text-base text-ink transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink/40"
-              >
-                <option value="">Select brand...</option>
-                {brands.map((b) => (
-                  <option key={b.id} value={b.id}>{b.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <Label htmlFor="useId">Use</Label>
-              <select
-                id="useId"
-                {...register("useId")}
-                className="flex h-12 w-full rounded-lg border border-line bg-white px-4 text-base text-ink transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink/40"
-              >
-                <option value="">Select use...</option>
-                {uses.map((u) => (
-                  <option key={u.id} value={u.id}>{u.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <Label htmlFor="condition">Condition</Label>
-              <select
-                id="condition"
-                {...register("condition")}
-                className="flex h-12 w-full rounded-lg border border-line bg-white px-4 text-base text-ink transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink/40"
-              >
-                <option value="New">New</option>
-                <option value="Like_New">Like New</option>
-                <option value="Excellent">Excellent</option>
-                <option value="Good">Good</option>
-                <option value="Fair">Fair</option>
-              </select>
-            </div>
-            <div>
-              <Label htmlFor="badge">Badge</Label>
-              <select
-                id="badge"
-                {...register("badge")}
-                className="flex h-12 w-full rounded-lg border border-line bg-white px-4 text-base text-ink transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink/40"
-              >
-                <option value="">None</option>
-                <option value="Certified">Certified</option>
-                <option value="Best Seller">Best Seller</option>
-                <option value="New">New</option>
-                <option value="Great deal">Great deal</option>
-                <option value="Staff pick">Staff pick</option>
-                <option value="Like new">Like new</option>
-                <option value="Low stock">Low stock</option>
-              </select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Key Specifications</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {specLabels.map((spec) => {
-              const existing = specs.find((s) => s.label === spec.label);
-              return (
-                <div key={spec.label}>
-                  <Label htmlFor={`spec-${spec.label}`}>{spec.label}</Label>
-                  <Input
-                    id={`spec-${spec.label}`}
-                    placeholder={spec.placeholder}
-                    value={existing?.value ?? ""}
-                    onChange={(e) => {
-                      setSpecs((prev) => {
-                        const next = prev.filter((s) => s.label !== spec.label);
-                        if (e.target.value.trim()) {
-                          next.push({ label: spec.label, value: e.target.value });
-                        }
-                        return next;
-                      });
-                    }}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Images</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-4">
-            {images.map((url, idx) => (
-              <div key={idx} className="group relative h-24 w-24 overflow-hidden rounded-lg border border-line bg-bg2 sm:h-28 sm:w-28">
-                <img src={url} alt="" className="h-full w-full object-cover" />
-                {idx === 0 && (
-                  <span className="absolute left-1 top-1 rounded bg-brand px-1.5 py-0.5 text-[10px] font-semibold text-white shadow-chip">
-                    Primary
-                  </span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setImages(images.filter((_, i) => i !== idx))}
-                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100"
-                  aria-label="Remove image"
-                >
-                  &times;
-                </button>
+        <Card>
+          <CardHeader>
+            <CardTitle>Basic Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <FormField
+                  control={control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name *</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-            ))}
-            {images.length < 6 && (
-              <ImageUpload
-                value=""
-                onChange={(url) => setImages([...images, url])}
-                label="Add Image"
-                folder="products"
+              <div className="col-span-2">
+                <FormField
+                  control={control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea rows={5} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Pricing</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <FormField
+                control={control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Price (AED) *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
+              <FormField
+                control={control}
+                name="compareAtPrice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Compare At</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Classification</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <FormField
+                control={control}
+                name="categoryId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <Select
+                      onValueChange={(val) =>
+                        field.onChange(
+                          val === NONE_VALUE ? "" : val,
+                        )
+                      }
+                      value={field.value || NONE_VALUE}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={NONE_VALUE}>
+                          None
+                        </SelectItem>
+                        {flattenTree(categories).map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            {"\u00A0".repeat(cat.depth * 4)}
+                            {cat.depth > 0 ? "─ " : ""}
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="brandId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Brand</FormLabel>
+                    <Select
+                      onValueChange={(val) =>
+                        field.onChange(
+                          val === NONE_VALUE ? "" : val,
+                        )
+                      }
+                      value={field.value || NONE_VALUE}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select brand..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={NONE_VALUE}>
+                          None
+                        </SelectItem>
+                        {brands.map((b) => (
+                          <SelectItem key={b.id} value={b.id}>
+                            {b.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="useId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Use</FormLabel>
+                    <Select
+                      onValueChange={(val) =>
+                        field.onChange(
+                          val === NONE_VALUE ? "" : val,
+                        )
+                      }
+                      value={field.value || NONE_VALUE}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select use..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={NONE_VALUE}>
+                          None
+                        </SelectItem>
+                        {uses.map((u) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="condition"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Condition</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="New">New</SelectItem>
+                        <SelectItem value="Like_New">
+                          Like New
+                        </SelectItem>
+                        <SelectItem value="Excellent">
+                          Excellent
+                        </SelectItem>
+                        <SelectItem value="Good">Good</SelectItem>
+                        <SelectItem value="Fair">Fair</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name="badge"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Badge</FormLabel>
+                    <Select
+                      onValueChange={(val) =>
+                        field.onChange(
+                          val === NONE_VALUE ? "" : val,
+                        )
+                      }
+                      value={field.value || NONE_VALUE}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="None" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={NONE_VALUE}>
+                          None
+                        </SelectItem>
+                        <SelectItem value="Certified">
+                          Certified
+                        </SelectItem>
+                        <SelectItem value="Best Seller">
+                          Best Seller
+                        </SelectItem>
+                        <SelectItem value="New">New</SelectItem>
+                        <SelectItem value="Great deal">
+                          Great deal
+                        </SelectItem>
+                        <SelectItem value="Staff pick">
+                          Staff pick
+                        </SelectItem>
+                        <SelectItem value="Like new">
+                          Like new
+                        </SelectItem>
+                        <SelectItem value="Low stock">
+                          Low stock
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Key Specifications</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {specLabels.map((spec) => {
+                const existing = specs.find((s) => s.label === spec.label);
+                return (
+                  <div key={spec.label}>
+                    <label
+                      htmlFor={`spec-${spec.label}`}
+                      className="mb-1 block text-sm font-medium text-ink"
+                    >
+                      {spec.label}
+                    </label>
+                    <Input
+                      id={`spec-${spec.label}`}
+                      placeholder={spec.placeholder}
+                      value={existing?.value ?? ""}
+                      onChange={(e) => {
+                        setSpecs((prev) => {
+                          const next = prev.filter(
+                            (s) => s.label !== spec.label,
+                          );
+                          if (e.target.value.trim()) {
+                            next.push({
+                              label: spec.label,
+                              value: e.target.value,
+                            });
+                          }
+                          return next;
+                        });
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Images</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-4">
+              {images.map((url, idx) => (
+                <div
+                  key={idx}
+                  className="group relative h-24 w-24 overflow-hidden rounded-lg border border-line bg-bg2 sm:h-28 sm:w-28"
+                >
+                  <img
+                    src={url}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                  {idx === 0 && (
+                    <span className="absolute left-1 top-1 rounded bg-brand px-1.5 py-0.5 text-[10px] font-semibold text-white shadow-chip">
+                      Primary
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setImages(images.filter((_, i) => i !== idx))
+                    }
+                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                    aria-label="Remove image"
+                  >
+                    &times;
+                  </button>
+                </div>
+              ))}
+              {images.length < 6 && (
+                <ImageUpload
+                  value=""
+                  onChange={(url) => setImages([...images, url])}
+                  label="Add Image"
+                  folder="products"
+                />
+              )}
+            </div>
+            {images.length === 0 && (
+              <p className="mt-2 text-xs text-ink-3">
+                Upload at least one image for the product gallery.
+              </p>
             )}
-          </div>
-          {images.length === 0 && (
-            <p className="mt-2 text-xs text-ink-3">Upload at least one image for the product gallery.</p>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      <div className="flex items-center gap-6">
-        <label className="flex items-center gap-2 text-sm font-medium text-ink">
-          <input
-            type="checkbox"
-            {...register("isActive")}
-            className="h-4 w-4 rounded border-line text-brand focus:outline-2 focus:outline-offset-2 focus:outline-ink/40"
+        <div className="flex items-center gap-6">
+          <FormField
+            control={control}
+            name="isActive"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center gap-2">
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormLabel className="pb-0">Active</FormLabel>
+              </FormItem>
+            )}
           />
-          Active
-        </label>
-        <label className="flex items-center gap-2 text-sm font-medium text-ink">
-          <input
-            type="checkbox"
-            {...register("isFeatured")}
-            className="h-4 w-4 rounded border-line text-brand focus:outline-2 focus:outline-offset-2 focus:outline-ink/40"
+          <FormField
+            control={control}
+            name="isFeatured"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center gap-2">
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormLabel className="pb-0">Featured</FormLabel>
+              </FormItem>
+            )}
           />
-          Featured
-        </label>
-      </div>
+        </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
-          {isSubmitting ? "Saving..." : id ? "Update Product" : "Create Product"}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.push("/products")} className="w-full sm:w-auto">
-          Cancel
-        </Button>
-      </div>
-    </form>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
+            {isSubmitting ? "Saving..." : id ? "Update Product" : "Create Product"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push("/products")}
+            className="w-full sm:w-auto"
+          >
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
-}
-
-function Label({ htmlFor, children }: { htmlFor: string; children: React.ReactNode }) {
-  return (
-    <label htmlFor={htmlFor} className="mb-1 block text-sm font-medium text-ink">
-      {children}
-    </label>
-  );
-}
-
-function FieldError({ children }: { children?: React.ReactNode }) {
-  return <p className="mt-1 text-xs text-sale">{children}</p>;
 }

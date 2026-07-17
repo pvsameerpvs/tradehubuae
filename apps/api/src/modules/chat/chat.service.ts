@@ -106,7 +106,7 @@ export class ChatService {
   async getMessages(sessionId: string) {
     return this.drizzle.db.query.chatMessages.findMany({
       where: eq(chatMessages.sessionId, sessionId),
-      orderBy: [desc(chatMessages.createdAt)],
+      orderBy: [chatMessages.createdAt],
     });
   }
 

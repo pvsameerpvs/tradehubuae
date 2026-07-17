@@ -8,8 +8,9 @@ import {
   MessageBody,
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
+import { JwtService } from "@nestjs/jwt";
 import { ChatService } from "./chat.service";
-import { Logger } from "@nestjs/common";
+import { Logger, UnauthorizedException } from "@nestjs/common";
 
 @WebSocketGateway({
   namespace: "/chat",
@@ -21,10 +22,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   private readonly logger = new Logger(ChatGateway.name);
 
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   handleConnection(client: Socket) {
-    this.logger.log(`Client connected: ${client.id}`);
+    const token = client.handshake.auth?.token || client.handshake.query?.token;
+
+    if (token && typeof token === "string") {
+      try {
+        const payload = this.jwtService.verify(token);
+        (client as any).user = payload;
+        this.logger.log(`Authenticated client connected: ${client.id} (${payload.email})`);
+        return;
+      } catch {
+        this.logger.warn(`Invalid token for client ${client.id}, allowing anonymous`);
+      }
+    }
+
+    this.logger.log(`Anonymous client connected: ${client.id}`);
   }
 
   handleDisconnect(client: Socket) {
@@ -47,11 +64,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { sessionId: string; content: string; messageType?: string },
   ) {
+    const user = (client as any).user;
+    const adminId = user?.role === "admin" || user?.role === "SUPER_ADMIN" ? user.sub : undefined;
+
     const message = await this.chatService.sendMessage(data.sessionId, {
       content: data.content,
       messageType: data.messageType,
-    });
+    }, adminId);
+
+    const session = await this.chatService.getSessionById(data.sessionId);
+
     this.server.to(`session:${data.sessionId}`).emit("chat:message:new", { message });
+    this.server.to(`session:${data.sessionId}`).emit("chat:session:updated", { session });
     this.server.emit("chat:unread:count", { sessionId: data.sessionId });
   }
 
@@ -60,8 +84,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { sessionId: string; isTyping: boolean },
   ) {
+    const user = (client as any).user;
+    const adminName = user?.name ?? "Admin";
+
     client.to(`session:${data.sessionId}`).emit("chat:typing:update", {
       sessionId: data.sessionId,
+      adminName,
       isTyping: data.isTyping,
     });
   }

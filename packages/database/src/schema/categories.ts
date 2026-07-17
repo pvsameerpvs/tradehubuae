@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { foreignKey, pgTable, uuid, varchar, text, integer, boolean, timestamp } from "drizzle-orm/pg-core";
 
 export const categories = pgTable("categories", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -13,7 +13,9 @@ export const categories = pgTable("categories", {
   seoDescription: text("seo_description"),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
-});
+}, (t) => ({
+  parentFk: foreignKey({ columns: [t.parentId], foreignColumns: [t.id] }).onDelete("set null"),
+}));
 
 export const categoryAttributes = pgTable("category_attributes", {
   id: uuid("id").defaultRandom().primaryKey(),

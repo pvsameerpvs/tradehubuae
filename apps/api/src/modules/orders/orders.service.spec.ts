@@ -154,7 +154,7 @@ describe("OrdersService", () => {
         taxAmount: 5,
         discountAmount: 0,
         total: 115,
-        items: [{ name: "Test", sku: "TST", quantity: 1, unitPrice: 100 }],
+        items: [{ productId: "prod-1", name: "Test", sku: "TST", quantity: 1, unitPrice: 100 }],
       };
 
       const createdOrder = {

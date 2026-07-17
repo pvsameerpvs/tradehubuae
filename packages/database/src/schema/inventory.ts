@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, integer, boolean, timestamp, unique } from "drizzle-orm/pg-core";
+import { index, pgTable, uuid, varchar, text, integer, boolean, timestamp, unique } from "drizzle-orm/pg-core";
 import { products, productVariants } from "./products";
 
 export const warehouses = pgTable("warehouses", {
@@ -32,6 +32,7 @@ export const stock = pgTable("stock", {
 
 export const stockHistory = pgTable("stock_history", {
   id: uuid("id").defaultRandom().primaryKey(),
+  productId: uuid("product_id").notNull().references(() => products.id),
   variantId: uuid("variant_id").notNull().references(() => productVariants.id),
   warehouseId: uuid("warehouse_id").notNull().references(() => warehouses.id),
   type: varchar("type", { length: 50 }).notNull(),
@@ -40,7 +41,11 @@ export const stockHistory = pgTable("stock_history", {
   referenceId: varchar("reference_id", { length: 255 }),
   note: text("note"),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
-});
+}, (t) => [
+  index("stock_history_product_idx").on(t.productId),
+  index("stock_history_variant_idx").on(t.variantId),
+  index("stock_history_created_at_idx").on(t.createdAt),
+]);
 
 export const stockTransfers = pgTable("stock_transfers", {
   id: uuid("id").defaultRandom().primaryKey(),

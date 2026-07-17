@@ -8,6 +8,20 @@
       "when": 1784223861089,
       "tag": "0000_public_raider",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784296081246,
+      "tag": "0001_bent_wrecking_crew",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784297364767,
+      "tag": "0002_blushing_namora",
+      "breakpoints": true
     }
   ]
 }

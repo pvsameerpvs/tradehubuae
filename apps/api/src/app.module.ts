@@ -20,6 +20,7 @@ import { ContactModule } from "./modules/contact/contact.module";
 import { AddressesModule } from "./modules/addresses/addresses.module";
 import { BulkSalesModule } from "./modules/bulk-sales/bulk-sales.module";
 import { ChatModule } from "./modules/chat/chat.module";
+import { ReviewsModule } from "./modules/reviews/reviews.module";
 import { DrizzleModule } from "./database/drizzle.module";
 
 @Module({
@@ -54,6 +55,7 @@ import { DrizzleModule } from "./database/drizzle.module";
     AddressesModule,
     BulkSalesModule,
     ChatModule,
+    ReviewsModule,
   ],
 })
 export class AppModule {}

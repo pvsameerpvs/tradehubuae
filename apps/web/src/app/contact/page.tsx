@@ -8,11 +8,20 @@ import { submitContact } from "@/lib/actions/contact";
 export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
+    setError(null);
     const result = await submitContact(form);
-    if (result.success) setSubmitted(true);
+    if (result.success) {
+      setSubmitted(true);
+    } else {
+      setError(result.error ?? "Something went wrong");
+    }
+    setSubmitting(false);
   };
 
   if (submitted) {
@@ -43,6 +52,7 @@ export default function ContactPage() {
           <div className="rounded-xl border bg-white p-6">
             <h2 className="mb-6 text-xl font-semibold">Send Us a Message</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && <div className="rounded-lg border border-sale/30 bg-sale/5 px-4 py-3 text-sm text-sale">{error}</div>}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="mb-1.5 block text-sm font-medium">Name *</label>
@@ -71,7 +81,7 @@ export default function ContactPage() {
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                 />
               </div>
-              <Button type="submit" size="lg">Send Message</Button>
+              <Button type="submit" size="lg" disabled={submitting}>{submitting ? "Sending..." : "Send Message"}</Button>
             </form>
           </div>
 

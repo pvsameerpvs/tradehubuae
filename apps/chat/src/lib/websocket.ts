@@ -1,10 +1,11 @@
+import { io, Socket } from "socket.io-client";
 import type { ChatMessage, ChatSession } from "@/types";
 
 type WsEvent =
   | { event: "chat:message:new"; message: ChatMessage }
   | { event: "chat:session:updated"; session: ChatSession }
   | { event: "chat:typing:update"; sessionId: string; adminName: string; isTyping: boolean }
-  | { event: "chat:unread:count"; count: number };
+  | { event: "chat:unread:count"; sessionId: string; count: number };
 
 type WsOutgoing =
   | { event: "chat:message"; sessionId: string; content: string }
@@ -14,56 +15,68 @@ type WsOutgoing =
 
 type Listener = (event: WsEvent) => void;
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:4000/chat";
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:4000";
+
+const EVENT_MAP: Record<string, string> = {
+  "chat:message:new": "chat:message:new",
+  "chat:session:updated": "chat:session:updated",
+  "chat:typing:update": "chat:typing:update",
+  "chat:unread:count": "chat:unread:count",
+};
 
 class ChatWebSocket {
-  private ws: WebSocket | null = null;
+  private socket: Socket | null = null;
   private listeners = new Set<Listener>();
   private onStatusChange: ((connected: boolean) => void) | null = null;
-  private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   private refCount = 0;
+  private token: string | null = null;
+
+  setToken(token: string | null) {
+    this.token = token;
+  }
 
   connect() {
     this.refCount++;
-    if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) return;
+    if (this.socket?.connected) return;
 
-    this.ws = new WebSocket(WS_URL);
+    if (this.socket) {
+      this.socket.connect();
+      return;
+    }
 
-    this.ws.onopen = () => this.onStatusChange?.(true);
+    this.socket = io(`${WS_URL}/chat`, {
+      transports: ["websocket", "polling"],
+      auth: this.token ? { token: this.token } : undefined,
+      autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 3000,
+    });
 
-    this.ws.onmessage = (event) => {
-      try {
-        const data: WsEvent = JSON.parse(event.data);
-        this.listeners.forEach((fn) => fn(data));
-      } catch {
-        // malformed message
-      }
-    };
+    this.socket.on("connect", () => this.onStatusChange?.(true));
+    this.socket.on("disconnect", () => this.onStatusChange?.(false));
+    this.socket.on("connect_error", (err) => console.error("[ChatWS] Connection error:", err.message));
 
-    this.ws.onclose = () => {
-      this.onStatusChange?.(false);
-      this.reconnectTimeout = setTimeout(() => {
-        this.ws = null;
-        this.connect();
-      }, 3000);
-    };
-
-    this.ws.onerror = () => this.ws?.close();
+    for (const eventName of Object.values(EVENT_MAP)) {
+      this.socket.on(eventName, (data: any) => {
+        const event = { event: eventName, ...data } as WsEvent;
+        this.listeners.forEach((fn) => fn(event));
+      });
+    }
   }
 
   disconnect() {
     this.refCount--;
     if (this.refCount > 0) return;
-    if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
     this.listeners.clear();
     this.onStatusChange = null;
-    this.ws?.close();
-    this.ws = null;
+    this.socket?.disconnect();
+    this.socket = null;
   }
 
   onConnectionChange(handler: (connected: boolean) => void) {
     this.onStatusChange = handler;
-    if (this.ws) handler(this.ws.readyState === WebSocket.OPEN);
+    if (this.socket) handler(this.socket.connected);
   }
 
   subscribe(handler: Listener): () => void {
@@ -72,13 +85,13 @@ class ChatWebSocket {
   }
 
   send(data: WsOutgoing) {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(data));
+    if (this.socket?.connected) {
+      this.socket.emit(data.event, data);
     }
   }
 
   get connected(): boolean {
-    return this.ws?.readyState === WebSocket.OPEN;
+    return this.socket?.connected ?? false;
   }
 }
 

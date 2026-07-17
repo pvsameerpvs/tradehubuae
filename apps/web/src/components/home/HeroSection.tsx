@@ -34,11 +34,11 @@ export function HeroSection() {
   const botPad = Math.max(0, 80 * (1 - paddingProgress));
 
   return (
-    <div
-      className="relative overflow-hidden"
-      style={{ paddingTop: `${topPad}px`, paddingBottom: `${botPad}px` }}
-    >
-      <div className="absolute inset-0 -top-24 h-[calc(100%+96px)]">
+      <div
+        className="relative"
+        style={{ paddingTop: `${topPad}px`, paddingBottom: `${botPad}px` }}
+      >
+      <div className="absolute inset-0 -top-24 h-[calc(100%+96px)] overflow-hidden">
         <Image
           src="/images/hero-bg.jpg"
           alt=""

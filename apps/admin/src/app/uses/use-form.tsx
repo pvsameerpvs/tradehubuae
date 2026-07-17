@@ -2,9 +2,21 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { api } from "@/lib/api";
 import { ImageUpload } from "@/components/ImageUpload";
-import { Button } from "@tradehubuae/ui";
+import {
+  Button,
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+  Input,
+} from "@tradehubuae/ui";
 
 interface UseItem {
   id: string;
@@ -12,32 +24,52 @@ interface UseItem {
   image: string | null;
 }
 
+const useSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  image: z.string().optional(),
+});
+
+type UseFormValues = z.infer<typeof useSchema>;
+
 export function UseForm({ id }: { id?: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(!!id);
-  const [form, setForm] = useState({
-    name: "",
-    image: "",
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const form = useForm<UseFormValues>({
+    resolver: zodResolver(useSchema),
+    defaultValues: {
+      name: "",
+      image: "",
+    },
   });
+
+  const { reset, control, watch } = form;
 
   useEffect(() => {
     if (!id) return;
     setFetching(true);
-    api.get<UseItem>(`/uses/${id}`)
-      .then((item) => setForm({
-        name: item.name,
-        image: item.image ?? "",
-      }))
-      .catch(() => { /* TODO: show error toast */ })
+    api
+      .get<UseItem>(`/uses/${id}`)
+      .then((item) =>
+        reset({
+          name: item.name,
+          image: item.image ?? "",
+        }),
+      )
+      .catch((err) => setSubmitError(err instanceof Error ? err.message : "Failed to load data"))
       .finally(() => setFetching(false));
-  }, [id]);
+  }, [id, reset]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: UseFormValues) => {
     setLoading(true);
+    setSubmitError(null);
     try {
-      const payload = { ...form, image: form.image || undefined };
+      const payload = {
+        ...data,
+        image: data.image || undefined,
+      };
       if (id) {
         await api.put(`/uses/${id}`, payload);
       } else {
@@ -46,7 +78,7 @@ export function UseForm({ id }: { id?: string }) {
       router.push("/uses");
       router.refresh();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to save");
+      setSubmitError(err instanceof Error ? err.message : "Failed to save");
     } finally {
       setLoading(false);
     }
@@ -55,38 +87,76 @@ export function UseForm({ id }: { id?: string }) {
   if (fetching) return <p className="text-sm text-ink-2">Loading...</p>;
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-lg space-y-5">
-      <div>
-        <label className="mb-1 block text-sm font-medium text-ink">Name *</label>
-        <input
-          required
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-3 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="max-w-lg space-y-5"
+        noValidate
+      >
+        {submitError && (
+          <div className="rounded-lg border border-sale/30 bg-sale/5 px-4 py-3 text-sm text-sale">
+            {submitError}
+          </div>
+        )}
+
+        <FormField
+          control={control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name *</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      <div>
-        <label className="mb-1 block text-sm font-medium text-ink">Slug</label>
-        <input
-          value={form.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")}
-          disabled
-          className="w-full rounded-lg border border-line bg-bg2 px-3 py-2 text-sm text-ink-2"
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-ink">
+            Slug
+          </label>
+          <Input
+            value={watch("name")
+              .toLowerCase()
+              .replace(/\s+/g, "-")
+              .replace(/[^a-z0-9-]/g, "")}
+            disabled
+            className="bg-bg2 text-ink-2"
+          />
+        </div>
+
+        <FormField
+          control={control}
+          name="image"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Image</FormLabel>
+              <ImageUpload
+                value={field.value ?? ""}
+                onChange={field.onChange}
+                label="Image"
+                folder="uses"
+              />
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      <ImageUpload
-        value={form.image}
-        onChange={(url) => setForm({ ...form, image: url })}
-        label="Image"
-        folder="uses"
-      />
-      <div className="flex gap-4 pt-2">
-        <Button type="submit" disabled={loading}>
-          {loading ? "Saving..." : id ? "Update" : "Create"}
-        </Button>
-        <Button type="button" variant="secondary" onClick={() => router.push("/uses")}>
-          Cancel
-        </Button>
-      </div>
-    </form>
+
+        <div className="flex gap-4 pt-2">
+          <Button type="submit" disabled={loading}>
+            {loading ? "Saving..." : id ? "Update" : "Create"}
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => router.push("/uses")}
+          >
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

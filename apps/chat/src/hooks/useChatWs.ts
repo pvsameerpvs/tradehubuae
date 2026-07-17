@@ -4,10 +4,29 @@ import { useEffect, useCallback } from "react";
 import { useChatStore } from "@/lib/store";
 import { chatWs } from "@/lib/websocket";
 
+function getToken(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const cookies = document.cookie.split("; ");
+    for (const cookie of cookies) {
+      const [name, ...rest] = cookie.split("=");
+      if (name === "token" || name === "sb-token" || name === "access_token") {
+        return rest.join("=");
+      }
+    }
+    const stored = localStorage.getItem("token") || localStorage.getItem("sb-token");
+    if (stored) return stored;
+  } catch {}
+  return null;
+}
+
 export function useChatWs() {
-  const { setConnected, addMessage, updateSession } = useChatStore();
+  const { setConnected, addMessage, updateSession, markSessionRead } = useChatStore();
 
   useEffect(() => {
+    const token = getToken();
+    if (token) chatWs.setToken(token);
+
     chatWs.onConnectionChange(setConnected);
     chatWs.connect();
 
@@ -19,6 +38,19 @@ export function useChatWs() {
         case "chat:session:updated":
           updateSession(data.session.id, data.session);
           break;
+        case "chat:unread:count": {
+          const session = useChatStore.getState().sessions.find((s) => s.id === data.sessionId);
+          if (session) {
+            updateSession(data.sessionId, { unreadCount: (session.unreadCount || 0) + 1 });
+          }
+          break;
+        }
+        case "chat:typing:update": {
+          updateSession(data.sessionId, {
+            ...(data.adminName ? { assignedAdminName: data.adminName } : {}),
+          });
+          break;
+        }
       }
     });
 
