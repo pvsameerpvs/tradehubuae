@@ -58,4 +58,9 @@ export class QueryProductDto {
   @IsOptional()
   @IsString()
   order?: "asc" | "desc" = "desc";
+
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  isActive?: boolean;
 }

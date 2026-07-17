@@ -45,7 +45,7 @@ export async function getProducts(params?: {
   sort?: string;
   order?: string;
 }): Promise<PaginatedResponse<ProductData>> {
-  return api.get<PaginatedResponse<ProductData>>("/products", params as Record<string, string | number | boolean | undefined>);
+  return api.get<PaginatedResponse<ProductData>>("/products", { isActive: true, ...params } as Record<string, string | number | boolean | undefined>);
 }
 
 export async function getProductBySlug(slug: string): Promise<ProductData | null> {

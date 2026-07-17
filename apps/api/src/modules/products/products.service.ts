@@ -32,11 +32,13 @@ export class ProductsService {
   constructor(private drizzle: DrizzleService) {}
 
   async findAll(query: QueryProductDto) {
-    const { page = 1, limit = 20, sort = "createdAt", order = "desc", q, category, brand, use, minPrice, maxPrice, condition, inStock } = query;
+    const { page = 1, limit = 20, sort = "createdAt", order = "desc", q, category, brand, use, minPrice, maxPrice, condition, inStock, isActive } = query;
 
-    const conditions: (typeof sql.arguments[number] | undefined)[] = [
-      eq(products.isActive, true),
-    ];
+    const conditions: (typeof sql.arguments[number] | undefined)[] = [];
+
+    if (isActive !== undefined) {
+      conditions.push(eq(products.isActive, isActive));
+    }
 
     if (q) {
       conditions.push(

@@ -25,10 +25,17 @@ import {
   SelectItem,
   Textarea,
   Switch,
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
 } from "@tradehubuae/ui";
 import { api, type PaginatedResponse } from "@/lib/api";
 import { ImageUpload } from "@/components/ImageUpload";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Trash2 } from "lucide-react";
 
 interface Category {
   id: string;
@@ -158,6 +165,7 @@ export function ProductForm({ id }: { id?: string }) {
   const [uses, setUses] = useState<UseItem[]>([]);
   const [fetching, setFetching] = useState(!!id);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [specs, setSpecs] = useState<{ label: string; value: string }[]>([]);
   const [generating, setGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
@@ -746,6 +754,53 @@ export function ProductForm({ id }: { id?: string }) {
             Cancel
           </Button>
         </div>
+
+        {id && (
+          <div className="border-t border-line pt-6">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button type="button" variant="outline" disabled={deleting} className="w-full text-sale border-sale/30 hover:bg-sale/5 sm:w-auto">
+                  <Trash2 className="mr-1.5 h-4 w-4" strokeWidth={1.75} />
+                  {deleting ? "Deleting..." : "Delete Product"}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Delete Product</DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to delete this product? This action cannot be undone.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="gap-2 sm:gap-0">
+                  <DialogTrigger asChild>
+                    <Button type="button" variant="outline" disabled={deleting} className="w-full sm:w-auto">
+                      Cancel
+                    </Button>
+                  </DialogTrigger>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full border-sale/30 bg-sale text-white hover:bg-sale-dark sm:w-auto"
+                    disabled={deleting}
+                    onClick={async () => {
+                      setDeleting(true);
+                      try {
+                        await api.delete(`/products/${id}`);
+                        router.push("/products");
+                        router.refresh();
+                      } catch (err) {
+                        alert(err instanceof Error ? err.message : "Failed to delete product");
+                        setDeleting(false);
+                      }
+                    }}
+                  >
+                    {deleting ? "Deleting..." : "Yes, Delete"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        )}
       </form>
     </Form>
   );

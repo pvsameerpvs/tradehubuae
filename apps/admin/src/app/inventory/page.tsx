@@ -26,10 +26,11 @@ interface InventoryProduct {
   categories?: { category: Category }[];
 }
 
-function StockCell({ productId, stock: initialStock, saving, onSave }: {
+function StockCell({ productId, stock: initialStock, saving, disabled, onSave }: {
   productId: string;
   stock: number;
   saving: boolean;
+  disabled?: boolean;
   onSave: (id: string, stock: number) => Promise<void>;
 }) {
   const [value, setValue] = useState(initialStock);
@@ -79,7 +80,7 @@ function StockCell({ productId, stock: initialStock, saving, onSave }: {
       <button
         type="button"
         onClick={() => adjust(-1)}
-        disabled={value <= 0 || saving}
+        disabled={value <= 0 || saving || disabled}
         className="flex h-7 w-7 items-center justify-center rounded-md border border-line text-ink transition-colors hover:bg-bg3 disabled:opacity-30 disabled:cursor-not-allowed"
         aria-label="Decrease stock"
       >
@@ -93,29 +94,31 @@ function StockCell({ productId, stock: initialStock, saving, onSave }: {
           onChange={handleChange}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          disabled={saving}
+          disabled={saving || disabled}
           className={`h-7 w-16 rounded-md border text-center text-sm font-semibold outline-none transition-colors [-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none ${
-            dirty
-              ? "border-brand bg-brand/[0.03] text-brand"
-              : value === 0
-                ? "border-sale/30 bg-sale/[0.03] text-sale"
-                : "border-line bg-white text-ink"
+            disabled
+              ? "border-line bg-bg2 text-ink-3"
+              : dirty
+                ? "border-brand bg-brand/[0.03] text-brand"
+                : value === 0
+                  ? "border-sale/30 bg-sale/[0.03] text-sale"
+                  : "border-line bg-white text-ink"
           }`}
         />
-        {saving && (
+        {(saving) && (
           <Loader2 className="absolute right-1 top-1/2 h-3 w-3 -translate-y-1/2 animate-spin text-ink-3" strokeWidth={2} />
         )}
       </div>
       <button
         type="button"
         onClick={() => adjust(1)}
-        disabled={saving}
+        disabled={saving || disabled}
         className="flex h-7 w-7 items-center justify-center rounded-md border border-line text-ink transition-colors hover:bg-bg3 disabled:opacity-30 disabled:cursor-not-allowed"
         aria-label="Increase stock"
       >
         <Plus className="h-3 w-3" strokeWidth={2} />
       </button>
-      {dirty && (
+      {dirty && !disabled && (
         <button
           type="button"
           onClick={commit}
@@ -335,6 +338,7 @@ export default function InventoryPage() {
                             productId={p.id}
                             stock={p.stock ?? 0}
                             saving={savingStock === p.id}
+                            disabled={!p.isActive}
                             onSave={handleStockSave}
                           />
                         </div>
@@ -376,6 +380,7 @@ export default function InventoryPage() {
                           productId={p.id}
                           stock={p.stock ?? 0}
                           saving={savingStock === p.id}
+                          disabled={!p.isActive}
                           onSave={handleStockSave}
                         />
                       </td>
