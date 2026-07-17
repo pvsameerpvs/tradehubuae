@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { api, type PaginatedResponse } from "@/lib/api";
 import { ImageUpload } from "@/components/ImageUpload";
+import { toast } from "sonner";
 import {
   Button,
   Form,
@@ -177,13 +178,17 @@ export function ComboOfferForm({ id }: { id?: string }) {
       };
       if (id) {
         await api.put(`/combo-offers/${id}`, payload);
+        toast.success("Combo offer updated");
       } else {
         await api.post("/combo-offers", payload);
+        toast.success("Combo offer created");
       }
       router.push("/combo-offers");
       router.refresh();
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Failed to save");
+      const msg = err instanceof Error ? err.message : "Failed to save";
+      setSubmitError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

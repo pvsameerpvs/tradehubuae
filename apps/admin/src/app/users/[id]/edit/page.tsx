@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@tradehubuae/ui";
 
@@ -36,10 +37,13 @@ export default function EditUserPage() {
     setError(null);
     try {
       await api.put(`/users/${params.id}`, { name: form.name, email: form.email, role: form.role, isActive: form.isActive });
+      toast.success("User updated");
       router.push("/users");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save user");
+      const msg = err instanceof Error ? err.message : "Failed to save user";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }

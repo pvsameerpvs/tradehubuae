@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { api } from "@/lib/api";
 import { ImageUpload } from "@/components/ImageUpload";
+import { toast } from "sonner";
 import {
   Button,
   Form,
@@ -72,13 +73,17 @@ export function UseForm({ id }: { id?: string }) {
       };
       if (id) {
         await api.put(`/uses/${id}`, payload);
+        toast.success("Use updated");
       } else {
         await api.post("/uses", payload);
+        toast.success("Use created");
       }
       router.push("/uses");
       router.refresh();
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Failed to save");
+      const msg = err instanceof Error ? err.message : "Failed to save";
+      setSubmitError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

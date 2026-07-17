@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Upload, X } from "lucide-react";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 interface ImageUploadProps {
   value?: string;
@@ -25,12 +26,12 @@ export function ImageUpload({ value, onChange, label = "Image", folder = "upload
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert("Please select an image file");
+      toast.error("Please select an image file");
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      alert("File too large (max 10MB)");
+      toast.error("File too large (max 10MB)");
       return;
     }
 
@@ -41,7 +42,7 @@ export function ImageUpload({ value, onChange, label = "Image", folder = "upload
       const url = await api.upload(file, folder);
       onChange(url);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Upload failed");
+      toast.error(err instanceof Error ? err.message : "Upload failed");
       setPreview(value ?? "");
     } finally {
       setUploading(false);

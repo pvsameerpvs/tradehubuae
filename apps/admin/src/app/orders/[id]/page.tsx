@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Package,
@@ -154,8 +155,11 @@ export default function OrderDetailPage() {
       await api.put(`/orders/${order.id}/status`, { status: newStatus });
       setOrder({ ...order, status: newStatus });
       setConfirmStatus(null);
+      toast.success(`Order status updated to ${newStatus}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update status");
+      const msg = err instanceof Error ? err.message : "Failed to update status";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setUpdating(false);
     }

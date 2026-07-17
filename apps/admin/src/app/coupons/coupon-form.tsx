@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 import {
   Button,
   Form,
@@ -145,13 +146,17 @@ export function CouponForm({ id }: { id?: string }) {
       };
       if (id) {
         await api.put(`/coupons/${id}`, payload);
+        toast.success("Coupon updated");
       } else {
         await api.post("/coupons", payload);
+        toast.success("Coupon created");
       }
       router.push("/coupons");
       router.refresh();
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Failed to save");
+      const msg = err instanceof Error ? err.message : "Failed to save";
+      setSubmitError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

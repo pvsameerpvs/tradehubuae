@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, FileText, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
+import { ArrowLeft, FileText, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "@tradehubuae/ui";
 import { Button } from "@tradehubuae/ui";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 interface SeoEntry {
   id: string;
@@ -42,7 +43,6 @@ export default function MetaPage() {
   const [pages, setPages] = useState<PageMeta[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
     async function loadSeo() {
@@ -85,7 +85,6 @@ export default function MetaPage() {
     const page = pages[idx];
     if (!page) return;
     setPages((prev) => prev.map((p, i) => i === idx ? { ...p, saving: true } : p));
-    setMessage(null);
 
     try {
       await api.post("/seo", {
@@ -98,19 +97,18 @@ export default function MetaPage() {
       setTimeout(() => {
         setPages((prev) => prev.map((p, i) => i === idx ? { ...p, saved: false } : p));
       }, 2000);
-      setMessage({ type: "success", text: "SEO metadata saved!" });
+      toast.success("SEO metadata saved");
     } catch {
       setPages((prev) => prev.map((p, i) => i === idx ? { ...p, saving: false } : p));
-      setMessage({ type: "error", text: "Failed to save. Check API connection." });
+      toast.error("Failed to save. Check API connection.");
     }
   };
 
   const handleGenerateAll = async () => {
     setGenerating(true);
-    setMessage(null);
     try {
       const result = await api.post<{ success: number; errors: number; total: number }>("/seo/generate", {});
-      setMessage({ type: "success", text: `SEO generated for ${result.success}/${result.total} pages.` });
+      toast.success(`SEO generated for ${result.success}/${result.total} pages`);
       // Reload
       const entries = await api.get<SeoEntry[]>("/seo");
       setPages((prev) =>
@@ -120,7 +118,7 @@ export default function MetaPage() {
         })
       );
     } catch {
-      setMessage({ type: "error", text: "Generation failed. Check Gemini API key." });
+      toast.error("Generation failed. Check Gemini API key.");
     } finally {
       setGenerating(false);
     }
@@ -159,19 +157,6 @@ export default function MetaPage() {
           {generating ? "Generating..." : "Generate All with AI"}
         </Button>
       </div>
-
-      {message && (
-        <div className={`flex items-center gap-2 rounded-lg p-4 text-sm font-medium ${
-          message.type === "success" ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
-        }`}>
-          {message.type === "success" ? (
-            <CheckCircle2 className="h-4 w-4" strokeWidth={1.75} />
-          ) : (
-            <AlertCircle className="h-4 w-4" strokeWidth={1.75} />
-          )}
-          {message.text}
-        </div>
-      )}
 
       {pages.map((page, idx) => (
         <Card key={page.path}>

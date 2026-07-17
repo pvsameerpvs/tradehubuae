@@ -36,6 +36,7 @@ import {
 import { api, type PaginatedResponse } from "@/lib/api";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Sparkles, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface Category {
   id: string;
@@ -259,13 +260,18 @@ export function ProductForm({ id }: { id?: string }) {
 
       if (id) {
         await api.put(`/products/${id}`, payload);
+        toast.success("Product updated successfully");
       } else {
         await api.post("/products", payload);
+        toast.success("Product created successfully");
       }
       router.push("/products");
       router.refresh();
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Failed to save product");
+      const msg = err instanceof Error ? err.message : "Failed to save product";
+      setSubmitError(msg);
+      toast.error(msg);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -786,10 +792,11 @@ export function ProductForm({ id }: { id?: string }) {
                       setDeleting(true);
                       try {
                         await api.delete(`/products/${id}`);
+                        toast.success("Product deleted");
                         router.push("/products");
                         router.refresh();
                       } catch (err) {
-                        alert(err instanceof Error ? err.message : "Failed to delete product");
+                        toast.error(err instanceof Error ? err.message : "Failed to delete product");
                         setDeleting(false);
                       }
                     }}

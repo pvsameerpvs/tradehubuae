@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { ImageIcon, Trash2, Loader2 } from "lucide-react";
 import { ImageUpload } from "@/components/ImageUpload";
+import { toast } from "sonner";
 import {
   Button,
   Dialog,
@@ -41,8 +42,11 @@ export default function MediaPage() {
       await api.delete(`/media/${id}`);
       setMedia((prev) => prev.filter((item) => item.url !== deleteTarget.url));
       setDeleteTarget(null);
+      toast.success("Image deleted");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete image");
+      const msg = err instanceof Error ? err.message : "Failed to delete image";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setDeleting(false);
     }

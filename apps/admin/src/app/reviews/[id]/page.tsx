@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Star,
@@ -101,8 +102,11 @@ export default function ReviewDetailPage() {
         isApproved: !review.isApproved,
       });
       setReview(updated);
+      toast.success(`Review ${updated.isApproved ? "approved" : "unapproved"}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update review");
+      const msg = err instanceof Error ? err.message : "Failed to update review";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setUpdating(false);
     }
@@ -113,9 +117,12 @@ export default function ReviewDetailPage() {
     setDeleting(true);
     try {
       await api.delete(`/reviews/${review.id}`);
+      toast.success("Review deleted");
       router.push("/reviews");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete review");
+      const msg = err instanceof Error ? err.message : "Failed to delete review";
+      setError(msg);
+      toast.error(msg);
       setDeleting(false);
       setDeleteOpen(false);
     }

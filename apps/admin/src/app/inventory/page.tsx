@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { AlertTriangle, Warehouse, Search, Plus, Minus, Loader2 } from "lucide-react";
 import { Card, CardContent, Switch } from "@tradehubuae/ui";
+import { toast } from "sonner";
 import { api, type PaginatedResponse } from "@/lib/api";
 
 interface Brand {
@@ -177,8 +178,9 @@ export default function InventoryPage() {
           data: prev.data.map((p) => p.id === productId ? { ...p, isActive: !current } : p),
         };
       });
+      toast.success(`Product ${!current ? "activated" : "deactivated"}`);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to update");
+      toast.error(err instanceof Error ? err.message : "Failed to update");
     } finally {
       setToggling(null);
     }
@@ -195,8 +197,9 @@ export default function InventoryPage() {
           data: prev.data.map((p) => p.id === productId ? { ...p, stock } : p),
         };
       });
+      toast.success("Stock updated");
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to update stock");
+      toast.error(err instanceof Error ? err.message : "Failed to update stock");
     } finally {
       setSavingStock(null);
     }

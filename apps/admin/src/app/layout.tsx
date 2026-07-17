@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 import { AdminShell } from "@/components/AdminShell";
 
@@ -20,6 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <html lang="en" className={`${inter.variable} ${outfit.variable}`} suppressHydrationWarning>
       <body>
         <AdminShell>{children}</AdminShell>
+        <Toaster richColors position="top-right" closeButton />
       </body>
     </html>
   );

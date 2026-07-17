@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { api, type PaginatedResponse } from "@/lib/api";
 import { ImageUpload } from "@/components/ImageUpload";
+import { toast } from "sonner";
 import {
   Button,
   Form,
@@ -105,13 +106,17 @@ export function CategoryForm({ id }: { id?: string }) {
       };
       if (id) {
         await api.put(`/categories/${id}`, payload);
+        toast.success("Category updated");
       } else {
         await api.post("/categories", payload);
+        toast.success("Category created");
       }
       router.push("/categories");
       router.refresh();
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Failed to save");
+      const msg = err instanceof Error ? err.message : "Failed to save";
+      setSubmitError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

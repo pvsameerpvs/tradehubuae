@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@tradehubuae/ui";
 
@@ -27,10 +28,13 @@ export default function NewUserPage() {
     setError(null);
     try {
       await api.post("/users", form);
+      toast.success("User created");
       router.push("/users");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create user");
+      const msg = err instanceof Error ? err.message : "Failed to create user";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
