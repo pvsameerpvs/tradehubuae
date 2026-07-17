@@ -1,7 +1,13 @@
-import { Injectable, NotFoundException, Logger } from "@nestjs/common";
+import { Injectable, NotFoundException, BadRequestException, Logger } from "@nestjs/common";
 import { DrizzleService } from "../../database/drizzle.service";
 import { chatSessions, chatMessages, users, orders } from "@tradehubuae/database";
-import { eq, and, desc, count, like, or, SQL } from "drizzle-orm";
+import { eq, and, desc, count, like, or, inArray, SQL } from "drizzle-orm";
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isValidUuid(s: string): boolean {
+  return UUID_RE.test(s);
+}
 import type { CreateSessionDto } from "./dto/create-session.dto";
 import type { SendMessageDto } from "./dto/send-message.dto";
 
@@ -59,7 +65,10 @@ export class ChatService {
     const { page = 1, limit = 50, status, q } = query;
     const conditions: SQL[] = [];
 
-    if (status) conditions.push(eq(chatSessions.status, status));
+    if (status) {
+      const statuses = status.split(",");
+      conditions.push(statuses.length > 1 ? inArray(chatSessions.status, statuses) : eq(chatSessions.status, status));
+    }
     if (q) {
       const searchCondition = or(
         like(chatSessions.userName, `%${q}%`),
@@ -95,6 +104,7 @@ export class ChatService {
   }
 
   async getSessionById(id: string) {
+    if (!isValidUuid(id)) throw new BadRequestException("Invalid session ID");
     const [session] = await this.drizzle.db.query.chatSessions.findMany({
       where: eq(chatSessions.id, id),
     });
@@ -113,11 +123,13 @@ export class ChatService {
   async sendMessage(sessionId: string, dto: SendMessageDto, adminId?: string) {
     await this.getSessionById(sessionId);
 
+    const senderType = dto.senderType ?? (adminId ? "admin" : "user");
+
     const [message] = await this.drizzle.db
       .insert(chatMessages)
       .values({
         sessionId,
-        senderType: adminId ? "admin" : "user",
+        senderType,
         adminId: adminId ?? null,
         messageType: dto.messageType ?? "text",
         content: dto.content,

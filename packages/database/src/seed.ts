@@ -20,28 +20,28 @@ async function seed() {
   console.log("🌱 Seeding database...");
 
   // ── Clean existing data ──
-  const tables = [
-    "stock", "stock_history", "stock_transfer_items", "stock_transfers",
-    "inventory_logs", "warehouses",
-    "order_items", "payments", "shipments", "returns", "orders",
-    "cart_items", "wishlist_items",
-    "reviews",
-    "combo_offer_items", "combo_offers",
-    "coupon_products", "coupons",
-    "blog_post_tags", "blog_post_products", "blog_tags", "blog_posts",
-    "seo_metadata", "redirects",
-    "notifications",
-    "bulk_request_items", "bulk_requests",
-    "chat_messages", "chat_sessions",
-    "analytics_events", "page_views", "search_logs",
-    "product_categories", "product_variants", "product_specs", "product_images", "products",
-    "category_attributes", "categories",
-    "brands", "uses",
-    "addresses", "activity_logs", "sessions", "profiles", "users",
+  const tables: { schema: string; name: string }[] = [
+    { schema: "inventory", name: "stock_history" }, { schema: "inventory", name: "stock_transfer_items" }, { schema: "inventory", name: "stock_transfers" },
+    { schema: "inventory", name: "inventory_logs" }, { schema: "inventory", name: "warehouses" }, { schema: "inventory", name: "stock" },
+    { schema: "sales", name: "order_items" }, { schema: "sales", name: "payments" }, { schema: "sales", name: "shipments" }, { schema: "sales", name: "returns" }, { schema: "sales", name: "orders" },
+    { schema: "sales", name: "cart_items" }, { schema: "sales", name: "wishlist_items" },
+    { schema: "catalog", name: "reviews" },
+    { schema: "marketing", name: "combo_offer_items" }, { schema: "marketing", name: "combo_offers" },
+    { schema: "marketing", name: "coupon_products" }, { schema: "marketing", name: "coupons" },
+    { schema: "marketing", name: "bulk_request_items" }, { schema: "marketing", name: "bulk_requests" },
+    { schema: "content", name: "blog_post_tags" }, { schema: "content", name: "blog_post_products" }, { schema: "content", name: "blog_tags" }, { schema: "content", name: "blog_posts" },
+    { schema: "content", name: "seo_metadata" }, { schema: "content", name: "redirects" },
+    { schema: "public", name: "notifications" },
+    { schema: "communication", name: "chat_messages" }, { schema: "communication", name: "chat_sessions" },
+    { schema: "analytics", name: "analytics_events" }, { schema: "analytics", name: "page_views" }, { schema: "analytics", name: "search_logs" },
+    { schema: "catalog", name: "product_categories" }, { schema: "catalog", name: "product_variants" }, { schema: "catalog", name: "product_specs" }, { schema: "catalog", name: "product_images" }, { schema: "catalog", name: "products" },
+    { schema: "catalog", name: "category_attributes" }, { schema: "catalog", name: "categories" },
+    { schema: "catalog", name: "brands" }, { schema: "catalog", name: "uses" },
+    { schema: "public", name: "addresses" }, { schema: "public", name: "activity_logs" }, { schema: "public", name: "sessions" }, { schema: "public", name: "profiles" }, { schema: "public", name: "users" },
   ];
 
   for (const t of tables) {
-    await db.execute(`DELETE FROM "${t}"`);
+    await db.execute(`DELETE FROM "${t.schema}"."${t.name}"`);
   }
 
   // ── Users ──
@@ -175,7 +175,7 @@ async function seed() {
       shortDescription: "Integrated Services Router for branch connectivity",
       description: "Cisco 4000 Series ISR with 2x GE ports, 2x NIM slots, and advanced routing capabilities.",
       sku: "ISR4321", price: "3200.00", costPrice: "2300.00",
-      brandId: brandMap["cisco"].id, useId: insertedUses[1].id, condition: "Used - Excellent",
+      brandId: brandMap["cisco"].id, useId: insertedUses[1].id, condition: "Excellent",
       isActive: true, isFeatured: false,
       categorySlugs: ["routers"], weight: "6.2", width: "43.8", height: "4.4", depth: "38.5",
     },
@@ -275,7 +275,7 @@ async function seed() {
       shortDescription: "48-port PoE+ Gigabit Ethernet switch",
       description: "Juniper EX2300 delivers cost-effective, scalable enterprise access switching with 48 PoE+ ports.",
       sku: "EX2300-48P", price: "5500.00", costPrice: "4000.00",
-      brandId: brandMap["juniper"].id, useId: insertedUses[1].id, condition: "Used - Excellent",
+      brandId: brandMap["juniper"].id, useId: insertedUses[1].id, condition: "Excellent",
       isActive: true, isFeatured: false,
       categorySlugs: ["switches"], weight: "5.5", width: "44.0", height: "4.4", depth: "36.0",
     },

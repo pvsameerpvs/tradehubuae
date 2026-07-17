@@ -24,7 +24,7 @@ export function useApi() {
   }, []);
 
   const fetchSessions = useCallback(
-    () => wrap(() => api.sessions.list()),
+    () => wrap(() => api.sessions.list({ status: "new,in_progress" })),
     [wrap],
   );
 

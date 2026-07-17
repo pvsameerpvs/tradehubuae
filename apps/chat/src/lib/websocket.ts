@@ -45,7 +45,7 @@ class ChatWebSocket {
     }
 
     this.socket = io(`${WS_URL}/chat`, {
-      transports: ["websocket", "polling"],
+      transports: ["polling", "websocket"],
       auth: this.token ? { token: this.token } : undefined,
       autoConnect: true,
       reconnection: true,

@@ -40,11 +40,11 @@ function MessageContent({ text }: { text: string }) {
     const productName = rest.slice(0, end);
     const after = rest.slice(end + 2);
     return (
-      <div>
+      <div className="w-full">
         <span className="text-sm leading-relaxed">I'm interested in </span>
-        <span className="inline-flex items-center gap-1 rounded-md bg-white/20 px-2 py-0.5 text-sm font-semibold">
-          <MessageSquareMore className="h-3 w-3" strokeWidth={2} />
-          {productName}
+        <span className="inline-flex items-center gap-1 rounded-md bg-white/20 px-2 py-0.5 text-sm font-semibold break-all max-w-full">
+          <MessageSquareMore className="h-3 w-3 shrink-0" strokeWidth={2} />
+          <span className="truncate">{productName}</span>
         </span>
         <span className="text-sm leading-relaxed">{after}</span>
       </div>
@@ -55,7 +55,7 @@ function MessageContent({ text }: { text: string }) {
   const parts = text.split(urlRegex);
   if (parts.length > 1) {
     return (
-      <p className="text-sm leading-relaxed">
+      <p className="text-sm leading-relaxed break-words whitespace-pre-wrap w-full">
         {parts.map((part, i) =>
           urlRegex.test(part) ? (
             <a
@@ -63,7 +63,7 @@ function MessageContent({ text }: { text: string }) {
               href={part}
               target="_blank"
               rel="noopener noreferrer"
-              className="underline underline-offset-2 hover:opacity-80"
+              className="underline underline-offset-2 hover:opacity-80 break-all"
             >
               {part}
             </a>
@@ -75,7 +75,7 @@ function MessageContent({ text }: { text: string }) {
     );
   }
 
-  return <p className="text-sm leading-relaxed">{text}</p>;
+  return <p className="text-sm leading-relaxed break-words whitespace-pre-wrap w-full">{text}</p>;
 }
 
 function hasPhoneBeenAsked(): boolean {
@@ -137,17 +137,45 @@ export function LiveChatWidget() {
     if (!user) return;
     const ctx = getProductContext();
     setProductCtx(ctx ?? null);
+    const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
     const existingId = getCurrentSessionId();
-    if (existingId) {
-      const s = getSessionById(existingId);
-      if (s && s.status === "active") {
-        setSession(s);
-        setStarted(true);
-        apiGetMessages(existingId).then(setMessages);
-        markSessionRead(existingId);
-        return;
+    if (existingId && /^[0-9a-f-]{36}$/i.test(existingId)) {
+      try {
+        const res = await fetch(`${apiBase}/chat/sessions/${existingId}`);
+        if (res.ok) {
+          const s = await res.json();
+          if (s && s.status !== "closed") {
+            setSession({ id: s.id, userName: s.userName, userEmail: s.userEmail, status: s.status, createdAt: s.createdAt, lastMessageAt: s.lastMessageAt, unreadCount: 0, productContext: s.productContext ?? null });
+            setStarted(true);
+            apiGetMessages(existingId).then(setMessages);
+            markSessionRead(existingId);
+            return;
+          }
+        }
+      } catch { /* fall through */ }
+    }
+
+    try {
+      const listRes = await fetch(`${apiBase}/chat/sessions?status=new,in_progress`);
+      if (listRes.ok) {
+        const list = await listRes.json();
+        const existing = (list.data ?? []).find((s: any) =>
+          s.userEmail === user.email && s.status !== "closed"
+        );
+        if (existing) {
+          localStorage.setItem("th_session_id", existing.id);
+          setSession({ id: existing.id, userName: existing.userName, userEmail: existing.userEmail, status: existing.status, createdAt: existing.createdAt, lastMessageAt: existing.lastMessageAt, unreadCount: 0, productContext: existing.productContext ?? null });
+          setStarted(true);
+          apiGetMessages(existing.id).then(setMessages);
+          markSessionRead(existing.id);
+          return;
+        }
       }
+    } catch { /* fall through */ }
+
+    if (existingId && typeof window !== "undefined") {
+      localStorage.removeItem("th_session_id");
     }
 
     apiCreateSession(user.name ?? user.email, user.email, (phone ?? getStoredPhone()) || undefined, ctx)
@@ -230,7 +258,7 @@ export function LiveChatWidget() {
   return (
     <div className="fixed bottom-0 right-0 z-50 sm:bottom-6 sm:right-6">
       {open ? (
-        <div className="mx-auto flex h-[85vh] w-full max-w-[400px] flex-col overflow-hidden rounded-t-2xl border border-line bg-white shadow-panel sm:h-[560px] sm:rounded-2xl animate-in fade-in slide-in-from-bottom-4 duration-200">
+        <div className="mx-auto flex h-[85vh] w-screen max-w-[400px] flex-col overflow-hidden rounded-t-2xl border border-line bg-white shadow-panel sm:h-[560px] sm:w-full sm:rounded-2xl animate-in fade-in slide-in-from-bottom-4 duration-200">
           {/* HEADER */}
           <div className="flex items-center justify-between bg-brand px-5 py-4 text-white">
             <div className="flex items-center gap-3">
@@ -315,14 +343,14 @@ export function LiveChatWidget() {
           ) : (
             <>
               {/* MESSAGES */}
-              <div className="flex-1 overflow-y-auto px-5 py-4">
-                <div className="space-y-3">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-3">
+                <div className="space-y-2">
                   {messages.map((msg) => (
                     <div
                       key={msg.id}
                       className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
                     >
-                      <div className="flex items-start gap-2 max-w-[85%]">
+                      <div className="flex items-start gap-2 max-w-[85%] min-w-0">
                         {msg.sender !== "user" && (
                           <div className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand/10">
                             {msg.sender === "n8n" ? (
@@ -333,11 +361,12 @@ export function LiveChatWidget() {
                           </div>
                         )}
                         <div
-                          className={`rounded-xl px-4 py-2.5 text-sm ${
+                          className={`rounded-xl px-3.5 py-2.5 text-sm break-words ${
                             msg.sender === "user"
                               ? "bg-brand text-white rounded-tr-sm"
                               : "bg-bg2 text-ink rounded-tl-sm"
                           }`}
+                          style={{ minWidth: 0, maxWidth: "100%" }}
                         >
                           <MessageContent text={msg.message} />
                           <p

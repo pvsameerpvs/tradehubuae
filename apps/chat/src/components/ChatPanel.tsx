@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo, useCallback, useEffect } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { useChatStore } from "@/lib/store";
 import { useChatWs } from "@/hooks/useChatWs";
+import { api } from "@/lib/api";
 import { SessionHeader } from "./SessionHeader";
 import { MessageList } from "./MessageList";
 import { ReplyBox } from "./ReplyBox";
@@ -14,8 +16,9 @@ interface ChatPanelProps {
 
 export function ChatPanel({ sessionId }: ChatPanelProps) {
   const sessions = useChatStore((s) => s.sessions);
-  const messages = useChatStore((s) => s.messages[sessionId] || []);
-  const { sendMessage, joinSession, leaveSession } = useChatWs();
+  const messages = useChatStore(useShallow((s) => s.messages[sessionId] || []));
+  const isConnected = useChatStore((s) => s.isConnected);
+  const { sendMessage: wsSend, joinSession, leaveSession } = useChatWs();
 
   const session = useMemo(
     () => sessions.find((s) => s.id === sessionId),
@@ -28,7 +31,7 @@ export function ChatPanel({ sessionId }: ChatPanelProps) {
   }, [sessionId, joinSession, leaveSession]);
 
   const handleSend = useCallback(
-    (content: string) => {
+    async (content: string) => {
       const optimistic: ChatMessage = {
         id: `opt-${Date.now()}`,
         sessionId,
@@ -38,9 +41,11 @@ export function ChatPanel({ sessionId }: ChatPanelProps) {
         createdAt: new Date().toISOString(),
       };
       useChatStore.getState().addMessage(sessionId, optimistic);
-      sendMessage(sessionId, content);
+      try {
+        await api.messages.send(sessionId, content);
+      } catch {}
     },
-    [sessionId, sendMessage]
+    [sessionId]
   );
 
   const handleGenerateAi = useCallback(

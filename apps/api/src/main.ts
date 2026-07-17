@@ -1,3 +1,5 @@
+try { require("dotenv").config({ path: require("path").resolve(process.cwd(), "../../.env") }); } catch {}
+
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";

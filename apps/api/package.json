@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "nest start --watch",
+    "dev": "npx nest build && DOTENV_CONFIG_PATH=../../.env node --import tsx/esm dist/main",
     "build": "nest build",
     "start": "node dist/main",
     "start:prod": "node dist/main",

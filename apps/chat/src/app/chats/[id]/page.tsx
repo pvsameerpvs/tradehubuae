@@ -15,12 +15,13 @@ export default function ChatDetailPage() {
   const setMessages = useChatStore((s) => s.setMessages);
   const setSessions = useChatStore((s) => s.setSessions);
   const setLoading = useChatStore((s) => s.setLoading);
+  const isConnected = useChatStore((s) => s.isConnected);
   const { fetchSessions, fetchMessages } = useApi();
 
   useEffect(() => {
     setActiveSession(sessionId);
     setLoading(true);
-    Promise.all([
+    const load = () => Promise.all([
       fetchSessions().then((result) => {
         if (!result) return;
         const data = typeof result === "object" && "data" in result
@@ -58,7 +59,9 @@ export default function ChatDetailPage() {
       }),
     ]).finally(() => setLoading(false));
 
-    return () => setActiveSession(null);
+    load();
+    const interval = setInterval(load, 5000);
+    return () => { clearInterval(interval); setActiveSession(null); };
   }, [sessionId, setActiveSession]);
 
   return (

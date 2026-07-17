@@ -7,4 +7,8 @@ export class SendMessageDto {
   @IsOptional()
   @IsEnum(["text", "image", "file", "system"])
   messageType?: string;
+
+  @IsOptional()
+  @IsEnum(["user", "admin"])
+  senderType?: string;
 }

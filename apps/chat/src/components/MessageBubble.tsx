@@ -30,7 +30,7 @@ function MessageBubbleComponent({ message }: { message: ChatMessage }) {
             ? "bg-brand text-white rounded-br-md"
             : isBot
               ? "bg-blue-50 text-ink rounded-bl-md"
-              : "bg-white border border-line text-ink rounded-bl-md"
+              : "bg-gray-100 text-ink rounded-bl-md"
         )}
       >
         {message.messageType === "image" && message.attachmentUrl && (

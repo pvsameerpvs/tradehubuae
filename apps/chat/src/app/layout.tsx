@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ChatShell } from "@/components/ChatShell";
 import { AuthGuard } from "@/components/AuthGuard";
+import { WsConnector } from "@/components/WsConnector";
 
 export const metadata: Metadata = {
   title: {
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <ChatShell>
+          <WsConnector />
           <AuthGuard>{children}</AuthGuard>
         </ChatShell>
       </body>

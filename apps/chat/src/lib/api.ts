@@ -10,12 +10,21 @@ export class ApiError extends Error {
   }
 }
 
+function getToken(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(/(?:^|;\s*)auth_token=([^;]*)/);
+  return match ? match[1] : null;
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = getToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
+    headers: { ...headers, ...(options?.headers as Record<string, string>) },
     ...options,
   });
 
@@ -58,7 +67,7 @@ export const api = {
     send: (sessionId: string, content: string) =>
       request<unknown>(`/chat/sessions/${sessionId}/messages`, {
         method: "POST",
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, senderType: "admin" }),
       }),
     generateAi: (sessionId: string) =>
       request<{ content: string }>(`/chat/sessions/${sessionId}/generate-ai-reply`, { method: "POST" }),

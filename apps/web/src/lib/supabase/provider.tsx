@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, createContext, useContext, useCallback, type ReactNode } from "react";
+import { createClient } from "./client";
 
 type User = {
   id: string;
@@ -68,10 +69,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const { user: storedUser, token: storedToken } = getStoredAuth();
-    setUser(storedUser);
-    setToken(storedToken);
-    setIsLoading(false);
+    const supabase = createClient();
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email ?? "",
+          name: session.user.user_metadata?.full_name ?? null,
+          avatar: session.user.user_metadata?.avatar_url ?? null,
+        });
+        setToken(session.access_token);
+      } else {
+        const { user: storedUser, token: storedToken } = getStoredAuth();
+        setUser(storedUser);
+        setToken(storedToken);
+      }
+      setIsLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email ?? "",
+          name: session.user.user_metadata?.full_name ?? null,
+          avatar: session.user.user_metadata?.avatar_url ?? null,
+        });
+        setToken(session.access_token);
+      } else {
+        setUser(null);
+        setToken(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const signInWithEmail = useCallback(async (email: string, password: string) => {
@@ -113,6 +145,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
     setUser(null);
     setToken(null);
     storeAuth(null, null);
@@ -121,63 +155,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [router]);
 
   const signInWithGoogle = useCallback(async () => {
-    return new Promise<void>((resolve, reject) => {
-      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-      if (!clientId) {
-        reject(new Error("Google Client ID not configured"));
-        return;
-      }
-
-      async function handleCredentialResponse(response: { credential: string }) {
-        try {
-          const res = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1"}/auth/google`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ credential: response.credential }),
-            },
-          );
-          if (!res.ok) throw new Error("Google auth failed");
-          const data = await res.json();
-          if (data.token && data.user) {
-            setAuth(data.user, data.token);
-            router.push("/");
-            router.refresh();
-            resolve();
-          } else {
-            reject(new Error("Invalid response from server"));
-          }
-        } catch {
-          reject(new Error("Google sign-in failed"));
-        }
-      }
-
-      if (window.google?.accounts?.id) {
-        window.google.accounts.id.initialize({
-          client_id: clientId,
-          callback: handleCredentialResponse,
-          cancel_on_tap_outside: false,
-        });
-        window.google.accounts.id.prompt();
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.src = "https://accounts.google.com/gsi/client";
-      script.async = true;
-      script.defer = true;
-      script.onload = () => {
-        window.google?.accounts?.id?.initialize({
-          client_id: clientId,
-          callback: handleCredentialResponse,
-          cancel_on_tap_outside: false,
-        });
-        window.google?.accounts?.id?.prompt();
-      };
-      document.body.appendChild(script);
+    const supabase = createClient();
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${location.origin}/auth/callback`,
+      },
     });
-  }, [setAuth, router]);
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, token, isLoading, signInWithGoogle, signInWithEmail, signUp, signOut, setAuth }}>
