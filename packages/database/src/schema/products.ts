@@ -1,10 +1,11 @@
-import { index, pgTable, uuid, varchar, text, numeric, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { index, uuid, varchar, text, numeric, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { catalog } from "./__schemas";
 import { conditionEnum } from "./enums";
 import { brands } from "./brands";
 import { categories } from "./categories";
 import { uses } from "./uses";
 
-export const products = pgTable("products", {
+export const products = catalog.table("products", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 500 }).notNull(),
   slug: varchar("slug", { length: 500 }).notNull().unique(),
@@ -41,7 +42,7 @@ export const products = pgTable("products", {
   index("products_name_idx").on(t.name),
 ]);
 
-export const productCategories = pgTable("product_categories", {
+export const productCategories = catalog.table("product_categories", {
   productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
   categoryId: uuid("category_id").notNull().references(() => categories.id, { onDelete: "cascade" }),
   isPrimary: boolean("is_primary").default(false).notNull(),
@@ -50,7 +51,7 @@ export const productCategories = pgTable("product_categories", {
   primaryKey: { columns: [t.productId, t.categoryId] },
 }));
 
-export const productImages = pgTable("product_images", {
+export const productImages = catalog.table("product_images", {
   id: uuid("id").defaultRandom().primaryKey(),
   productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
   url: varchar("url", { length: 1000 }).notNull(),
@@ -64,7 +65,7 @@ export const productImages = pgTable("product_images", {
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 
-export const productSpecs = pgTable("product_specs", {
+export const productSpecs = catalog.table("product_specs", {
   id: uuid("id").defaultRandom().primaryKey(),
   productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
   label: varchar("label", { length: 255 }).notNull(),
@@ -73,7 +74,7 @@ export const productSpecs = pgTable("product_specs", {
   sortOrder: integer("sort_order").default(0).notNull(),
 });
 
-export const productVariants = pgTable("product_variants", {
+export const productVariants = catalog.table("product_variants", {
   id: uuid("id").defaultRandom().primaryKey(),
   productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
   name: varchar("name", { length: 255 }).notNull(),

@@ -1,6 +1,7 @@
-import { pgTable, uuid, varchar, text, integer, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { uuid, varchar, text, integer, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { analytics } from "./__schemas";
 
-export const analyticsEvents = pgTable("analytics_events", {
+export const analyticsEvents = analytics.table("analytics_events", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   properties: jsonb("properties"),
@@ -12,7 +13,7 @@ export const analyticsEvents = pgTable("analytics_events", {
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 
-export const pageViews = pgTable("page_views", {
+export const pageViews = analytics.table("page_views", {
   id: uuid("id").defaultRandom().primaryKey(),
   url: varchar("url", { length: 1000 }).notNull(),
   title: varchar("title", { length: 500 }),
@@ -25,7 +26,7 @@ export const pageViews = pgTable("page_views", {
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 
-export const searchLogs = pgTable("search_logs", {
+export const searchLogs = analytics.table("search_logs", {
   id: uuid("id").defaultRandom().primaryKey(),
   query: varchar("query", { length: 500 }).notNull(),
   results: integer("results"),

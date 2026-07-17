@@ -1,11 +1,11 @@
-import { index, pgTable, uuid, varchar, text, numeric, integer, boolean, timestamp } from "drizzle-orm/pg-core";
-import { jsonb } from "drizzle-orm/pg-core";
+import { index, uuid, varchar, text, numeric, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { orderStatusEnum, paymentStatusEnum } from "./enums";
+import { sales } from "./__schemas";
 import { users } from "./users";
 import { products, productVariants } from "./products";
 import { addresses } from "./addresses";
 
-export const orders = pgTable("orders", {
+export const orders = sales.table("orders", {
   id: uuid("id").defaultRandom().primaryKey(),
   orderNumber: varchar("order_number", { length: 50 }).notNull().unique(),
   userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
@@ -42,7 +42,7 @@ export const orders = pgTable("orders", {
   index("orders_payment_status_idx").on(t.paymentStatus),
 ]);
 
-export const orderItems = pgTable("order_items", {
+export const orderItems = sales.table("order_items", {
   id: uuid("id").defaultRandom().primaryKey(),
   orderId: uuid("order_id").notNull().references(() => orders.id, { onDelete: "cascade" }),
   productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "restrict" }),
@@ -60,7 +60,7 @@ export const orderItems = pgTable("order_items", {
   index("order_items_product_id_idx").on(t.productId),
 ]);
 
-export const payments = pgTable("payments", {
+export const payments = sales.table("payments", {
   id: uuid("id").defaultRandom().primaryKey(),
   orderId: uuid("order_id").notNull().references(() => orders.id, { onDelete: "restrict" }),
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
@@ -74,7 +74,7 @@ export const payments = pgTable("payments", {
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
 
-export const shipments = pgTable("shipments", {
+export const shipments = sales.table("shipments", {
   id: uuid("id").defaultRandom().primaryKey(),
   orderId: uuid("order_id").notNull().references(() => orders.id, { onDelete: "restrict" }),
   trackingNumber: varchar("tracking_number", { length: 255 }).notNull().unique(),
@@ -90,7 +90,7 @@ export const shipments = pgTable("shipments", {
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
 
-export const returns = pgTable("returns", {
+export const returns = sales.table("returns", {
   id: uuid("id").defaultRandom().primaryKey(),
   orderId: uuid("order_id").notNull().references(() => orders.id, { onDelete: "restrict" }),
   reason: text("reason").notNull(),

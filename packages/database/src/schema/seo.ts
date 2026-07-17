@@ -1,6 +1,7 @@
-import { pgTable, uuid, varchar, text, boolean, timestamp, unique } from "drizzle-orm/pg-core";
+import { uuid, varchar, text, boolean, timestamp, unique } from "drizzle-orm/pg-core";
+import { content } from "./__schemas";
 
-export const seoMetadata = pgTable("seo_metadata", {
+export const seoMetadata = content.table("seo_metadata", {
   id: uuid("id").defaultRandom().primaryKey(),
   entityType: varchar("entity_type", { length: 100 }).notNull(),
   entityId: varchar("entity_id", { length: 255 }).notNull(),
@@ -16,7 +17,7 @@ export const seoMetadata = pgTable("seo_metadata", {
   unq: unique().on(t.entityType, t.entityId),
 }));
 
-export const redirects = pgTable("redirects", {
+export const redirects = content.table("redirects", {
   id: uuid("id").defaultRandom().primaryKey(),
   from: varchar("from", { length: 500 }).notNull().unique(),
   to: varchar("to", { length: 500 }).notNull(),

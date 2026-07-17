@@ -1,6 +1,7 @@
-import { foreignKey, pgTable, uuid, varchar, text, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { foreignKey, uuid, varchar, text, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { catalog } from "./__schemas";
 
-export const categories = pgTable("categories", {
+export const categories = catalog.table("categories", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 255 }).notNull().unique(),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
@@ -15,7 +16,7 @@ export const categories = pgTable("categories", {
   parentFk: foreignKey({ columns: [t.parentId], foreignColumns: [t.id] }).onDelete("set null"),
 }));
 
-export const categoryAttributes = pgTable("category_attributes", {
+export const categoryAttributes = catalog.table("category_attributes", {
   id: uuid("id").defaultRandom().primaryKey(),
   categoryId: uuid("category_id").notNull().references(() => categories.id, { onDelete: "cascade" }),
   name: varchar("name", { length: 255 }).notNull(),

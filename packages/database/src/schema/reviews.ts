@@ -1,8 +1,9 @@
-import { pgTable, uuid, varchar, text, integer, boolean, timestamp, unique } from "drizzle-orm/pg-core";
+import { uuid, varchar, text, integer, boolean, timestamp, unique } from "drizzle-orm/pg-core";
+import { catalog } from "./__schemas";
 import { products } from "./products";
 import { users } from "./users";
 
-export const reviews = pgTable("reviews", {
+export const reviews = catalog.table("reviews", {
   id: uuid("id").defaultRandom().primaryKey(),
   productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),

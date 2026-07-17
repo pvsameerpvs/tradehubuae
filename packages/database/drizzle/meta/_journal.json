@@ -29,6 +29,13 @@
       "when": 1744318800000,
       "tag": "0003_schema_fixes",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1744326000000,
+      "tag": "0004_schema_organization",
+      "breakpoints": true
     }
   ]
 }

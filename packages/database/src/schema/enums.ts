@@ -1,4 +1,5 @@
 import { pgEnum } from "drizzle-orm/pg-core";
+import { catalog } from "./__schemas";
 
 export const roleEnum = pgEnum("role", [
   "SUPER_ADMIN",
@@ -10,7 +11,7 @@ export const roleEnum = pgEnum("role", [
   "CUSTOMER",
 ]);
 
-export const conditionEnum = pgEnum("condition", [
+export const conditionEnum = catalog.enum("condition", [
   "New",
   "Like New",
   "Excellent",

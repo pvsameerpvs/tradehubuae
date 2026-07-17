@@ -1,9 +1,10 @@
-import { pgTable, uuid, integer, timestamp, uniqueIndex, unique } from "drizzle-orm/pg-core";
+import { uuid, integer, timestamp, uniqueIndex, unique } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import { sales } from "./__schemas";
 import { users } from "./users";
 import { products, productVariants } from "./products";
 
-export const cartItems = pgTable("cart_items", {
+export const cartItems = sales.table("cart_items", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
@@ -16,7 +17,7 @@ export const cartItems = pgTable("cart_items", {
   uniqueIndex("cart_user_product_null_unq").on(t.userId, t.productId).where(sql`${t.variantId} IS NULL`),
 ]);
 
-export const wishlistItems = pgTable("wishlist_items", {
+export const wishlistItems = sales.table("wishlist_items", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),

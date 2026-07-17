@@ -1,7 +1,8 @@
-import { pgTable, uuid, varchar, text, numeric, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { uuid, varchar, text, numeric, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { marketing } from "./__schemas";
 import { products } from "./products";
 
-export const coupons = pgTable("coupons", {
+export const coupons = marketing.table("coupons", {
   id: uuid("id").defaultRandom().primaryKey(),
   code: varchar("code", { length: 50 }).notNull().unique(),
   description: text("description"),
@@ -18,14 +19,14 @@ export const coupons = pgTable("coupons", {
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
 
-export const couponProducts = pgTable("coupon_products", {
+export const couponProducts = marketing.table("coupon_products", {
   couponId: uuid("coupon_id").notNull().references(() => coupons.id, { onDelete: "cascade" }),
   productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
 }, (t) => ({
   primaryKey: { columns: [t.couponId, t.productId] },
 }));
 
-export const comboOffers = pgTable("combo_offers", {
+export const comboOffers = marketing.table("combo_offers", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
@@ -40,7 +41,7 @@ export const comboOffers = pgTable("combo_offers", {
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
 
-export const comboOfferItems = pgTable("combo_offer_items", {
+export const comboOfferItems = marketing.table("combo_offer_items", {
   id: uuid("id").defaultRandom().primaryKey(),
   offerId: uuid("offer_id").notNull().references(() => comboOffers.id, { onDelete: "cascade" }),
   productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),

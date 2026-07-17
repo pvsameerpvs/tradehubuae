@@ -1,7 +1,8 @@
-import { index, pgTable, uuid, varchar, text, timestamp, jsonb, integer } from "drizzle-orm/pg-core";
+import { index, uuid, varchar, text, timestamp, jsonb, integer } from "drizzle-orm/pg-core";
 import { users } from "./users";
+import { communication } from "./__schemas";
 
-export const chatSessions = pgTable("chat_sessions", {
+export const chatSessions = communication.table("chat_sessions", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
   userName: varchar("user_name", { length: 255 }).notNull(),
@@ -23,7 +24,7 @@ export const chatSessions = pgTable("chat_sessions", {
   index("chat_sessions_last_message_idx").on(t.lastMessageAt),
 ]);
 
-export const chatMessages = pgTable("chat_messages", {
+export const chatMessages = communication.table("chat_messages", {
   id: uuid("id").defaultRandom().primaryKey(),
   sessionId: uuid("session_id").notNull().references(() => chatSessions.id, { onDelete: "cascade" }),
   senderType: varchar("sender_type", { length: 20 }).notNull(),

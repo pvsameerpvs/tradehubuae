@@ -1,6 +1,7 @@
-import { pgTable, uuid, varchar, text, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { uuid, varchar, text, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { catalog } from "./__schemas";
 
-export const brands = pgTable("brands", {
+export const brands = catalog.table("brands", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 255 }).notNull().unique(),
   slug: varchar("slug", { length: 255 }).notNull().unique(),

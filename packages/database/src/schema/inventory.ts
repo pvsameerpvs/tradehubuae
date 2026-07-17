@@ -1,8 +1,9 @@
-import { index, pgTable, uuid, varchar, text, integer, boolean, timestamp, unique } from "drizzle-orm/pg-core";
+import { index, uuid, varchar, text, integer, boolean, timestamp, unique } from "drizzle-orm/pg-core";
 import { products, productVariants } from "./products";
 import { emirateEnum } from "./enums";
+import { inventory } from "./__schemas";
 
-export const warehouses = pgTable("warehouses", {
+export const warehouses = inventory.table("warehouses", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   code: varchar("code", { length: 50 }).notNull().unique(),
@@ -14,7 +15,7 @@ export const warehouses = pgTable("warehouses", {
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
 
-export const stock = pgTable("stock", {
+export const stock = inventory.table("stock", {
   id: uuid("id").defaultRandom().primaryKey(),
   warehouseId: uuid("warehouse_id").notNull().references(() => warehouses.id, { onDelete: "restrict" }),
   productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
@@ -30,7 +31,7 @@ export const stock = pgTable("stock", {
   unq: unique().on(t.warehouseId, t.productId, t.variantId),
 }));
 
-export const stockHistory = pgTable("stock_history", {
+export const stockHistory = inventory.table("stock_history", {
   id: uuid("id").defaultRandom().primaryKey(),
   productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
   variantId: uuid("variant_id").references(() => productVariants.id, { onDelete: "set null" }),
@@ -47,7 +48,7 @@ export const stockHistory = pgTable("stock_history", {
   index("stock_history_created_at_idx").on(t.createdAt),
 ]);
 
-export const stockTransfers = pgTable("stock_transfers", {
+export const stockTransfers = inventory.table("stock_transfers", {
   id: uuid("id").defaultRandom().primaryKey(),
   fromWarehouseId: uuid("from_warehouse_id").notNull().references(() => warehouses.id, { onDelete: "restrict" }),
   toWarehouseId: uuid("to_warehouse_id").notNull().references(() => warehouses.id, { onDelete: "restrict" }),
@@ -58,14 +59,14 @@ export const stockTransfers = pgTable("stock_transfers", {
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
 
-export const stockTransferItems = pgTable("stock_transfer_items", {
+export const stockTransferItems = inventory.table("stock_transfer_items", {
   id: uuid("id").defaultRandom().primaryKey(),
   transferId: uuid("transfer_id").notNull().references(() => stockTransfers.id, { onDelete: "cascade" }),
   variantId: uuid("variant_id").notNull().references(() => productVariants.id, { onDelete: "restrict" }),
   quantity: integer("quantity").notNull(),
 });
 
-export const inventoryLogs = pgTable("inventory_logs", {
+export const inventoryLogs = inventory.table("inventory_logs", {
   id: uuid("id").defaultRandom().primaryKey(),
   warehouseId: uuid("warehouse_id").notNull().references(() => warehouses.id, { onDelete: "restrict" }),
   action: varchar("action", { length: 100 }).notNull(),
