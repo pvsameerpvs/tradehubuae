@@ -160,7 +160,7 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
   items: many(orderItems),
   payment: many(payments),
   shipments: many(shipments),
-  return: many(returns),
+  orderReturns: many(returns),
   notifications: many(notifications),
   shippingAddress: one(addresses, { fields: [orders.shippingAddressId], references: [addresses.id], relationName: "ShippingAddress" }),
   billingAddress: one(addresses, { fields: [orders.billingAddressId], references: [addresses.id], relationName: "BillingAddress" }),
@@ -254,7 +254,8 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
 }));
 
 // ── Bulk Sales ──
-export const bulkRequestsRelations = relations(bulkRequests, ({ many }) => ({
+export const bulkRequestsRelations = relations(bulkRequests, ({ one, many }) => ({
+  user: one(users, { fields: [bulkRequests.userId], references: [users.id] }),
   items: many(bulkRequestItems),
 }));
 

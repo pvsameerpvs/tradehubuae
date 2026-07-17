@@ -41,7 +41,7 @@ export class ComboOffersService {
         items: {
           with: {
             product: {
-              columns: { id: true, name: true, slug: true, price: true, availableStock: true },
+              columns: { id: true, name: true, slug: true, price: true },
               with: { images: { where: eq(productImages.isPrimary, true), limit: 1 } },
             },
           },
@@ -60,8 +60,7 @@ export class ComboOffersService {
     const total = Number(totalResult?.total ?? 0);
 
     const enriched = data.map((offer) => {
-      const allOutOfStock = offer.items.every((item) => (item.product?.availableStock ?? 0) < item.quantity);
-      return { ...offer, allOutOfStock, _count: { items: offer.items.length } };
+      return { ...offer, allOutOfStock: false, _count: { items: offer.items.length } };
     });
 
     return {
@@ -83,7 +82,7 @@ export class ComboOffersService {
         items: {
           with: {
             product: {
-              columns: { id: true, name: true, slug: true, price: true, availableStock: true, compareAtPrice: true },
+              columns: { id: true, name: true, slug: true, price: true, compareAtPrice: true },
               with: { images: { where: eq(productImages.isPrimary, true), limit: 1 } },
             },
           },
@@ -92,9 +91,7 @@ export class ComboOffersService {
       orderBy: [desc(comboOffers.createdAt)],
     });
 
-    return offers.filter((offer) =>
-      offer.items.every((item) => (item.product?.availableStock ?? 0) >= item.quantity),
-    );
+    return offers;
   }
 
   async findById(id: string) {
@@ -104,7 +101,7 @@ export class ComboOffersService {
         items: {
           with: {
             product: {
-              columns: { id: true, name: true, slug: true, price: true, availableStock: true, compareAtPrice: true },
+              columns: { id: true, name: true, slug: true, price: true, compareAtPrice: true },
               with: { images: { where: eq(productImages.isPrimary, true), limit: 1 } },
             },
           },
@@ -114,8 +111,7 @@ export class ComboOffersService {
 
     if (!offer) throw new NotFoundException("Combo offer not found");
 
-    const allOutOfStock = offer.items.every((item) => (item.product?.availableStock ?? 0) < item.quantity);
-    return { ...offer, allOutOfStock };
+    return { ...offer, allOutOfStock: false };
   }
 
   async create(dto: CreateComboOfferDto) {

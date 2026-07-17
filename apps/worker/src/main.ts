@@ -158,9 +158,7 @@ async function startWorkers() {
             name: generated.title,
             description: generated.description,
             shortDescription: generated.shortDescription,
-            seoTitle: generated.seo.metaTitle,
-            seoDescription: generated.seo.metaDescription,
-            metaKeywords: generated.seo.keywords.join(", "),
+
             updatedAt: new Date(),
           })
           .where(eq(schema.products.id, productId));

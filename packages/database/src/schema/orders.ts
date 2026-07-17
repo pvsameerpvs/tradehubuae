@@ -8,7 +8,7 @@ import { addresses } from "./addresses";
 export const orders = pgTable("orders", {
   id: uuid("id").defaultRandom().primaryKey(),
   orderNumber: varchar("order_number", { length: 50 }).notNull().unique(),
-  userId: uuid("user_id").references(() => users.id),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
   status: orderStatusEnum("status").default("PENDING").notNull(),
   subtotal: numeric("subtotal", { precision: 10, scale: 2 }).notNull(),
   shippingCost: numeric("shipping_cost", { precision: 10, scale: 2 }).default("0").notNull(),
@@ -20,10 +20,10 @@ export const orders = pgTable("orders", {
   paymentStatus: paymentStatusEnum("payment_status").default("PENDING").notNull(),
   shippingMethod: varchar("shipping_method", { length: 100 }),
   contactName: varchar("contact_name", { length: 255 }),
-  contactPhone: varchar("contact_phone", { length: 20 }),
-  shippingAddressId: uuid("shipping_address_id").references(() => addresses.id),
+  contactPhone: varchar("contact_phone", { length: 50 }),
+  shippingAddressId: uuid("shipping_address_id").references(() => addresses.id, { onDelete: "set null" }),
   shippingAddress: jsonb("shipping_address"),
-  billingAddressId: uuid("billing_address_id").references(() => addresses.id),
+  billingAddressId: uuid("billing_address_id").references(() => addresses.id, { onDelete: "set null" }),
   billingAddress: jsonb("billing_address"),
   notes: text("notes"),
   couponCode: varchar("coupon_code", { length: 50 }),
@@ -45,25 +45,30 @@ export const orders = pgTable("orders", {
 export const orderItems = pgTable("order_items", {
   id: uuid("id").defaultRandom().primaryKey(),
   orderId: uuid("order_id").notNull().references(() => orders.id, { onDelete: "cascade" }),
-  productId: uuid("product_id").notNull().references(() => products.id),
-  variantId: uuid("variant_id").references(() => productVariants.id),
+  productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "restrict" }),
+  variantId: uuid("variant_id").references(() => productVariants.id, { onDelete: "set null" }),
   name: varchar("name", { length: 500 }).notNull(),
   sku: varchar("sku", { length: 100 }).notNull(),
   quantity: integer("quantity").notNull(),
   unitPrice: numeric("unit_price", { precision: 10, scale: 2 }).notNull(),
   totalPrice: numeric("total_price", { precision: 10, scale: 2 }).notNull(),
   image: varchar("image", { length: 1000 }),
-});
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+}, (t) => [
+  index("order_items_order_id_idx").on(t.orderId),
+  index("order_items_product_id_idx").on(t.productId),
+]);
 
 export const payments = pgTable("payments", {
   id: uuid("id").defaultRandom().primaryKey(),
-  orderId: uuid("order_id").notNull().references(() => orders.id),
+  orderId: uuid("order_id").notNull().references(() => orders.id, { onDelete: "restrict" }),
   amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
   currency: varchar("currency", { length: 3 }).default("AED").notNull(),
   method: varchar("method", { length: 50 }).notNull(),
   status: paymentStatusEnum("status").default("PENDING").notNull(),
   transactionId: varchar("transaction_id", { length: 255 }),
-  gatewayResponse: text("gateway_response"),
+  gatewayResponse: jsonb("gateway_response"),
   paidAt: timestamp("paid_at", { mode: "date" }),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
@@ -71,7 +76,7 @@ export const payments = pgTable("payments", {
 
 export const shipments = pgTable("shipments", {
   id: uuid("id").defaultRandom().primaryKey(),
-  orderId: uuid("order_id").notNull().references(() => orders.id),
+  orderId: uuid("order_id").notNull().references(() => orders.id, { onDelete: "restrict" }),
   trackingNumber: varchar("tracking_number", { length: 255 }).notNull().unique(),
   carrier: varchar("carrier", { length: 100 }),
   method: varchar("method", { length: 100 }),
@@ -87,10 +92,10 @@ export const shipments = pgTable("shipments", {
 
 export const returns = pgTable("returns", {
   id: uuid("id").defaultRandom().primaryKey(),
-  orderId: uuid("order_id").notNull().references(() => orders.id),
+  orderId: uuid("order_id").notNull().references(() => orders.id, { onDelete: "restrict" }),
   reason: text("reason").notNull(),
   status: varchar("status", { length: 50 }).default("PENDING").notNull(),
-  items: text("items"),
+  items: jsonb("items"),
   refundAmount: numeric("refund_amount", { precision: 10, scale: 2 }),
   notes: text("notes"),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),

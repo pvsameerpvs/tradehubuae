@@ -140,8 +140,7 @@ export class CategoriesService {
         parentId: dto.parentId,
         sortOrder: dto.sortOrder ?? 0,
         isActive: dto.isActive ?? true,
-        seoTitle: dto.seoTitle,
-        seoDescription: dto.seoDescription,
+
       })
       .returning();
 
@@ -163,8 +162,7 @@ export class CategoriesService {
     if (dto.parentId !== undefined) updateData.parentId = dto.parentId;
     if (dto.sortOrder !== undefined) updateData.sortOrder = dto.sortOrder;
     if (dto.isActive !== undefined) updateData.isActive = dto.isActive;
-    if (dto.seoTitle !== undefined) updateData.seoTitle = dto.seoTitle;
-    if (dto.seoDescription !== undefined) updateData.seoDescription = dto.seoDescription;
+
 
     if (dto.name && dto.name !== existing.name) {
       const newSlug = slugify(dto.name, { lower: true, strict: true });

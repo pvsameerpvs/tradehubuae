@@ -24,7 +24,6 @@ interface RecentProduct {
   slug: string;
   sku: string;
   price: number;
-  availableStock: number;
   isActive: boolean;
   createdAt: string;
   images: { url: string }[];
@@ -77,7 +76,7 @@ export default function DashboardPage() {
           totalProducts,
           activeOrders,
           totalCustomers: 0,
-          lowStockCount: products.filter((p) => p.availableStock > 0 && p.availableStock <= 5).length,
+          lowStockCount: 0,
           revenue: 0,
         });
         if (seoRes.status === "fulfilled") setSeoStats(seoRes.value);
@@ -281,10 +280,8 @@ export default function DashboardPage() {
                           {product.brand?.name ?? "No brand"} · AED {Number(product.price).toLocaleString()}
                         </p>
                       </div>
-                      <span className={`flex-shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                        product.availableStock > 0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
-                      }`}>
-                        {product.availableStock > 0 ? `${product.availableStock} in stock` : "Out of stock"}
+                      <span className="flex-shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                        In stock
                       </span>
                     </Link>
                   ))}

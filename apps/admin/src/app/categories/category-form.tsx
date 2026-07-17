@@ -32,8 +32,6 @@ interface Category {
   image: string | null;
   sortOrder: number;
   isActive: boolean;
-  seoTitle: string | null;
-  seoDescription: string | null;
   parent: { id: string; name: string } | null;
 }
 

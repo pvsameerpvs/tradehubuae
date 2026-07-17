@@ -83,9 +83,6 @@ export const productCreateSchema = z.object({
   depth: z.number().min(0).optional(),
   isActive: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
-  seoTitle: z.string().max(70).optional(),
-  seoDescription: z.string().max(160).optional(),
-  metaKeywords: z.string().max(255).optional(),
 });
 
 export const productUpdateSchema = productCreateSchema.partial();

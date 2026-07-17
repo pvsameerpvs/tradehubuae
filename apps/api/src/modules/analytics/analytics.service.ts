@@ -171,12 +171,11 @@ export class AnalyticsService {
 
     const productsWithSeo = await this.drizzle.db
       .select({ count: count() })
-      .from(products)
+      .from(seoMetadata)
       .where(
         and(
-          eq(products.isActive, true),
-          sql`${products.seoTitle} IS NOT NULL`,
-          sql`${products.seoDescription} IS NOT NULL`
+          eq(seoMetadata.entityType, "product"),
+          sql`${seoMetadata.title} IS NOT NULL`
         )
       );
 

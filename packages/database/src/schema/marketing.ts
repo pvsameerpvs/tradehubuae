@@ -43,6 +43,6 @@ export const comboOffers = pgTable("combo_offers", {
 export const comboOfferItems = pgTable("combo_offer_items", {
   id: uuid("id").defaultRandom().primaryKey(),
   offerId: uuid("offer_id").notNull().references(() => comboOffers.id, { onDelete: "cascade" }),
-  productId: uuid("product_id").notNull().references(() => products.id),
+  productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
   quantity: integer("quantity").default(1).notNull(),
 });

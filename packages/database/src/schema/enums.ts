@@ -36,3 +36,13 @@ export const paymentStatusEnum = pgEnum("payment_status", [
   "REFUNDED",
   "PARTIALLY_REFUNDED",
 ]);
+
+export const emirateEnum = pgEnum("emirate", [
+  "Abu Dhabi",
+  "Dubai",
+  "Sharjah",
+  "Ajman",
+  "Umm Al Quwain",
+  "Ras Al Khaimah",
+  "Fujairah",
+]);

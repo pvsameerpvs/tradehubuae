@@ -21,7 +21,6 @@ interface Product {
   condition: string;
   isActive: boolean;
   isFeatured: boolean;
-  availableStock: number;
   viewCount: number;
   saleCount: number;
   createdAt: string;
@@ -86,8 +85,6 @@ export default function ProductsPage() {
                     <p className="truncate text-sm font-medium text-ink">{product.name}</p>
                     <div className="mt-0.5 flex items-center gap-2 text-xs text-ink-2">
                       <span>AED {Number(product.price).toLocaleString()}</span>
-                      <span>·</span>
-                      <span>{product.availableStock} in stock</span>
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
@@ -107,7 +104,6 @@ export default function ProductsPage() {
                 <tr className="border-b text-left text-xs text-ink-3 uppercase tracking-wider">
                   <th className="p-4 font-medium">Product</th>
                   <th className="p-4 font-medium">Price</th>
-                  <th className="p-4 font-medium">Stock</th>
                   <th className="p-4 font-medium">Condition</th>
                   <th className="p-4 font-medium">Status</th>
                   <th className="p-4 font-medium">Actions</th>
@@ -136,11 +132,6 @@ export default function ProductsPage() {
                       {product.compareAtPrice && (
                         <p className="text-xs text-ink-3 line-through">AED {Number(product.compareAtPrice).toLocaleString()}</p>
                       )}
-                    </td>
-                    <td className="p-4">
-                      <span className={`text-sm font-medium ${product.availableStock > 0 ? "text-ink" : "text-sale"}`}>
-                        {product.availableStock}
-                      </span>
                     </td>
                     <td className="p-4 text-sm text-ink-2">{product.condition.replace("_", " ")}</td>
                     <td className="p-4">

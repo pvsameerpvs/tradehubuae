@@ -47,7 +47,7 @@ export class AddressesService {
         addressLine1: dto.addressLine1,
         addressLine2: dto.addressLine2,
         city: dto.city,
-        emirate: dto.emirate,
+        emirate: dto.emirate as "Abu Dhabi" | "Dubai" | "Sharjah" | "Ajman" | "Umm Al Quwain" | "Ras Al Khaimah" | "Fujairah",
         country: dto.country ?? "UAE",
         zipCode: dto.zipCode,
         isDefault: dto.isDefault ?? false,

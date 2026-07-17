@@ -66,7 +66,7 @@ export class ProductsService {
     if (minPrice !== undefined) conditions.push(sql`${products.price} >= ${minPrice}`);
     if (maxPrice !== undefined) conditions.push(sql`${products.price} <= ${maxPrice}`);
     if (condition) conditions.push(eq(products.condition, condition as "New" | "Like New" | "Excellent" | "Good" | "Fair"));
-    if (inStock) conditions.push(sql`${products.availableStock} > 0`);
+
 
     const where = and(...conditions.filter(Boolean));
 
@@ -179,9 +179,7 @@ export class ProductsService {
         useId: dto.useId,
         isActive: dto.isActive ?? true,
         isFeatured: dto.isFeatured ?? false,
-        seoTitle: dto.seoTitle,
-        seoDescription: dto.seoDescription,
-        metaKeywords: dto.metaKeywords,
+
       })
       .returning();
 
@@ -249,9 +247,7 @@ export class ProductsService {
     }
     if (dto.isActive !== undefined) updateData.isActive = dto.isActive;
     if (dto.isFeatured !== undefined) updateData.isFeatured = dto.isFeatured;
-    if (dto.seoTitle !== undefined) updateData.seoTitle = dto.seoTitle;
-    if (dto.seoDescription !== undefined) updateData.seoDescription = dto.seoDescription;
-    if (dto.metaKeywords !== undefined) updateData.metaKeywords = dto.metaKeywords;
+
 
     if ("name" in dto && dto.name && dto.name !== existing.name) {
       updateData.slug = slugify(dto.name, { lower: true, strict: true });

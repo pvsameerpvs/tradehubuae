@@ -32,7 +32,7 @@ export class InventoryService {
     });
 
     if (query.lowStock) {
-      return allStock.filter((s) => s.available <= s.minimumStock);
+      return allStock.filter((s) => (s.quantity - s.reserved) <= s.minimumStock);
     }
 
     return allStock;
@@ -51,7 +51,6 @@ export class InventoryService {
       .update(stock)
       .set({
         quantity: sql`quantity + ${quantity}`,
-        available: sql`available + ${quantity}`,
       })
       .where(eq(stock.id, id))
       .returning();
@@ -82,7 +81,7 @@ export class InventoryService {
           )
           .limit(1);
 
-        if (!fromStock || fromStock.available < item.quantity) {
+        if (!fromStock || (fromStock.quantity - fromStock.reserved) < item.quantity) {
           throw new Error(`Insufficient stock for variant ${item.variantId}`);
         }
       }
@@ -114,12 +113,12 @@ export class InventoryService {
 
   async getLowStockAlerts(threshold: number = 5) {
     return this.drizzle.db.query.stock.findMany({
-      where: lte(stock.available, threshold),
+      where: lte(sql`quantity - reserved`, threshold),
       with: {
         product: { columns: { name: true, sku: true } },
         warehouse: { columns: { name: true } },
       },
-      orderBy: (stock, { asc }) => [asc(stock.available)],
+      orderBy: (stock, { asc }) => [asc(stock.quantity)],
     });
   }
 }

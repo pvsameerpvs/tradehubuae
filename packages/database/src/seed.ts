@@ -157,10 +157,9 @@ async function seed() {
       description: "The Cisco Catalyst 9300 Series switches are the industry's most widely used enterprise switching platform, offering 48 PoE+ ports, 4x10G uplinks, and advanced security features.",
       sku: "C9300-48P", price: "8500.00", compareAtPrice: "9500.00", costPrice: "6200.00",
       brandId: brandMap["cisco"].id, useId: insertedUses[0].id, condition: "New",
-      isActive: true, isFeatured: true, totalStock: 45, availableStock: 42,
+      isActive: true, isFeatured: true,
       categorySlugs: ["switches"], weight: "7.2", width: "44.5", height: "4.4", depth: "48.0",
-      seoTitle: "Cisco Catalyst 9300-48P PoE+ Switch Dubai | TradeHub UAE",
-      seoDescription: "Buy Cisco Catalyst 9300-48P PoE+ switch in UAE. 48 GigE PoE+ ports, modular uplinks, advanced security.",
+
     },
     {
       name: "Cisco Catalyst 9200-24P Switch", slug: "cisco-c9200-24p",
@@ -168,7 +167,7 @@ async function seed() {
       description: "Entry-level enterprise switch with 24 PoE+ ports, ideal for branch offices and small deployments.",
       sku: "C9200-24P", price: "4200.00", compareAtPrice: "4800.00", costPrice: "3100.00",
       brandId: brandMap["cisco"].id, useId: insertedUses[1].id, condition: "New",
-      isActive: true, isFeatured: true, totalStock: 78, availableStock: 75,
+      isActive: true, isFeatured: true,
       categorySlugs: ["switches"], weight: "5.8", width: "44.5", height: "4.4", depth: "40.0",
     },
     {
@@ -177,7 +176,7 @@ async function seed() {
       description: "Cisco 4000 Series ISR with 2x GE ports, 2x NIM slots, and advanced routing capabilities.",
       sku: "ISR4321", price: "3200.00", costPrice: "2300.00",
       brandId: brandMap["cisco"].id, useId: insertedUses[1].id, condition: "Used - Excellent",
-      isActive: true, isFeatured: false, totalStock: 12, availableStock: 10,
+      isActive: true, isFeatured: false,
       categorySlugs: ["routers"], weight: "6.2", width: "43.8", height: "4.4", depth: "38.5",
     },
     {
@@ -186,10 +185,9 @@ async function seed() {
       description: "The Dell PowerEdge R750xs delivers exceptional performance for mainstream business workloads with 3rd Gen Intel Xeon Scalable processors.",
       sku: "R750XS", price: "18500.00", compareAtPrice: "21000.00", costPrice: "14000.00",
       brandId: brandMap["dell"].id, useId: insertedUses[2].id, condition: "New",
-      isActive: true, isFeatured: true, totalStock: 25, availableStock: 22,
+      isActive: true, isFeatured: true,
       categorySlugs: ["rack-servers"], weight: "14.5", width: "48.2", height: "8.6", depth: "73.5",
-      seoTitle: "Dell PowerEdge R750xs Server Price UAE | TradeHub",
-      seoDescription: "Buy Dell PowerEdge R750xs rack server in Dubai. Dual Xeon Scalable, 16 DIMM slots, enterprise reliability.",
+
     },
     {
       name: "Dell PowerEdge T550 Tower Server", slug: "dell-t550",
@@ -197,7 +195,7 @@ async function seed() {
       description: "Versatile tower server for small and medium businesses with excellent expandability.",
       sku: "T550-TOWER", price: "12000.00", costPrice: "9000.00",
       brandId: brandMap["dell"].id, useId: insertedUses[4].id, condition: "New",
-      isActive: true, isFeatured: false, totalStock: 18, availableStock: 16,
+      isActive: true, isFeatured: false,
       categorySlugs: ["tower-servers"], weight: "18.0", width: "21.3", height: "43.0", depth: "59.0",
     },
     {
@@ -206,7 +204,7 @@ async function seed() {
       description: "The industry-standard 2U rack server with 5th Gen Intel Xeon Scalable processors, up to 8TB memory, and comprehensive security.",
       sku: "DL380-G11", price: "22000.00", compareAtPrice: "25000.00", costPrice: "16500.00",
       brandId: brandMap["hpe"].id, useId: insertedUses[0].id, condition: "New",
-      isActive: true, isFeatured: true, totalStock: 30, availableStock: 28,
+      isActive: true, isFeatured: true,
       categorySlugs: ["rack-servers"], weight: "15.0", width: "48.2", height: "8.6", depth: "73.0",
     },
     {
@@ -215,7 +213,7 @@ async function seed() {
       description: "Lenovo ThinkSystem SR650 V3 is a 2-socket 2U rack server designed for maximum performance and reliability.",
       sku: "SR650-V3", price: "19500.00", costPrice: "14800.00",
       brandId: brandMap["lenovo"].id, useId: insertedUses[2].id, condition: "New",
-      isActive: true, isFeatured: false, totalStock: 20, availableStock: 19,
+      isActive: true, isFeatured: false,
       categorySlugs: ["rack-servers"], weight: "15.5", width: "48.2", height: "8.6", depth: "73.5",
     },
     {
@@ -224,7 +222,7 @@ async function seed() {
       description: "FortiGate 100F delivers AI-powered security with NGFW capabilities, SSL inspection, and SD-WAN in a compact form factor.",
       sku: "FG-100F", price: "5800.00", compareAtPrice: "6500.00", costPrice: "4200.00",
       brandId: brandMap["fortinet"].id, useId: insertedUses[3].id, condition: "New",
-      isActive: true, isFeatured: true, totalStock: 35, availableStock: 33,
+      isActive: true, isFeatured: true,
       categorySlugs: ["firewalls"], weight: "2.3", width: "24.0", height: "4.4", depth: "28.0",
     },
     {
@@ -233,7 +231,7 @@ async function seed() {
       description: "Palo Alto Networks PA-440 Series delivers ML-powered NGFW security with precision AI to stop threats.",
       sku: "PA-440", price: "7200.00", costPrice: "5300.00",
       brandId: brandMap["palo-alto"].id, useId: insertedUses[3].id, condition: "New",
-      isActive: true, isFeatured: true, totalStock: 15, availableStock: 14,
+      isActive: true, isFeatured: true,
       categorySlugs: ["firewalls"], weight: "2.8", width: "24.0", height: "4.4", depth: "30.0",
     },
     {
@@ -242,7 +240,7 @@ async function seed() {
       description: "High-performance WiFi 6 access point for enterprise deployments with seamless roaming.",
       sku: "U6-PRO", price: "650.00", compareAtPrice: "750.00", costPrice: "480.00",
       brandId: brandMap["ubiquiti"].id, useId: insertedUses[4].id, condition: "New",
-      isActive: true, isFeatured: true, totalStock: 120, availableStock: 115,
+      isActive: true, isFeatured: true,
       categorySlugs: ["wireless"], weight: "0.5", width: "22.0", height: "4.5", depth: "22.0",
     },
     {
@@ -251,7 +249,7 @@ async function seed() {
       description: "Enterprise WiFi 6 access point with patented BeamFlex+ adaptive antenna technology.",
       sku: "R550-ROW", price: "890.00", costPrice: "650.00",
       brandId: brandMap["ruckus"].id, useId: insertedUses[1].id, condition: "New",
-      isActive: true, isFeatured: false, totalStock: 45, availableStock: 43,
+      isActive: true, isFeatured: false,
       categorySlugs: ["wireless"], weight: "0.4", width: "21.0", height: "4.0", depth: "21.0",
     },
     {
@@ -260,7 +258,7 @@ async function seed() {
       description: "APC Smart-UPS with Pure Sinewave output, 2200VA/1980W, ideal for servers and network equipment.",
       sku: "SMT2200MI", price: "3200.00", compareAtPrice: "3600.00", costPrice: "2400.00",
       brandId: brandMap["apc"].id, useId: insertedUses[0].id, condition: "New",
-      isActive: true, isFeatured: true, totalStock: 28, availableStock: 25,
+      isActive: true, isFeatured: true,
       categorySlugs: ["ups"], weight: "32.0", width: "30.5", height: "43.5", depth: "66.5",
     },
     {
@@ -269,7 +267,7 @@ async function seed() {
       description: "High-performance 8-bay NAS with AMD Ryzen processor, 10GbE connectivity, and Synology DSM.",
       sku: "DS1823XS", price: "4500.00", compareAtPrice: "5000.00", costPrice: "3400.00",
       brandId: brandMap["synology"].id, useId: insertedUses[0].id, condition: "New",
-      isActive: true, isFeatured: true, totalStock: 15, availableStock: 13,
+      isActive: true, isFeatured: true,
       categorySlugs: ["nas"], weight: "8.5", width: "30.0", height: "24.0", depth: "28.0",
     },
     {
@@ -278,7 +276,7 @@ async function seed() {
       description: "Juniper EX2300 delivers cost-effective, scalable enterprise access switching with 48 PoE+ ports.",
       sku: "EX2300-48P", price: "5500.00", costPrice: "4000.00",
       brandId: brandMap["juniper"].id, useId: insertedUses[1].id, condition: "Used - Excellent",
-      isActive: true, isFeatured: false, totalStock: 22, availableStock: 20,
+      isActive: true, isFeatured: false,
       categorySlugs: ["switches"], weight: "5.5", width: "44.0", height: "4.4", depth: "36.0",
     },
     {
@@ -287,7 +285,7 @@ async function seed() {
       description: "Windows Server 2022 Standard Edition with advanced security, hybrid capabilities, and application platform.",
       sku: "WS2022-STD", price: "3200.00", costPrice: "2500.00",
       brandId: brandMap["microsoft"].id, useId: insertedUses[2].id, condition: "New",
-      isActive: true, isFeatured: false, totalStock: 999, availableStock: 999,
+      isActive: true, isFeatured: false,
       categorySlugs: ["software-licensing"], isBundle: true,
     },
   ];

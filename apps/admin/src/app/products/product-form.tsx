@@ -90,7 +90,6 @@ interface ExistingProduct {
   badge: string | null;
   isActive: boolean;
   isFeatured: boolean;
-  totalStock: number;
   specs: ProductSpec[];
   images: ProductImage[];
   categories: ProductCategory[];

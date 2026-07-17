@@ -185,8 +185,6 @@ export class OrdersService {
           await this.drizzle.db
             .update(products)
             .set({
-              availableStock: sql`${products.availableStock} - ${item.quantity}`,
-              totalStock: sql`${products.totalStock} - ${item.quantity}`,
               saleCount: sql`${products.saleCount} + ${item.quantity}`,
             })
             .where(eq(products.id, item.productId));

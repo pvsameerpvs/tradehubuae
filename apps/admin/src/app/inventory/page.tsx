@@ -20,9 +20,6 @@ interface InventoryProduct {
   id: string;
   name: string;
   sku: string;
-  totalStock: number;
-  reservedStock: number;
-  availableStock: number;
   isActive: boolean;
   brand?: Brand | null;
   categories?: { category: Category }[];
@@ -44,7 +41,7 @@ export default function InventoryPage() {
 
   useEffect(() => {
     Promise.all([
-      api.get<PaginatedResponse<InventoryProduct>>("/products", { limit: 200, sort: "availableStock", order: "asc" }),
+      api.get<PaginatedResponse<InventoryProduct>>("/products", { limit: 200, sort: "name", order: "asc" }),
       api.get<PaginatedResponse<Brand>>("/brands", { limit: 200, sort: "name", order: "asc" }),
       api.get<PaginatedResponse<Category>>("/categories", { limit: 200, sort: "name", order: "asc" }),
     ])
@@ -88,8 +85,6 @@ export default function InventoryPage() {
     return true;
   });
 
-  const lowStock = filtered.filter((p) => p.availableStock > 0 && p.availableStock <= 5);
-  const outOfStock = filtered.filter((p) => p.availableStock === 0);
   const totalStockItems = filtered.length;
 
   const getCategoryName = (id: string) => categories.find((c) => c.id === id)?.name ?? id;
@@ -101,7 +96,7 @@ export default function InventoryPage() {
         <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Monitor stock levels across all products</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-1">
         <Card>
           <CardContent className="p-5">
             <div className="flex items-start justify-between">
@@ -111,36 +106,6 @@ export default function InventoryPage() {
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand/5">
                 <Warehouse className="h-5 w-5 text-brand" strokeWidth={1.75} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm text-ink-2">Low Stock</p>
-                <p className={`mt-1.5 text-2xl font-semibold ${lowStock.length > 0 ? "text-amber-600" : "text-ink"}`}>
-                  {loading ? "..." : lowStock.length}
-                </p>
-              </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50">
-                <AlertTriangle className="h-5 w-5 text-amber-600" strokeWidth={1.75} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm text-ink-2">Out of Stock</p>
-                <p className={`mt-1.5 text-2xl font-semibold ${outOfStock.length > 0 ? "text-sale" : "text-ink"}`}>
-                  {loading ? "..." : outOfStock.length}
-                </p>
-              </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50">
-                <Package className="h-5 w-5 text-sale" strokeWidth={1.75} />
               </div>
             </div>
           </CardContent>
@@ -231,9 +196,6 @@ export default function InventoryPage() {
                         </p>
                       </div>
                       <div className="ml-3 flex flex-col items-end gap-2">
-                        <span className={`text-sm font-semibold ${p.availableStock <= 0 ? "text-sale" : p.availableStock <= 5 ? "text-amber-600" : "text-ink"}`}>
-                          {p.availableStock}
-                        </span>
                         <label className="relative inline-flex cursor-pointer items-center p-1.5 -m-1.5">
                           <input
                             type="checkbox"
@@ -255,9 +217,6 @@ export default function InventoryPage() {
                     <th className="p-4 font-medium">Product</th>
                     <th className="p-4 font-medium">Category</th>
                     <th className="p-4 font-medium">Brand</th>
-                    <th className="p-4 font-medium text-right">Total</th>
-                    <th className="p-4 font-medium text-right">Reserved</th>
-                    <th className="p-4 font-medium text-right">Available</th>
                     <th className="p-4 font-medium text-center">Active</th>
                   </tr>
                 </thead>
@@ -272,13 +231,6 @@ export default function InventoryPage() {
                         {p.categories?.map((pc) => pc.category.name).join(", ") ?? "—"}
                       </td>
                       <td className="p-4 text-sm text-ink-2">{p.brand?.name ?? "—"}</td>
-                      <td className="p-4 text-right text-sm text-ink">{p.totalStock}</td>
-                      <td className="p-4 text-right text-sm text-ink-2">{p.reservedStock}</td>
-                      <td className="p-4 text-right">
-                        <span className={`text-sm font-semibold ${p.availableStock <= 0 ? "text-sale" : p.availableStock <= 5 ? "text-amber-600" : "text-ink"}`}>
-                          {p.availableStock}
-                        </span>
-                      </td>
                       <td className="p-4 text-center">
                         <label className="relative inline-flex cursor-pointer items-center p-1">
                           <input

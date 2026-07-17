@@ -57,17 +57,5 @@ export class CreateProductDto {
   isFeatured?: boolean;
 
   @IsOptional()
-  @IsString()
-  seoTitle?: string;
-
-  @IsOptional()
-  @IsString()
-  seoDescription?: string;
-
-  @IsOptional()
-  @IsString()
-  metaKeywords?: string;
-
-  @IsOptional()
   specs?: { label: string; value: string }[];
 }

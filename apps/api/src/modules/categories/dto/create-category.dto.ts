@@ -24,12 +24,4 @@ export class CreateCategoryDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
-
-  @IsOptional()
-  @IsString()
-  seoTitle?: string;
-
-  @IsOptional()
-  @IsString()
-  seoDescription?: string;
 }

@@ -1,9 +1,9 @@
-import { pgTable, uuid, varchar, text, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, integer, timestamp, jsonb } from "drizzle-orm/pg-core";
 
 export const analyticsEvents = pgTable("analytics_events", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
-  properties: text("properties"),
+  properties: jsonb("properties"),
   sessionId: varchar("session_id", { length: 255 }),
   userId: varchar("user_id", { length: 255 }),
   ipAddress: varchar("ip_address", { length: 45 }),
@@ -29,7 +29,7 @@ export const searchLogs = pgTable("search_logs", {
   id: uuid("id").defaultRandom().primaryKey(),
   query: varchar("query", { length: 500 }).notNull(),
   results: integer("results"),
-  filters: text("filters"),
+  filters: jsonb("filters"),
   userId: varchar("user_id", { length: 255 }),
   sessionId: varchar("session_id", { length: 255 }),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),

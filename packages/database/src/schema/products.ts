@@ -21,17 +21,11 @@ export const products = pgTable("products", {
   width: numeric("width", { precision: 8, scale: 2 }),
   height: numeric("height", { precision: 8, scale: 2 }),
   depth: numeric("depth", { precision: 8, scale: 2 }),
-  brandId: uuid("brand_id").references(() => brands.id),
-  useId: uuid("use_id").references(() => uses.id),
+  brandId: uuid("brand_id").references(() => brands.id, { onDelete: "set null" }),
+  useId: uuid("use_id").references(() => uses.id, { onDelete: "set null" }),
   isActive: boolean("is_active").default(true).notNull(),
   isFeatured: boolean("is_featured").default(false).notNull(),
   isBundle: boolean("is_bundle").default(false).notNull(),
-  seoTitle: varchar("seo_title", { length: 255 }),
-  seoDescription: text("seo_description"),
-  metaKeywords: varchar("meta_keywords", { length: 500 }),
-  totalStock: integer("total_stock").default(0).notNull(),
-  reservedStock: integer("reserved_stock").default(0).notNull(),
-  availableStock: integer("available_stock").default(0).notNull(),
   viewCount: integer("view_count").default(0).notNull(),
   saleCount: integer("sale_count").default(0).notNull(),
   ratingAverage: numeric("rating_average", { precision: 3, scale: 2 }),
@@ -91,4 +85,6 @@ export const productVariants = pgTable("product_variants", {
   attributes: text("attributes").array(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
-});
+}, (t) => [
+  index("product_variants_product_id_idx").on(t.productId),
+]);

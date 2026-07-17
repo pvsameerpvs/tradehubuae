@@ -1,5 +1,6 @@
-import { pgTable, uuid, varchar, text, boolean, timestamp } from "drizzle-orm/pg-core";
+import { index, pgTable, uuid, varchar, text, boolean, timestamp } from "drizzle-orm/pg-core";
 import { users } from "./users";
+import { emirateEnum } from "./enums";
 
 export const addresses = pgTable("addresses", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -10,10 +11,12 @@ export const addresses = pgTable("addresses", {
   addressLine1: text("address_line1").notNull(),
   addressLine2: text("address_line2"),
   city: varchar("city", { length: 255 }).notNull(),
-  emirate: varchar("emirate", { length: 255 }).notNull(),
+  emirate: emirateEnum("emirate").notNull(),
   country: varchar("country", { length: 100 }).default("UAE").notNull(),
   zipCode: varchar("zip_code", { length: 20 }),
   isDefault: boolean("is_default").default(false).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
-});
+}, (t) => [
+  index("addresses_user_id_idx").on(t.userId),
+]);
