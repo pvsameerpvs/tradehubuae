@@ -31,7 +31,7 @@ export interface CreateAddressInput {
   isDefault?: boolean;
 }
 
-export interface UpdateAddressInput extends Partial<CreateAddressInput> {}
+export type UpdateAddressInput = Partial<CreateAddressInput>;
 
 export async function getAddresses(): Promise<AddressData[]> {
   const res = await api.get<{ data: AddressData[] }>("/addresses");

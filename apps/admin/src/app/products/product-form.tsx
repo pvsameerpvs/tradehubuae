@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from "@tradehubuae/ui";
 import { api, type PaginatedResponse } from "@/lib/api";
-import ImageUpload from "@/components/ImageUpload";
+import { ImageUpload } from "@/components/ImageUpload";
 import { Sparkles } from "lucide-react";
 
 interface Category {
@@ -123,7 +123,7 @@ const specLabels = [
   { label: "Warranty", placeholder: "e.g. 2 Years" },
 ];
 
-export default function ProductForm({ id }: { id?: string }) {
+export function ProductForm({ id }: { id?: string }) {
   const router = useRouter();
   const [images, setImages] = useState<string[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -158,7 +158,7 @@ export default function ProductForm({ id }: { id?: string }) {
         setBrands(brs.data);
         setUses(us.data);
       })
-      .catch((err) => console.error("Failed to fetch categories/brands/uses", err));
+      .catch(() => { /* TODO: show error toast */ });
   }, []);
 
   useEffect(() => {
@@ -184,7 +184,7 @@ export default function ProductForm({ id }: { id?: string }) {
         });
         setImages(p.images?.filter((img) => img?.url).map((img) => img.url) ?? []);
       })
-      .catch((err) => console.error("Failed to fetch product", err))
+      .catch(() => { /* TODO: show error toast */ })
       .finally(() => setFetching(false));
   }, [id, reset]);
 

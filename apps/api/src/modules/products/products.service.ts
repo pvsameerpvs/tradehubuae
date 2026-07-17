@@ -65,7 +65,7 @@ export class ProductsService {
 
     if (minPrice !== undefined) conditions.push(sql`${products.price} >= ${minPrice}`);
     if (maxPrice !== undefined) conditions.push(sql`${products.price} <= ${maxPrice}`);
-    if (condition) conditions.push(eq(products.condition, condition as any));
+    if (condition) conditions.push(eq(products.condition, condition as "New" | "Like New" | "Excellent" | "Good" | "Fair"));
     if (inStock) conditions.push(sql`${products.availableStock} > 0`);
 
     const where = and(...conditions.filter(Boolean));
@@ -171,7 +171,7 @@ export class ProductsService {
         shortDescription: dto.shortDescription,
         sku,
         barcode: dto.barcode,
-        condition: dto.condition as any,
+        condition: dto.condition as "New" | "Like New" | "Excellent" | "Good" | "Fair",
         price: dto.price.toString(),
         compareAtPrice: dto.compareAtPrice?.toString(),
         costPrice: dto.costPrice?.toString(),

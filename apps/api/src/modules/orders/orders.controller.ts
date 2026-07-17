@@ -32,7 +32,29 @@ export class OrdersController {
   }
 
   @Post()
-  async create(@Body() dto: any, @CurrentUser("id") userId?: string) {
+  async create(@Body() dto: {
+    subtotal: number;
+    total: number;
+    paymentMethod: string;
+    shippingMethod: string;
+    contactName: string;
+    contactPhone: string;
+    shippingCost?: number;
+    taxAmount?: number;
+    discountAmount?: number;
+    notes?: string;
+    shippingAddressId?: string;
+    shippingAddress?: Record<string, unknown>;
+    items?: Array<{
+      productId: string;
+      variantId?: string;
+      quantity: number;
+      unitPrice: number;
+      name: string;
+      sku: string;
+      image?: string;
+    }>;
+  }, @CurrentUser("id") userId?: string) {
     return this.ordersService.create(dto, userId);
   }
 

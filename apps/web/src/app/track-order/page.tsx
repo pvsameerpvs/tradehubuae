@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button, Input, Badge } from "@tradehubuae/ui";
 import {
   Search,
   ShoppingCart,
-  CheckCircle2,
+  Check, CheckCircle2,
   RefreshCw,
   Truck,
   PackageCheck,
@@ -70,9 +70,7 @@ function Timeline({ status, shippedAt, deliveredAt }: { status: string; shippedA
                 }`}
               >
                 {stepStatus === "completed" ? (
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                  </svg>
+                  <Check className="h-4 w-4" strokeWidth={2.5} />
                 ) : (
                   <StepIcon className="h-4 w-4" strokeWidth={2} />
                 )}
@@ -329,7 +327,7 @@ function OrderTrackCard({ order }: { order: OrderData }) {
   );
 }
 
-export default function TrackOrderPage() {
+function TrackOrderContent() {
   const searchParams = useSearchParams();
   const [orderId, setOrderId] = useState("");
   const [order, setOrder] = useState<OrderData | null>(null);
@@ -413,5 +411,21 @@ export default function TrackOrderPage() {
         {order && <OrderTrackCard order={order} />}
       </div>
     </div>
+  );
+}
+
+export default function TrackOrderPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-8 sm:py-12">
+        <div className="mx-auto max-w-2xl animate-pulse space-y-5">
+          <div className="h-8 w-48 rounded bg-bg2" />
+          <div className="h-12 w-full rounded bg-bg2" />
+          <div className="h-40 rounded bg-bg2" />
+        </div>
+      </div>
+    }>
+      <TrackOrderContent />
+    </Suspense>
   );
 }

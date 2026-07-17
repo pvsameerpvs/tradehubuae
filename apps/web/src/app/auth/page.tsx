@@ -28,7 +28,11 @@ export default function AuthPage() {
   const handleGoogle = async () => {
     setIsLoading(true);
     setError(null);
-    await signInWithGoogle();
+    try {
+      await signInWithGoogle();
+    } catch {
+      setError("Google sign-in failed. Please try again.");
+    }
     setIsLoading(false);
   };
 

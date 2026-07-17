@@ -2,8 +2,9 @@
 
 import { memo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Phone, Mail, MoreVertical, Circle } from "lucide-react";
+import { ArrowLeft, Phone, Mail, MoreVertical, Circle, User } from "lucide-react";
 import { useChatStore } from "@/lib/store";
+import { api } from "@/lib/api";
 import { getInitials, getDisplayName, getAvatarColor } from "@/lib/utils";
 import { cn } from "@tradehubuae/ui";
 import type { ChatSession } from "@/types";
@@ -37,6 +38,7 @@ function SessionHeaderComponent({ session }: { session: ChatSession }) {
   const handleStatus = useCallback(
     (value: string) => {
       setMenuOpen(false);
+      api.sessions.updateStatus(session.id, value as "new" | "in_progress" | "closed").catch(() => {});
       updateSession(session.id, { status: value as ChatSession["status"] });
     },
     [session.id, updateSession]
@@ -78,6 +80,16 @@ function SessionHeaderComponent({ session }: { session: ChatSession }) {
           <a href={`mailto:${session.userEmail}`} className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-2 hover:bg-bg2 hover:text-ink transition-colors">
             <Mail className="h-4 w-4" />
           </a>
+        )}
+
+        {session.userId && (
+          <button
+            onClick={() => router.push(`/chats/user/${session.userId}`)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-2 hover:bg-bg2 hover:text-ink transition-colors"
+            title="View profile"
+          >
+            <User className="h-4 w-4" />
+          </button>
         )}
 
         <div className="relative">

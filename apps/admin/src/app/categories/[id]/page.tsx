@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import CategoryForm from "../category-form";
+import { CategoryForm } from "../category-form";
 
 export default async function EditCategoryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

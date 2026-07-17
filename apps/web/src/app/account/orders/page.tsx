@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { Package, ChevronRight, X, AlertTriangle } from "lucide-react";
+import { Package, ChevronRight, X, AlertTriangle, Check } from "lucide-react";
 import {
   Button,
   Badge,
@@ -47,9 +47,7 @@ function OrderStatusTimeline({ status }: { status: string }) {
                 }`}
               >
                 {isCompleted && (
-                  <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
-                  </svg>
+                  <Check className="h-2.5 w-2.5" strokeWidth={3} />
                 )}
               </div>
               {i < ORDER_STATUS_FLOW.length - 1 && (

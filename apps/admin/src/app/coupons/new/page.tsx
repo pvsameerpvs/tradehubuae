@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import CouponForm from "../coupon-form";
+import { CouponForm } from "../coupon-form";
 
 export default function NewCouponPage() {
   return (

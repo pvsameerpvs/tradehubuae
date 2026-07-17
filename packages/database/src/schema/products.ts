@@ -47,7 +47,7 @@ export const productCategories = pgTable("product_categories", {
   isPrimary: boolean("is_primary").default(false).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 }, (t) => ({
-  pk: { primaryKey: { columns: [t.productId, t.categoryId] } },
+  primaryKey: { columns: [t.productId, t.categoryId] },
 }));
 
 export const productImages = pgTable("product_images", {

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import UseForm from "../use-form";
+import { UseForm } from "../use-form";
 
 export default function NewUsePage() {
   return (

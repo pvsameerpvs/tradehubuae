@@ -24,18 +24,18 @@ export const blogPostProducts = pgTable("blog_post_products", {
   blogPostId: uuid("blog_post_id").notNull().references(() => blogPosts.id, { onDelete: "cascade" }),
   productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
 }, (t) => ({
-  pk: { primaryKey: { columns: [t.blogPostId, t.productId] } },
+  primaryKey: { columns: [t.blogPostId, t.productId] },
 }));
 
 export const blogTags = pgTable("blog_tags", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
-  slug: varchar("slug", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
 });
 
 export const blogPostTags = pgTable("blog_post_tags", {
   blogPostId: uuid("blog_post_id").notNull().references(() => blogPosts.id, { onDelete: "cascade" }),
   tagId: uuid("tag_id").notNull().references(() => blogTags.id, { onDelete: "cascade" }),
 }, (t) => ({
-  pk: { primaryKey: { columns: [t.blogPostId, t.tagId] } },
+  primaryKey: { columns: [t.blogPostId, t.tagId] },
 }));

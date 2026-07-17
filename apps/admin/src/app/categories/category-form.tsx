@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api, type PaginatedResponse } from "@/lib/api";
-import ImageUpload from "@/components/ImageUpload";
+import { ImageUpload } from "@/components/ImageUpload";
 import { Button } from "@tradehubuae/ui";
 
 interface Category {
@@ -19,7 +19,7 @@ interface Category {
   parent: { id: string; name: string } | null;
 }
 
-export default function CategoryForm({ id }: { id?: string }) {
+export function CategoryForm({ id }: { id?: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(!!id);
@@ -35,7 +35,7 @@ export default function CategoryForm({ id }: { id?: string }) {
   useEffect(() => {
     api.get<PaginatedResponse<Category>>("/categories", { limit: 200, sort: "name", order: "asc" })
       .then((res) => setCategories(res.data))
-      .catch((err) => console.error("Failed to fetch categories", err));
+      .catch(() => { /* TODO: show error toast */ });
   }, []);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export default function CategoryForm({ id }: { id?: string }) {
         sortOrder: cat.sortOrder ?? 0,
         isActive: cat.isActive ?? true,
       }))
-      .catch((err) => console.error("Failed to fetch category", err))
+      .catch(() => { /* TODO: show error toast */ })
       .finally(() => setFetching(false));
   }, [id]);
 

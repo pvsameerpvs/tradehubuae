@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import BrandForm from "../brand-form";
+import { BrandForm } from "../brand-form";
 
 export default async function EditBrandPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

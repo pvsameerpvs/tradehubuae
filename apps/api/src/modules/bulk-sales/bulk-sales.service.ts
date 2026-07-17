@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, Logger } from "@nestjs/common";
 import { DrizzleService } from "../../database/drizzle.service";
 import { bulkRequests, bulkRequestItems, products } from "@tradehubuae/database";
-import { eq, and, count, desc } from "drizzle-orm";
+import { eq, and, count, desc, SQL } from "drizzle-orm";
 import type { CreateBulkSaleDto } from "./dto/create-bulk-sale.dto";
 import type { UpdateBulkSaleStatusDto } from "./dto/update-status.dto";
 
@@ -13,7 +13,7 @@ export class BulkSalesService {
 
   async findAll(query: { page?: number; limit?: number; status?: string }) {
     const { page = 1, limit = 20, status } = query;
-    const conditions: any[] = [];
+    const conditions: SQL[] = [];
 
     if (status) conditions.push(eq(bulkRequests.status, status));
 

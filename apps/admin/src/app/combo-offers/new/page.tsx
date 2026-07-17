@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import ComboOfferForm from "../combo-offer-form";
+import { ComboOfferForm } from "../combo-offer-form";
 
 export default function NewComboOfferPage() {
   return (

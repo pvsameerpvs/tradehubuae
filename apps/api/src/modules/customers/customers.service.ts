@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, Logger } from "@nestjs/common";
 import { DrizzleService } from "../../database/drizzle.service";
 import { users, orders, addresses } from "@tradehubuae/database";
-import { eq, like, or, count, and, desc } from "drizzle-orm";
+import { eq, like, or, count, and, desc, SQL } from "drizzle-orm";
 import type { UpdateProfileDto } from "./dto/profile.dto";
 
 @Injectable()
@@ -53,16 +53,15 @@ export class CustomersService {
 
   async findAll(query: { page?: number; limit?: number; q?: string }) {
     const { page = 1, limit = 20, q } = query;
-    const conditions: any[] = [eq(users.role, "CUSTOMER")];
+    const conditions: SQL[] = [eq(users.role, "CUSTOMER")];
 
     if (q) {
-      conditions.push(
-        or(
-          like(users.name, `%${q}%`),
-          like(users.email, `%${q}%`),
-          like(users.phone, `%${q}%`),
-        ),
+      const searchCondition = or(
+        like(users.name, `%${q}%`),
+        like(users.email, `%${q}%`),
+        like(users.phone, `%${q}%`),
       );
+      if (searchCondition) conditions.push(searchCondition);
     }
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;

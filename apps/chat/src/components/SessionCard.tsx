@@ -8,6 +8,13 @@ import { cn } from "@tradehubuae/ui";
 import type { ChatSession } from "@/types";
 import { Circle } from "lucide-react";
 
+function handleAvatarClick(e: React.MouseEvent, userId?: string) {
+  e.stopPropagation();
+  if (userId) {
+    window.location.href = `/chats/user/${userId}`;
+  }
+}
+
 const STATUS_DOT: Record<string, string> = {
   new: "text-green-500",
   in_progress: "text-amber-500",
@@ -43,7 +50,11 @@ function SessionCardComponent({ session, isActive }: { session: ChatSession; isA
         isActive ? "bg-bg2" : "hover:bg-bg2"
       )}
     >
-      <div className="relative flex-shrink-0">
+      <div
+        className="relative flex-shrink-0 cursor-pointer"
+        onClick={(e) => handleAvatarClick(e, session.userId)}
+        title={session.userId ? "View profile" : undefined}
+      >
         {session.avatarUrl ? (
           <img src={session.avatarUrl} alt="" className="h-12 w-12 rounded-full object-cover" />
         ) : (

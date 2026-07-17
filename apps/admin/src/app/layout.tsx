@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
-import AdminShell from "@/components/AdminShell";
+import { AdminShell } from "@/components/AdminShell";
 
 const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-sans" });
 const outfit = Outfit({ subsets: ["latin"], display: "swap", variable: "--font-heading" });

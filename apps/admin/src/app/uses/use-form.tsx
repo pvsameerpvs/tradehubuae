@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import ImageUpload from "@/components/ImageUpload";
+import { ImageUpload } from "@/components/ImageUpload";
 import { Button } from "@tradehubuae/ui";
 
 interface UseItem {
@@ -12,7 +12,7 @@ interface UseItem {
   image: string | null;
 }
 
-export default function UseForm({ id }: { id?: string }) {
+export function UseForm({ id }: { id?: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(!!id);
@@ -29,7 +29,7 @@ export default function UseForm({ id }: { id?: string }) {
         name: item.name,
         image: item.image ?? "",
       }))
-      .catch((err) => console.error("Failed to fetch use", err))
+      .catch(() => { /* TODO: show error toast */ })
       .finally(() => setFetching(false));
   }, [id]);
 

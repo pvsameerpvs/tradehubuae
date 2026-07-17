@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@tradehubuae/ui";
-import ImageUpload from "@/components/ImageUpload";
+import { ImageUpload } from "@/components/ImageUpload";
 
 interface BlogPost {
   id: string;
@@ -18,7 +18,7 @@ interface BlogPost {
   authorId: string | null;
 }
 
-export default function BlogForm({ id }: { id?: string }) {
+export function BlogForm({ id }: { id?: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({

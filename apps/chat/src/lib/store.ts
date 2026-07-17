@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import type { ChatSession, ChatMessage, OnlineStatus } from "@/types";
-import { DEMO_SESSIONS, DEMO_MESSAGES } from "./demo-data";
 
 interface ChatState {
   sessions: ChatSession[];
@@ -27,9 +26,9 @@ interface ChatState {
 export type { ChatSession, ChatMessage } from "@/types";
 
 export const useChatStore = create<ChatState>((set) => ({
-  sessions: DEMO_SESSIONS,
-  activeSessionId: "s1",
-  messages: DEMO_MESSAGES,
+  sessions: [],
+  activeSessionId: null,
+  messages: {},
   searchQuery: "",
   onlineStatus: "online",
   isConnected: false,

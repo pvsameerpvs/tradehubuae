@@ -2,10 +2,12 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ShoppingCart, Minus, Plus, AlertTriangle } from "lucide-react";
+import { ShoppingCart, Minus, Plus, AlertTriangle, LogIn } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { useCartFly } from "@/lib/cart-fly-context";
 import { Button } from "@tradehubuae/ui";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { useAuth } from "@/lib/supabase/provider";
 import type { Product } from "@/data";
 
 function QtySelector({ qty, onChange, compact, max }: { qty: number; onChange: (d: number) => void; compact?: boolean; max?: number }) {
@@ -53,10 +55,13 @@ function AnimatedPrice({ amount, label }: { amount: number; label?: string }) {
 
 export function BuyButtons({ product }: { product: Product }) {
   const router = useRouter();
+  const { user } = useAuth();
   const { addItem, updateQuantity } = useCart();
   const { flyToCart } = useCartFly();
   const imageRef = useRef<HTMLDivElement>(null);
   const [qty, setQty] = useState(1);
+  const [showAuth, setShowAuth] = useState(false);
+  const [pendingAction, setPendingAction] = useState<"cart" | "buy" | null>(null);
 
   const maxStock = product.stock ?? 99;
 
@@ -70,14 +75,36 @@ export function BuyButtons({ product }: { product: Product }) {
   };
 
   const handleBuyNow = () => {
+    if (!user) {
+      setPendingAction("buy");
+      setShowAuth(true);
+      return;
+    }
     addToCartWithQty();
     router.push("/checkout");
   };
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
+    if (!user) {
+      setPendingAction("cart");
+      setShowAuth(true);
+      return;
+    }
     addToCartWithQty();
     if (imageRef.current) flyToCart(imageRef.current);
+  };
+
+  const handleSignedIn = () => {
+    setShowAuth(false);
+    if (pendingAction === "buy") {
+      addToCartWithQty();
+      router.push("/checkout");
+    } else if (pendingAction === "cart") {
+      addToCartWithQty();
+      if (imageRef.current) flyToCart(imageRef.current);
+    }
+    setPendingAction(null);
   };
 
   const totalPrice = product.price * qty;
@@ -127,6 +154,24 @@ export function BuyButtons({ product }: { product: Product }) {
           </Button>
         </div>
       </div>
+
+      {/* AUTH MODAL */}
+      {showAuth && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-brand/10">
+              <LogIn className="h-6 w-6 text-brand" strokeWidth={1.75} />
+            </div>
+            <h3 className="text-base font-semibold text-ink">Sign in to continue</h3>
+            <p className="mt-1 text-sm text-ink-2">
+              {pendingAction === "buy" ? "Sign in to proceed with your purchase." : "Sign in to add items to your cart."}
+            </p>
+            <div className="mt-5">
+              <GoogleSignInButton onSignIn={handleSignedIn} onClose={() => { setShowAuth(false); setPendingAction(null); }} closeLabel="Continue browsing" />
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

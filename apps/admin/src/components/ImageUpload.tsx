@@ -11,7 +11,7 @@ interface ImageUploadProps {
   folder?: string;
 }
 
-export default function ImageUpload({ value, onChange, label = "Image", folder = "uploads" }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, label = "Image", folder = "uploads" }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(value ?? "");
   const inputRef = useRef<HTMLInputElement>(null);

@@ -31,7 +31,7 @@ export class QueryProductDto {
   maxPrice?: number;
 
   @IsOptional()
-  @IsEnum(["New", "Like_New", "Excellent", "Good", "Fair"])
+  @IsEnum(["New", "Like New", "Excellent", "Good", "Fair"])
   condition?: string;
 
   @IsOptional()

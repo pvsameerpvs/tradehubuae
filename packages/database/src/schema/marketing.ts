@@ -22,7 +22,7 @@ export const couponProducts = pgTable("coupon_products", {
   couponId: uuid("coupon_id").notNull().references(() => coupons.id, { onDelete: "cascade" }),
   productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
 }, (t) => ({
-  pk: { primaryKey: { columns: [t.couponId, t.productId] } },
+  primaryKey: { columns: [t.couponId, t.productId] },
 }));
 
 export const comboOffers = pgTable("combo_offers", {

@@ -1,6 +1,5 @@
 import { pgTable, uuid, varchar, text, integer, boolean, timestamp, unique } from "drizzle-orm/pg-core";
-import { products } from "./products";
-import { productVariants } from "./products";
+import { products, productVariants } from "./products";
 
 export const warehouses = pgTable("warehouses", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -34,7 +33,7 @@ export const stock = pgTable("stock", {
 export const stockHistory = pgTable("stock_history", {
   id: uuid("id").defaultRandom().primaryKey(),
   variantId: uuid("variant_id").notNull().references(() => productVariants.id),
-  warehouseId: uuid("warehouse_id").notNull(),
+  warehouseId: uuid("warehouse_id").notNull().references(() => warehouses.id),
   type: varchar("type", { length: 50 }).notNull(),
   quantity: integer("quantity").notNull(),
   reference: varchar("reference", { length: 255 }),
@@ -57,7 +56,7 @@ export const stockTransfers = pgTable("stock_transfers", {
 export const stockTransferItems = pgTable("stock_transfer_items", {
   id: uuid("id").defaultRandom().primaryKey(),
   transferId: uuid("transfer_id").notNull().references(() => stockTransfers.id, { onDelete: "cascade" }),
-  variantId: uuid("variant_id").notNull(),
+  variantId: uuid("variant_id").notNull().references(() => productVariants.id),
   quantity: integer("quantity").notNull(),
 });
 

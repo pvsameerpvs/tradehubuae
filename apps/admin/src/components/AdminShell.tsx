@@ -5,7 +5,7 @@ import { cn } from "@tradehubuae/ui";
 import { Sidebar } from "./layout/Sidebar";
 import { Header } from "./layout/Header";
 
-export default function AdminShell({ children }: { children: React.ReactNode }) {
+export function AdminShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (

@@ -28,18 +28,27 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  users: {
+    get: (id: string) => request<unknown>(`/chat/users/${id}`),
+    orders: (id: string) => request<unknown[]>(`/chat/users/${id}/orders`),
+  },
   sessions: {
     list: (params?: { status?: string; page?: number }) => {
       const qs = new URLSearchParams();
       if (params?.status) qs.set("status", params.status);
       if (params?.page) qs.set("page", String(params.page));
       const q = qs.toString();
-      return request<unknown[]>(`/chat/sessions${q ? `?${q}` : ""}`);
+      return request<{ data: unknown[]; meta: unknown }>(`/chat/sessions${q ? `?${q}` : ""}`);
     },
     get: (id: string) => request<unknown>(`/chat/sessions/${id}`),
     assign: (id: string) => request<unknown>(`/chat/sessions/${id}/assign`, { method: "PATCH" }),
     close: (id: string) => request<unknown>(`/chat/sessions/${id}/close`, { method: "PATCH" }),
     reopen: (id: string) => request<unknown>(`/chat/sessions/${id}/reopen`, { method: "PATCH" }),
+    updateStatus: (id: string, status: "new" | "in_progress" | "closed") =>
+      request<unknown>(`/chat/sessions/${id}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+      }),
   },
   messages: {
     list: (sessionId: string, params?: { page?: number }) => {

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api, type PaginatedResponse } from "@/lib/api";
-import ImageUpload from "@/components/ImageUpload";
+import { ImageUpload } from "@/components/ImageUpload";
 import { Button } from "@tradehubuae/ui";
 
 interface Product {
@@ -33,7 +33,7 @@ interface ComboOffer {
   items: ComboOfferItem[];
 }
 
-export default function ComboOfferForm({ id }: { id?: string }) {
+export function ComboOfferForm({ id }: { id?: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(!!id);
@@ -53,7 +53,7 @@ export default function ComboOfferForm({ id }: { id?: string }) {
   useEffect(() => {
     api.get<PaginatedResponse<Product>>("/products", { limit: 200, sort: "name", order: "asc" })
       .then((res) => setProducts(res.data))
-      .catch((err) => console.error("Failed to fetch products", err));
+      .catch(() => { /* TODO: show error toast */ });
   }, []);
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function ComboOfferForm({ id }: { id?: string }) {
         });
         setItems(offer.items.map((i) => ({ productId: i.productId, quantity: i.quantity, product: i.product })));
       })
-      .catch((err) => console.error("Failed to fetch combo offer", err))
+      .catch(() => { /* TODO: show error toast */ })
       .finally(() => setFetching(false));
   }, [id]);
 

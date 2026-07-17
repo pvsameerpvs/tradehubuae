@@ -48,3 +48,63 @@ export interface ChatSession {
 export interface UnreadCounts {
   [sessionId: string]: number;
 }
+
+/** Raw shape returned by the chat API for a session (before mapping to ChatSession). */
+export interface RawSession {
+  id: string;
+  userId?: string;
+  userName: string;
+  userEmail: string;
+  userPhone?: string;
+  status: string;
+  source?: string;
+  createdAt: string;
+  lastMessageAt: string;
+  assignedAdminId?: string;
+  assignedAdminName?: string;
+  productContext?: unknown;
+}
+
+export interface UserProfile {
+  id: string;
+  name: string | null;
+  email: string;
+  phone: string | null;
+  image: string | null;
+  createdAt: string;
+}
+
+export interface OrderItemData {
+  id: string;
+  orderId: string;
+  productId: string;
+  variantId?: string;
+  name: string;
+  sku: string;
+  quantity: number;
+  unitPrice: string;
+  totalPrice: string;
+  image?: string;
+  product?: { name: string; slug: string; image?: string };
+}
+
+export interface OrderData {
+  id: string;
+  orderNumber: string;
+  status: string;
+  total: string;
+  currency: string;
+  createdAt: string;
+  items: OrderItemData[];
+}
+
+/** Raw shape returned by the chat API for a message (before mapping to ChatMessage). */
+export interface RawMessage {
+  id: string;
+  sessionId: string;
+  senderType: string;
+  messageType?: string;
+  content: string;
+  createdAt: string;
+  readAt?: string;
+}

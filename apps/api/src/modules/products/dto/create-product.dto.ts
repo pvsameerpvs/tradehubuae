@@ -23,7 +23,7 @@ export class CreateProductDto {
   @IsUUID()
   useId?: string;
 
-  @IsEnum(["New", "Like_New", "Excellent", "Good", "Fair"])
+  @IsEnum(["New", "Like New", "Excellent", "Good", "Fair"])
   condition!: string;
 
   @IsNumber()

@@ -28,6 +28,7 @@ import {
   type AddressData,
   type CreateAddressInput,
 } from "@/lib/actions/addresses";
+import { useAuth } from "@/lib/supabase/provider";
 import { AddressCard } from "@/components/shared/AddressCard";
 import { AddressForm } from "@/components/shared/AddressForm";
 
@@ -47,6 +48,7 @@ function formatExpiry(v: string) {
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const {
     items, subtotal, shipping, activePromo, promoError,
     totalSavings, grandTotal, savingsBreakdown,
@@ -87,6 +89,11 @@ export default function CheckoutPage() {
         restoredRef.current = true;
       }
     } catch {/* ignore parse errors */}
+
+    if (!restoredRef.current && user) {
+      if (user.name) setName(user.name);
+    }
+
     getAddresses()
       .then((data) => {
         setSavedAddresses(data);
@@ -97,7 +104,7 @@ export default function CheckoutPage() {
       })
       .catch(() => {/* ignore */})
       .finally(() => setAddressesLoading(false));
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const state = { step, payment, name, phone, address, cardNumber, cardExpiry, cardCvv, selectedAddressId };
@@ -124,6 +131,10 @@ export default function CheckoutPage() {
     if (!payment || !name || !phone || !address || !agreed || items.length === 0) return;
     if (payment === "card" && (!cardNumber || !cardExpiry || !cardCvv)) return;
 
+    const selectedAddr = selectedAddressId
+      ? savedAddresses.find((a) => a.id === selectedAddressId)
+      : null;
+
     try {
       const result = await createOrder({
         contactName: name,
@@ -135,6 +146,30 @@ export default function CheckoutPage() {
         taxAmount: 0,
         discountAmount: totalSavings,
         total: grandTotal,
+        shippingAddressId: selectedAddr?.id ?? undefined,
+        shippingAddress: selectedAddr
+          ? {
+              firstName: selectedAddr.firstName,
+              lastName: selectedAddr.lastName,
+              phone: selectedAddr.phone,
+              addressLine1: selectedAddr.addressLine1,
+              addressLine2: selectedAddr.addressLine2 ?? null,
+              city: selectedAddr.city,
+              emirate: selectedAddr.emirate,
+              country: selectedAddr.country,
+              zipCode: selectedAddr.zipCode ?? null,
+            }
+          : {
+              firstName: name,
+              lastName: "",
+              phone,
+              addressLine1: address,
+              addressLine2: null,
+              city: "",
+              emirate: "",
+              country: "UAE",
+              zipCode: null,
+            },
         items: items.map((item) => ({
           productId: item.id,
           name: item.name,

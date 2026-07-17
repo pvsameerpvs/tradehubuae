@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import BlogForm from "@/app/blog/blog-form";
+import { BlogForm } from "@/app/blog/blog-form";
 
 export default function NewBlogPage() {
   const router = useRouter();

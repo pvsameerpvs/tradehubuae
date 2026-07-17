@@ -9,19 +9,17 @@ import { BrandsModule } from "./modules/brands/brands.module";
 import { InventoryModule } from "./modules/inventory/inventory.module";
 import { OrdersModule } from "./modules/orders/orders.module";
 import { CustomersModule } from "./modules/customers/customers.module";
-import { ReviewsModule } from "./modules/reviews/reviews.module";
 import { CouponsModule } from "./modules/coupons/coupons.module";
 import { MediaModule } from "./modules/media/media.module";
 import { SEOsModule } from "./modules/seo/seo.module";
 import { AnalyticsModule } from "./modules/analytics/analytics.module";
 import { AIModule } from "./modules/ai/ai.module";
-import { NotificationsModule } from "./modules/notifications/notifications.module";
-import { ReportsModule } from "./modules/reports/reports.module";
 import { UsesModule } from "./modules/uses/uses.module";
 import { ComboOffersModule } from "./modules/combo-offers/combo-offers.module";
 import { ContactModule } from "./modules/contact/contact.module";
 import { AddressesModule } from "./modules/addresses/addresses.module";
 import { BulkSalesModule } from "./modules/bulk-sales/bulk-sales.module";
+import { ChatModule } from "./modules/chat/chat.module";
 import { DrizzleModule } from "./database/drizzle.module";
 
 @Module({
@@ -45,19 +43,17 @@ import { DrizzleModule } from "./database/drizzle.module";
     InventoryModule,
     OrdersModule,
     CustomersModule,
-    ReviewsModule,
     CouponsModule,
     MediaModule,
     SEOsModule,
     AnalyticsModule,
     AIModule,
-    NotificationsModule,
-    ReportsModule,
     UsesModule,
     ComboOffersModule,
     ContactModule,
     AddressesModule,
     BulkSalesModule,
+    ChatModule,
   ],
 })
 export class AppModule {}

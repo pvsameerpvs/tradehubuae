@@ -4,11 +4,12 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Send, Minus, User, Bot, MessageSquareMore } from "lucide-react";
 import {
   getSettings,
-  startSession,
+  apiCreateSession,
+  apiGetMessages,
+  apiSendMessage,
   getCurrentSessionId,
   getSessionById,
   getMessages,
-  saveMessage,
   getProductContext,
   clearProductContext,
   markSessionRead,
@@ -18,6 +19,8 @@ import {
   type ProductContext,
 } from "@/lib/chat-store";
 import { ChatBubbleFilled } from "@/components/icons";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { useAuth } from "@/lib/supabase/provider";
 
 function genId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -75,16 +78,37 @@ function MessageContent({ text }: { text: string }) {
   return <p className="text-sm leading-relaxed">{text}</p>;
 }
 
+function hasPhoneBeenAsked(): boolean {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem("th_chat_phone_asked") === "true";
+}
+
+function markPhoneAsked(): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem("th_chat_phone_asked", "true");
+}
+
+function getStoredPhone(): string {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem("th_chat_phone") ?? "";
+}
+
+function storePhone(phone: string): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem("th_chat_phone", phone);
+}
+
 export function LiveChatWidget() {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "" });
+  const [showPhoneForm, setShowPhoneForm] = useState(false);
+  const [phoneInput, setPhoneInput] = useState(getStoredPhone());
   const [started, setStarted] = useState(false);
   const [session, setSession] = useState<ChatSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [settings, setSettings] = useState(getSettings());
   const [productCtx, setProductCtx] = useState<ProductContext | null>(null);
-  const [showProductChip, setShowProductChip] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -96,12 +120,23 @@ export function LiveChatWidget() {
   }, []);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !user) return;
 
-    const ctx = getProductContext();
-    if (ctx) {
-      setProductCtx(ctx);
+    const phone = getStoredPhone();
+    const asked = hasPhoneBeenAsked();
+    if (!asked || !phone) {
+      setShowPhoneForm(true);
+      setPhoneInput(phone);
+      return;
     }
+
+    startChat();
+  }, [open, user]);
+
+  const startChat = useCallback(async (phone?: string) => {
+    if (!user) return;
+    const ctx = getProductContext();
+    setProductCtx(ctx ?? null);
 
     const existingId = getCurrentSessionId();
     if (existingId) {
@@ -109,19 +144,41 @@ export function LiveChatWidget() {
       if (s && s.status === "active") {
         setSession(s);
         setStarted(true);
-        setMessages(getMessages(existingId));
+        apiGetMessages(existingId).then(setMessages);
         markSessionRead(existingId);
+        return;
       }
     }
-  }, [open]);
+
+    apiCreateSession(user.name ?? user.email, user.email, (phone ?? getStoredPhone()) || undefined, ctx)
+      .then((s) => {
+        setSession(s);
+        setStarted(true);
+        apiGetMessages(s.id).then(setMessages);
+      });
+    clearProductContext();
+  }, [user]);
+
+  const handlePhoneSubmit = () => {
+    storePhone(phoneInput);
+    markPhoneAsked();
+    setShowPhoneForm(false);
+    startChat(phoneInput);
+  };
+
+  const handlePhoneSkip = () => {
+    markPhoneAsked();
+    setShowPhoneForm(false);
+    startChat();
+  };
 
   useEffect(() => {
     if (!started || !session) return;
 
     markSessionRead(session.id);
     pollRef.current = setInterval(() => {
-      setMessages(getMessages(session.id));
-    }, 2000);
+      apiGetMessages(session.id).then(setMessages);
+    }, 3000);
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
@@ -145,34 +202,10 @@ export function LiveChatWidget() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleStart = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!form.name.trim() || !form.email.trim()) return;
-
-      const ctx = productCtx;
-      const s = startSession(form.name.trim(), form.email.trim(), ctx);
-      setSession(s);
-      setStarted(true);
-      setMessages(getMessages(s.id));
-      clearProductContext();
-      setShowProductChip(false);
-    },
-    [form, productCtx],
-  );
-
   const handleSend = useCallback(() => {
     if (!input.trim() || !session) return;
-    const msg: ChatMessage = {
-      id: genId(),
-      sessionId: session.id,
-      sender: "user",
-      message: input.trim(),
-      createdAt: new Date().toISOString(),
-      read: false,
-    };
-    saveMessage(msg);
-    setMessages(getMessages(session.id));
+    apiSendMessage(session.id, input.trim());
+    apiGetMessages(session.id).then(setMessages);
     setInput("");
   }, [input, session]);
 
@@ -183,9 +216,7 @@ export function LiveChatWidget() {
   useEffect(() => {
     function handler(e: Event) {
       const ctx = (e as CustomEvent<ProductContext>).detail;
-      if (ctx?.slug) {
-        setProductCtx(ctx);
-      }
+      if (ctx?.slug) setProductCtx(ctx);
       setOpen(true);
     }
     window.addEventListener("open-chat-with-product", handler);
@@ -226,80 +257,60 @@ export function LiveChatWidget() {
             </button>
           </div>
 
-          {!started ? (
-            /* PRE-CHAT FORM */
-            <div className="flex flex-1 flex-col overflow-y-auto">
-              <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
-                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-brand/10">
-                  <MessageSquareMore className="h-7 w-7 text-brand" strokeWidth={1.5} />
-                </div>
-                <h3 className="text-base font-semibold text-ink">
-                  {productCtx ? "Ask about this item" : "Need help with bulk orders?"}
-                </h3>
-                <p className="mt-1 text-sm text-ink-2">
-                  {productCtx
-                    ? `Get answers about ${productCtx.name} — pricing, availability, shipping & more.`
-                    : "Our sales team is ready to assist you with volume pricing, availability, and custom quotes."}
-                </p>
-
-                {productCtx && showProductChip && (
-                  <div className="mt-4 flex w-full items-center gap-3 rounded-xl border border-brand/20 bg-brand/[0.03] p-3 text-left">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-bg2 text-xs font-bold text-ink-2">
-                      {productCtx.name.slice(0, 2).toUpperCase()}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-ink">
-                        {productCtx.name}
-                      </p>
-                      <p className="text-xs text-brand font-semibold">
-                        AED {productCtx.price.toLocaleString()}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setProductCtx(null);
-                        setShowProductChip(false);
-                        clearProductContext();
-                      }}
-                      aria-label="Remove product"
-                      className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-ink-3 transition-colors hover:bg-bg3 hover:text-ink"
-                    >
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                        <path d="M9 3L3 9M3 3l6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                      </svg>
-                    </button>
-                  </div>
-                )}
-
-                <form onSubmit={handleStart} className="mt-6 w-full space-y-3">
-                  <input
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="Your name"
-                    required
-                    aria-label="Your name"
-                    className="flex h-11 w-full rounded-lg border border-line px-4 text-sm text-ink placeholder:text-ink-3 transition-colors focus-visible:border-ink/40 focus-visible:outline-2 focus-visible:outline-ink/40 focus-visible:outline-offset-2"
-                  />
-                  <input
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    placeholder="your@email.com"
-                    type="email"
-                    required
-                    aria-label="Email address"
-                    className="flex h-11 w-full rounded-lg border border-line px-4 text-sm text-ink placeholder:text-ink-3 transition-colors focus-visible:border-ink/40 focus-visible:outline-2 focus-visible:outline-ink/40 focus-visible:outline-offset-2"
-                  />
-                  <button
-                    type="submit"
-                    className="btn-brand flex h-11 w-full items-center justify-center rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                  >
-                    {productCtx ? "Ask about this item" : "Start Chat"}
-                  </button>
-                </form>
-                <p className="mt-4 text-[11px] text-ink-3">
-                  We typically reply within minutes during business hours.
-                </p>
+          {!user ? (
+            /* AUTH GATE */
+            <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-brand/10">
+                <MessageSquareMore className="h-7 w-7 text-brand" strokeWidth={1.5} />
               </div>
+              <h3 className="text-base font-semibold text-ink">
+                {productCtx ? "Sign in to ask about this item" : "Sign in to chat with our team"}
+              </h3>
+              <p className="mt-1 text-sm text-ink-2">
+                {productCtx
+                  ? `Sign in with Google to get answers about ${productCtx.name}.`
+                  : "Sign in with Google to get help with bulk pricing, availability, and custom quotes."}
+              </p>
+              <div className="mt-6 w-full max-w-[280px]">
+                <GoogleSignInButton onSignIn={() => {}} onClose={() => setOpen(false)} />
+              </div>
+            </div>
+          ) : showPhoneForm ? (
+            /* PHONE COLLECTION */
+            <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-brand/10">
+                <MessageSquareMore className="h-7 w-7 text-brand" strokeWidth={1.5} />
+              </div>
+              <h3 className="text-base font-semibold text-ink">Share your number (optional)</h3>
+              <p className="mt-1 text-sm text-ink-2">
+                If you provide your phone number, our team can reach you easily.
+              </p>
+              <div className="mt-5 w-full max-w-[280px] space-y-3">
+                <input
+                  value={phoneInput}
+                  onChange={(e) => setPhoneInput(e.target.value)}
+                  placeholder="+971 5X XXX XXXX"
+                  type="tel"
+                  className="flex h-11 w-full rounded-lg border border-line px-4 text-sm text-ink placeholder:text-ink-3 transition-colors focus-visible:border-ink/40 focus-visible:outline-2 focus-visible:outline-ink/40 focus-visible:outline-offset-2"
+                />
+                <button
+                  onClick={handlePhoneSubmit}
+                  className="btn-brand flex h-11 w-full items-center justify-center rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                >
+                  Start Chat
+                </button>
+                <button
+                  onClick={handlePhoneSkip}
+                  className="text-xs text-ink-3 transition-colors hover:text-ink-2"
+                >
+                  Skip — I'll chat now
+                </button>
+              </div>
+            </div>
+          ) : !started ? (
+            /* LOADING */
+            <div className="flex flex-1 items-center justify-center">
+              <p className="text-sm text-ink-3">Starting chat...</p>
             </div>
           ) : (
             <>

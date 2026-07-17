@@ -12,7 +12,7 @@ export const roleEnum = pgEnum("role", [
 
 export const conditionEnum = pgEnum("condition", [
   "New",
-  "Like_New",
+  "Like New",
   "Excellent",
   "Good",
   "Fair",

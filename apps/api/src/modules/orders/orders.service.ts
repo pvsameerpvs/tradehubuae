@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from "@nestjs/common";
 import { DrizzleService } from "../../database/drizzle.service";
-import { orders, orderItems, products } from "@tradehubuae/database";
-import { eq, and, count, desc, sql } from "drizzle-orm";
+import { orders, orderItems, products, productVariants } from "@tradehubuae/database";
+import { eq, and, count, desc, sql, SQL } from "drizzle-orm";
 import { generateOrderNumber } from "@tradehubuae/utils";
 import { ORDER_STATUS, type OrderStatus } from "@tradehubuae/config";
 
@@ -24,9 +24,9 @@ export class OrdersService {
 
   async findAll(query: { page?: number; limit?: number; status?: string; userId?: string; search?: string }) {
     const { page = 1, limit = 20, status, userId, search } = query;
-    const conditions: any[] = [];
+    const conditions: SQL[] = [];
 
-    if (status) conditions.push(eq(orders.status, status as any));
+    if (status) conditions.push(eq(orders.status, status as "PENDING" | "CONFIRMED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "RETURNED" | "REFUNDED"));
     if (userId) conditions.push(eq(orders.userId, userId));
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
@@ -108,7 +108,29 @@ export class OrdersService {
     return order;
   }
 
-  async create(dto: any, userId?: string) {
+  async create(dto: {
+    subtotal: number;
+    total: number;
+    paymentMethod: string;
+    shippingMethod: string;
+    contactName: string;
+    contactPhone: string;
+    shippingCost?: number;
+    taxAmount?: number;
+    discountAmount?: number;
+    notes?: string;
+    shippingAddressId?: string;
+    shippingAddress?: Record<string, unknown>;
+    items?: Array<{
+      productId: string;
+      variantId?: string;
+      quantity: number;
+      unitPrice: number;
+      name: string;
+      sku: string;
+      image?: string;
+    }>;
+  }, userId?: string) {
     const orderNumber = generateOrderNumber();
 
     const estDelivery = new Date();
@@ -135,14 +157,17 @@ export class OrdersService {
         shippingMethod: dto.shippingMethod,
         contactName: dto.contactName,
         contactPhone: dto.contactPhone,
+        shippingAddressId: dto.shippingAddressId ?? null,
+        shippingAddress: dto.shippingAddress ?? null,
         estimatedDeliveryDate: estDelivery,
         notes: dto.notes,
       })
       .returning();
 
-    if (dto.items?.length > 0) {
+    if (dto.items && dto.items.length > 0) {
+      const items = dto.items;
       await this.drizzle.db.insert(orderItems).values(
-        dto.items.map((item: any) => ({
+        items.map((item) => ({
           orderId: order!.id,
           productId: item.productId,
           variantId: item.variantId,
@@ -155,7 +180,7 @@ export class OrdersService {
         })),
       );
 
-      for (const item of dto.items) {
+      for (const item of items) {
         if (item.productId) {
           await this.drizzle.db
             .update(products)
@@ -165,6 +190,15 @@ export class OrdersService {
               saleCount: sql`${products.saleCount} + ${item.quantity}`,
             })
             .where(eq(products.id, item.productId));
+
+          if (item.variantId) {
+            await this.drizzle.db
+              .update(productVariants)
+              .set({
+                stock: sql`${productVariants.stock} - ${item.quantity}`,
+              })
+              .where(eq(productVariants.id, item.variantId));
+          }
         }
       }
     }

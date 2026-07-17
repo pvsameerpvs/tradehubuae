@@ -19,7 +19,7 @@ interface CouponItem {
   expiresAt: string | null;
 }
 
-export default function CouponForm({ id }: { id?: string }) {
+export function CouponForm({ id }: { id?: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(!!id);
@@ -52,7 +52,7 @@ export default function CouponForm({ id }: { id?: string }) {
         startsAt: item.startsAt ? item.startsAt.slice(0, 16) : "",
         expiresAt: item.expiresAt ? item.expiresAt.slice(0, 16) : "",
       }))
-      .catch((err) => console.error("Failed to fetch coupon", err))
+      .catch(() => { /* TODO: show error toast */ })
       .finally(() => setFetching(false));
   }, [id]);
 

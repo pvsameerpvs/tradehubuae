@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ImageIcon } from "lucide-react";
-import ImageUpload from "@/components/ImageUpload";
+import { ImageUpload } from "@/components/ImageUpload";
 
 export default function MediaPage() {
   const [media, setMedia] = useState<{ url: string; filename: string }[]>([]);

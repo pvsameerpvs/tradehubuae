@@ -1,4 +1,4 @@
-import { Queue, Worker } from "bullmq";
+import { Queue, Worker, type Job } from "bullmq";
 import IORedis from "ioredis";
 import { logger } from "@tradehubuae/logger";
 import { db, schema } from "@tradehubuae/database";
@@ -7,7 +7,7 @@ import { eq, desc, count, sql } from "drizzle-orm";
 
 const connection = new IORedis(process.env.REDIS_URL ?? "redis://localhost:6379", {
   maxRetriesPerRequest: null,
-}) as any;
+});
 
 const QUEUE_NAMES = [
   "ai-generation",
@@ -22,7 +22,7 @@ async function setupQueue(name: string): Promise<Queue> {
   return new Queue(name, { connection });
 }
 
-async function setupWorker(name: string, processor: (job: any) => Promise<void>): Promise<Worker> {
+async function setupWorker(name: string, processor: (job: Job) => Promise<void>): Promise<Worker> {
   const worker = new Worker(
     name,
     async (job) => {

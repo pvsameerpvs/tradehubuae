@@ -26,6 +26,12 @@ interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>;
 }
 
+function getAuthHeaders(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  const token = localStorage.getItem("tradehub_token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 async function request<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
   const { params, ...fetchOpts } = options;
 
@@ -40,7 +46,7 @@ async function request<T>(endpoint: string, options: FetchOptions = {}): Promise
   }
 
   const res = await fetch(url, {
-    headers: { "Content-Type": "application/json", ...fetchOpts.headers },
+    headers: { "Content-Type": "application/json", ...getAuthHeaders(), ...fetchOpts.headers },
     ...fetchOpts,
   });
 

@@ -1,4 +1,5 @@
 import { pgTable, uuid, varchar, text, numeric, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { jsonb } from "drizzle-orm/pg-core";
 import { orderStatusEnum, paymentStatusEnum } from "./enums";
 import { users } from "./users";
 import { products, productVariants } from "./products";
@@ -21,7 +22,9 @@ export const orders = pgTable("orders", {
   contactName: varchar("contact_name", { length: 255 }),
   contactPhone: varchar("contact_phone", { length: 20 }),
   shippingAddressId: uuid("shipping_address_id").references(() => addresses.id),
+  shippingAddress: jsonb("shipping_address"),
   billingAddressId: uuid("billing_address_id").references(() => addresses.id),
+  billingAddress: jsonb("billing_address"),
   notes: text("notes"),
   couponCode: varchar("coupon_code", { length: 50 }),
   isBulkOrder: boolean("is_bulk_order").default(false).notNull(),

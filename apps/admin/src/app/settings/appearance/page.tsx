@@ -5,7 +5,7 @@ import { ArrowLeft, Palette, Save } from "lucide-react";
 import { Card, CardContent } from "@tradehubuae/ui";
 import { Button } from "@tradehubuae/ui";
 import { useRouter } from "next/navigation";
-import ImageUpload from "@/components/ImageUpload";
+import { ImageUpload } from "@/components/ImageUpload";
 
 export default function AppearanceSettingsPage() {
   const router = useRouter();

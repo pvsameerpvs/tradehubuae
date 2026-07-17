@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ConflictException, Logger } from "@nestjs/common";
 import { DrizzleService } from "../../database/drizzle.service";
 import { users } from "@tradehubuae/database";
-import { eq, like, or, count, and, desc } from "drizzle-orm";
+import { eq, like, or, count, and, desc, SQL } from "drizzle-orm";
 import type { CreateUserDto } from "./dto/create-user.dto";
 import type { UpdateUserDto } from "./dto/update-user.dto";
 
@@ -13,16 +13,15 @@ export class UsersService {
 
   async findAll(query: { page?: number; limit?: number; sort?: string; order?: string; role?: string; q?: string }) {
     const { page = 1, limit = 50, sort = "createdAt", order = "desc", role, q } = query;
-    const conditions: any[] = [];
+    const conditions: SQL[] = [];
 
-    if (role) conditions.push(eq(users.role, role as any));
+    if (role) conditions.push(eq(users.role, role as "SUPER_ADMIN" | "ADMIN" | "INVENTORY_MANAGER" | "SALES_MANAGER" | "CONTENT_MANAGER" | "SEO_MANAGER" | "CUSTOMER"));
     if (q) {
-      conditions.push(
-        or(
-          like(users.name, `%${q}%`),
-          like(users.email, `%${q}%`),
-        ),
+      const searchCondition = or(
+        like(users.name, `%${q}%`),
+        like(users.email, `%${q}%`),
       );
+      if (searchCondition) conditions.push(searchCondition);
     }
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
@@ -94,7 +93,7 @@ export class UsersService {
         email: dto.email,
         password: dto.password,
         phone: dto.phone,
-        role: (dto.role ?? "STAFF") as any,
+        role: (dto.role ?? "STAFF") as "SUPER_ADMIN" | "ADMIN" | "INVENTORY_MANAGER" | "SALES_MANAGER" | "CONTENT_MANAGER" | "SEO_MANAGER" | "CUSTOMER",
         isActive: true,
       })
       .returning({
@@ -135,7 +134,7 @@ export class UsersService {
     if (dto.email !== undefined) updateData.email = dto.email;
     if (dto.password !== undefined) updateData.password = dto.password;
     if (dto.phone !== undefined) updateData.phone = dto.phone;
-    if (dto.role !== undefined) updateData.role = dto.role as any;
+    if (dto.role !== undefined) updateData.role = dto.role as "SUPER_ADMIN" | "ADMIN" | "INVENTORY_MANAGER" | "SALES_MANAGER" | "CONTENT_MANAGER" | "SEO_MANAGER" | "CUSTOMER";
     if (dto.isActive !== undefined) updateData.isActive = dto.isActive;
 
     const [user] = await this.drizzle.db

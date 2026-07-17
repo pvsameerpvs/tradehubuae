@@ -18,6 +18,7 @@ import { coupons, couponProducts, comboOffers, comboOfferItems } from "./marketi
 import { blogPosts, blogPostProducts, blogTags, blogPostTags } from "./blog";
 import { notifications } from "./notifications";
 import { bulkRequests, bulkRequestItems } from "./bulk-sales";
+import { chatSessions, chatMessages } from "./chat";
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(profiles, { fields: [users.id], references: [profiles.userId] }),
@@ -175,4 +176,15 @@ export const stockTransfersRelations = relations(stockTransfers, ({ one, many })
   fromWarehouse: one(warehouses, { fields: [stockTransfers.fromWarehouseId], references: [warehouses.id], relationName: "SourceWarehouse" }),
   toWarehouse: one(warehouses, { fields: [stockTransfers.toWarehouseId], references: [warehouses.id], relationName: "DestinationWarehouse" }),
   items: many(stockTransferItems),
+}));
+
+export const chatSessionsRelations = relations(chatSessions, ({ one, many }) => ({
+  user: one(users, { fields: [chatSessions.userId], references: [users.id] }),
+  assignedAdmin: one(users, { fields: [chatSessions.assignedAdminId], references: [users.id], relationName: "AssignedAdmin" }),
+  messages: many(chatMessages),
+}));
+
+export const chatMessagesRelations = relations(chatMessages, ({ one }) => ({
+  session: one(chatSessions, { fields: [chatMessages.sessionId], references: [chatSessions.id] }),
+  admin: one(users, { fields: [chatMessages.adminId], references: [users.id] }),
 }));
