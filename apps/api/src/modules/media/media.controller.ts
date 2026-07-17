@@ -1,4 +1,4 @@
-import { Controller, Post, UploadedFile, UseInterceptors, BadRequestException, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from "@nestjs/common";
+import { Controller, Post, UploadedFile, UseInterceptors, BadRequestException, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, Body } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { MediaService } from "./media.service";
 import { Roles } from "../../common/decorators/roles.decorator";
@@ -21,9 +21,10 @@ export class MediaController {
       }),
     )
     file: { buffer: Buffer; originalname: string; mimetype: string; size: number },
+    @Body("folder") folder: string = "uploads",
   ) {
     if (!file) throw new BadRequestException("File is required");
 
-    return this.mediaService.uploadImage(file.buffer, file.originalname, "uploads");
+    return this.mediaService.uploadImage(file.buffer, file.originalname, folder);
   }
 }

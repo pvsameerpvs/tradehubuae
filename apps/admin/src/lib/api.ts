@@ -43,6 +43,7 @@ export const api = {
   upload: async (file: File, folder = "uploads"): Promise<string> => {
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("folder", folder);
     const res = await fetch(`${API_BASE}/media/upload`, { method: "POST", body: formData });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ message: res.statusText }));
