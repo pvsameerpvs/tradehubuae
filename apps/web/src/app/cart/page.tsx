@@ -80,8 +80,12 @@ export default function CartPage() {
                   key={item.slug}
                   className="flex gap-4 border-b border-line py-4 last:border-0"
                 >
-                  <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-xl bg-bg2">
-                    <Image className="h-8 w-8 text-ink-3" strokeWidth={1} />
+                  <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-bg2">
+                    {item.image ? (
+                      <img src={item.image} alt={item.name} className="h-full w-full object-contain" />
+                    ) : (
+                      <Image className="h-8 w-8 text-ink-3" strokeWidth={1} />
+                    )}
                   </div>
                   <div className="flex flex-1 flex-col justify-between">
                     <div>

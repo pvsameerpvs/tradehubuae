@@ -55,8 +55,10 @@ async function request<T>(endpoint: string, options: FetchOptions = {}): Promise
     throw new ApiError(res.status, body.message || `Request failed (${res.status})`);
   }
 
-  if (res.status === 204) return undefined as T;
-  return res.json();
+  if (res.status === 204 || res.headers.get("content-length") === "0") return undefined as T;
+  const text = await res.text();
+  if (!text) return undefined as T;
+  return JSON.parse(text);
 }
 
 export const api = {

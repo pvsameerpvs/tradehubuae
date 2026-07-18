@@ -1,6 +1,5 @@
 "use client";
 
-import { Image } from "lucide-react";
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
@@ -12,10 +11,11 @@ interface FlyState {
   h: number;
   dx: number;
   dy: number;
+  image: string | undefined;
 }
 
 interface CartFlyContextType {
-  flyToCart: (element: HTMLElement) => void;
+  flyToCart: (element: HTMLElement, image?: string) => void;
 }
 
 const CartFlyContext = createContext<CartFlyContextType>({ flyToCart: () => {} });
@@ -34,7 +34,7 @@ function getCartPosition() {
 export function CartFlyProvider({ children }: { children: ReactNode }) {
   const [flies, setFlies] = useState<FlyState[]>([]);
 
-  const flyToCart = useCallback((element: HTMLElement) => {
+  const flyToCart = useCallback((element: HTMLElement, image?: string) => {
     const rect = element.getBoundingClientRect();
     const cart = getCartPosition();
     if (!cart) return;
@@ -47,7 +47,7 @@ export function CartFlyProvider({ children }: { children: ReactNode }) {
     const dx = cart.x - (x + w / 2);
     const dy = cart.y - (y + h / 2);
 
-    setFlies((prev) => [...prev, { id, x, y, w, h, dx, dy }]);
+    setFlies((prev) => [...prev, { id, x, y, w, h, dx, dy, image }]);
     setTimeout(() => {
       setFlies((prev) => prev.filter((f) => f.id !== id));
     }, 900);
@@ -71,7 +71,11 @@ export function CartFlyProvider({ children }: { children: ReactNode }) {
                   ["--dy" as string]: `${fly.dy}px`,
                 }}
               >
-                <Image className="h-full w-full p-6 text-ink-3" strokeWidth={1} />
+                {fly.image ? (
+                  <img src={fly.image} alt="" className="h-full w-full object-contain" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-bg2" />
+                )}
               </div>
             ))}
           </div>,

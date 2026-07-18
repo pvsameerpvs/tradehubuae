@@ -95,7 +95,6 @@ interface ExistingProduct {
   compareAtPrice: number | null;
   brandId: string | null;
   useId: string | null;
-  badge: string | null;
   stock: number | null;
   isActive: boolean;
   isFeatured: boolean;
@@ -119,7 +118,6 @@ const productSchema = z.object({
   categoryId: z.string().optional(),
   brandId: z.string().optional(),
   useId: z.string().optional(),
-  badge: z.string().optional(),
   stock: z.preprocess(
     (v) => (v === "" ? undefined : Number(v)),
     z.number().min(0).optional(),
@@ -137,12 +135,11 @@ const defaultValues: ProductFormValues = {
   description: "",
   condition: "New",
   price: "" as unknown as number,
-  compareAtPrice: undefined,
+  compareAtPrice: "" as unknown as number,
   categoryId: "",
   brandId: "",
   useId: "",
-  badge: "",
-  stock: undefined,
+  stock: "" as unknown as number,
   isActive: true,
   isFeatured: false,
 };
@@ -212,12 +209,11 @@ export function ProductForm({ id }: { id?: string }) {
           description: p.description ?? "",
           condition: p.condition as ProductFormValues["condition"],
           price: Number(p.price),
-          compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : undefined,
+          compareAtPrice: p.compareAtPrice ? Number(p.compareAtPrice) : ("" as unknown as number),
           categoryId: p.categories?.find((c) => c.isPrimary)?.categoryId ?? p.categories?.[0]?.categoryId ?? "",
           brandId: p.brandId ?? "",
           useId: p.useId ?? "",
-          badge: p.badge ?? "",
-          stock: p.stock ? Number(p.stock) : undefined,
+          stock: p.stock ? Number(p.stock) : ("" as unknown as number),
           isActive: p.isActive,
           isFeatured: p.isFeatured,
         });
@@ -251,8 +247,8 @@ export function ProductForm({ id }: { id?: string }) {
         categoryId: data.categoryId || undefined,
         brandId: data.brandId || undefined,
         useId: data.useId || undefined,
-        badge: data.badge || undefined,
         specs: specs.filter((s) => s.value.trim()),
+        images: images.filter(Boolean),
         stock: data.stock ?? 0,
         isActive: data.isActive,
         isFeatured: data.isFeatured,
@@ -570,54 +566,6 @@ export function ProductForm({ id }: { id?: string }) {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={control}
-                name="badge"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Badge</FormLabel>
-                    <Select
-                      onValueChange={(val) =>
-                        field.onChange(
-                          val === NONE_VALUE ? "" : val,
-                        )
-                      }
-                      value={field.value || NONE_VALUE}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="None" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value={NONE_VALUE}>
-                          None
-                        </SelectItem>
-                        <SelectItem value="Certified">
-                          Certified
-                        </SelectItem>
-                        <SelectItem value="Best Seller">
-                          Best Seller
-                        </SelectItem>
-                        <SelectItem value="New">New</SelectItem>
-                        <SelectItem value="Great deal">
-                          Great deal
-                        </SelectItem>
-                        <SelectItem value="Staff pick">
-                          Staff pick
-                        </SelectItem>
-                        <SelectItem value="Like new">
-                          Like new
-                        </SelectItem>
-                        <SelectItem value="Low stock">
-                          Low stock
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
           </CardContent>
         </Card>
@@ -669,8 +617,8 @@ export function ProductForm({ id }: { id?: string }) {
             <CardTitle>Images</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-4">
-              {images.map((url, idx) => (
+            <div className="flex flex-wrap items-start gap-4">
+              {images.filter(Boolean).map((url, idx) => (
                 <div
                   key={idx}
                   className="group relative h-24 w-24 overflow-hidden rounded-lg border border-line bg-bg2 sm:h-28 sm:w-28"
@@ -697,20 +645,24 @@ export function ProductForm({ id }: { id?: string }) {
                   </button>
                 </div>
               ))}
-              {images.length < 6 && (
+              {images.filter(Boolean).length < 5 && (
                 <ImageUpload
+                  key={images.filter(Boolean).length}
                   value=""
-                  onChange={(url) => setImages([...images, url])}
+                  onChange={(url) => {
+                    if (url) setImages((prev) => [...prev, url]);
+                  }}
                   label="Add Image"
                   folder="products"
                 />
               )}
             </div>
-            {images.length === 0 && (
-              <p className="mt-2 text-xs text-ink-3">
-                Upload at least one image for the product gallery.
-              </p>
-            )}
+            <div className="mt-2 flex items-center gap-2 text-xs text-ink-3">
+              <span>{images.filter(Boolean).length}/5 images</span>
+              {images.filter(Boolean).length === 0 && (
+                <span>Upload at least one image for the product gallery.</span>
+              )}
+            </div>
           </CardContent>
         </Card>
 

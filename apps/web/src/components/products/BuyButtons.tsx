@@ -94,7 +94,7 @@ export function BuyButtons({ product }: { product: Product }) {
       return;
     }
     addToCartWithQty();
-    if (imageRef.current) flyToCart(imageRef.current);
+    if (imageRef.current) flyToCart(imageRef.current, product.image);
   };
 
   const handleSignedIn = () => {
@@ -104,7 +104,7 @@ export function BuyButtons({ product }: { product: Product }) {
       router.push("/checkout");
     } else if (pendingAction === "cart") {
       addToCartWithQty();
-      if (imageRef.current) flyToCart(imageRef.current);
+      if (imageRef.current) flyToCart(imageRef.current, product.image);
     }
     setPendingAction(null);
   };

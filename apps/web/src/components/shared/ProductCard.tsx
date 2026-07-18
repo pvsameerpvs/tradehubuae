@@ -12,6 +12,7 @@ export function ProductCard({ product }: { product: Product }) {
   const imageRef = useRef<HTMLDivElement>(null);
   const { addItem } = useCart();
   const { flyToCart } = useCartFly();
+  const [imgError, setImgError] = useState(false);
   const { isWishlisted, toggle } = useWishlist();
   const wishlisted = isWishlisted(product.slug);
   const outOfStock = product.stock === undefined || product.stock === 0;
@@ -21,7 +22,7 @@ export function ProductCard({ product }: { product: Product }) {
     e.stopPropagation();
     if (outOfStock) return;
     addItem(product);
-    if (imageRef.current) flyToCart(imageRef.current);
+    if (imageRef.current) flyToCart(imageRef.current, product.image);
   };
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
@@ -111,7 +112,7 @@ export function WishlistCard({ product }: { product: Product }) {
     e.stopPropagation();
     if (outOfStock) return;
     addItem(product);
-    if (imageRef.current) flyToCart(imageRef.current);
+    if (imageRef.current) flyToCart(imageRef.current, product.image);
   };
 
   const handleRemove = (e: React.MouseEvent) => {

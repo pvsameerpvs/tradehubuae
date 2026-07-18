@@ -78,11 +78,15 @@ const CartContext = createContext<CartContextType>({
 
 const CART_KEY = "tradehub_cart";
 
+function normalizeItem(item: Partial<CartItem>): CartItem {
+  return { ...item, price: Number(item.price ?? 0) } as CartItem;
+}
+
 function loadCart(): CartItem[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(CART_KEY);
-    return raw ? JSON.parse(raw) : [];
+    return raw ? (JSON.parse(raw) as CartItem[]).map(normalizeItem) : [];
   } catch {
     return [];
   }
@@ -114,7 +118,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (user) {
       api.get<{ items: CartItem[] }>("/cart").then((res) => {
         if (res.items && res.items.length > 0) {
-          setItems(res.items);
+          setItems(res.items.map(normalizeItem));
         } else {
           const local = loadCart();
           if (local.length > 0) setItems(local);
@@ -155,7 +159,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             : item,
         );
       } else {
-        newItems = [...prev, { ...product, quantity: 1 }];
+        newItems = [...prev, normalizeItem({ ...product, quantity: 1 })];
       }
       if (user) {
         const updatedItem = newItems.find((i) => i.slug === product.slug);
@@ -176,7 +180,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         if (existing) {
           existing.quantity += ci.quantity;
         } else {
-          next.push({
+          next.push(normalizeItem({
             id: ci.id ?? ci.slug,
             name: ci.name,
             price: ci.price,
@@ -185,7 +189,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
             slug: ci.slug,
             quantity: ci.quantity,
             stock: 99,
-          });
+          }));
         }
       }
       if (user) {

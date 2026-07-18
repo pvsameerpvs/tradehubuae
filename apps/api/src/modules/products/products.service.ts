@@ -202,6 +202,17 @@ export class ProductsService {
       );
     }
 
+    if (dto.images?.length) {
+      await this.drizzle.db.insert(productImages).values(
+        dto.images.map((url, i) => ({
+          productId: product!.id,
+          url,
+          isPrimary: i === 0,
+          sortOrder: i,
+        })),
+      );
+    }
+
     const result = await this.findById(product!.id);
 
     this.logger.log(`Product created: ${result.name} (${result.sku})`);
@@ -242,6 +253,21 @@ export class ProductsService {
             productId: id,
             label: s.label,
             value: s.value,
+            sortOrder: i,
+          })),
+        );
+      }
+    }
+    if (dto.images !== undefined) {
+      await this.drizzle.db
+        .delete(productImages)
+        .where(eq(productImages.productId, id));
+      if (dto.images.length) {
+        await this.drizzle.db.insert(productImages).values(
+          dto.images.map((url, i) => ({
+            productId: id,
+            url,
+            isPrimary: i === 0,
             sortOrder: i,
           })),
         );

@@ -21,7 +21,7 @@ export function LatestArrivalsCard({ product }: { product: Product }) {
     e.preventDefault();
     e.stopPropagation();
     addItem(product);
-    if (imageRef.current) flyToCart(imageRef.current);
+    if (imageRef.current) flyToCart(imageRef.current, product.image);
   };
 
   const handleToggleWishlist = (e: React.MouseEvent) => {

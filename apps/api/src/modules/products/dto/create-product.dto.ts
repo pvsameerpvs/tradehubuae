@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsBoolean, IsOptional, IsEnum, Min, Max, IsUUID } from "class-validator";
+import { IsString, IsNumber, IsBoolean, IsOptional, IsEnum, Min, Max, IsUUID, IsArray } from "class-validator";
 
 export class CreateProductDto {
   @IsString()
@@ -63,4 +63,9 @@ export class CreateProductDto {
 
   @IsOptional()
   specs?: { label: string; value: string }[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  images?: string[];
 }
