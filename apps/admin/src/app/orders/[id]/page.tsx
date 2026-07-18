@@ -208,8 +208,8 @@ export default function OrderDetailPage() {
         <div className="rounded-lg border border-sale/30 bg-sale/5 px-4 py-3 text-sm text-sale">{error}</div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
+      <div className="flex flex-col gap-6 lg:flex-row">
+        <div className="flex-1 space-y-6">
           {/* Items */}
           <Card>
             <CardHeader className="px-5 py-4">
@@ -221,15 +221,15 @@ export default function OrderDetailPage() {
             <CardContent className="px-0 pb-0">
               <div className="divide-y divide-line">
                 {order.items.map((item) => (
-                  <div key={item.id} className="flex items-center gap-4 px-5 py-4">
-                    <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-bg2">
+                  <div key={item.id} className="flex items-start gap-3 px-4 py-4 sm:items-center sm:gap-4 sm:px-5">
+                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-bg2 sm:h-14 sm:w-14">
                       {item.image && <img src={item.image} alt="" className="h-full w-full object-cover" />}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-ink">{item.product?.name || item.name}</p>
-                      <p className="text-xs text-ink-3">SKU: {item.sku} · Qty: {item.quantity}</p>
+                      <p className="text-sm font-medium text-ink">{item.product?.name || item.name}</p>
+                      <p className="mt-0.5 text-xs text-ink-3">SKU: {item.sku} · Qty: {item.quantity}</p>
                     </div>
-                    <p className="shrink-0 text-sm font-semibold text-ink">AED {Number(item.unitPrice).toFixed(2)}</p>
+                    <p className="shrink-0 text-xs font-semibold text-ink sm:text-sm">AED {Number(item.unitPrice).toFixed(2)}</p>
                   </div>
                 ))}
               </div>
@@ -237,15 +237,15 @@ export default function OrderDetailPage() {
           </Card>
 
           {/* Shipping Address + Payment */}
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="flex flex-col gap-4 sm:grid sm:grid-cols-2 sm:gap-6">
             <Card>
-              <CardHeader className="px-5 py-4">
+              <CardHeader className="px-4 py-3 sm:px-5 sm:py-4">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-brand" strokeWidth={1.75} />
                   <CardTitle className="text-sm font-semibold text-ink">Shipping Address</CardTitle>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-1 px-5 pb-5 text-sm">
+              <CardContent className="space-y-1 px-4 pb-4 text-sm sm:px-5 sm:pb-5">
                 {shippingAddr ? (
                   <>
                     <p className="font-medium text-ink">{shippingAddr.firstName} {shippingAddr.lastName}</p>
@@ -268,13 +268,13 @@ export default function OrderDetailPage() {
             </Card>
 
             <Card>
-              <CardHeader className="px-5 py-4">
+              <CardHeader className="px-4 py-3 sm:px-5 sm:py-4">
                 <div className="flex items-center gap-2">
                   <CreditCard className="h-4 w-4 text-brand" strokeWidth={1.75} />
                   <CardTitle className="text-sm font-semibold text-ink">Payment</CardTitle>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2 px-5 pb-5 text-sm">
+              <CardContent className="space-y-2 px-4 pb-4 text-sm sm:px-5 sm:pb-5">
                 <div className="flex justify-between">
                   <span className="text-ink-2">Subtotal</span>
                   <span className="text-ink">AED {Number(order.subtotal).toFixed(2)}</span>
@@ -310,13 +310,13 @@ export default function OrderDetailPage() {
 
           {/* Customer Info */}
           <Card>
-            <CardHeader className="px-5 py-4">
+            <CardHeader className="px-4 py-3 sm:px-5 sm:py-4">
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4 text-brand" strokeWidth={1.75} />
                 <CardTitle className="text-sm font-semibold text-ink">Customer</CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="px-5 pb-5">
+            <CardContent className="px-4 pb-4 sm:px-5 sm:pb-5">
               {customerDisplay ? (
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand/10">
@@ -340,10 +340,28 @@ export default function OrderDetailPage() {
                     </div>
                   </div>
                 </div>
+              ) : order.contactName ? (
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-bg2">
+                    <User className="h-6 w-6 text-ink-3" strokeWidth={1.5} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-medium text-ink">{order.contactName}</p>
+                    <div className="mt-0.5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-2">
+                      {order.contactPhone && (
+                        <span className="flex items-center gap-1">
+                          <Phone className="h-3.5 w-3.5" strokeWidth={1.75} />
+                          {order.contactPhone}
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-xs text-ink-3">Guest checkout</p>
+                  </div>
+                </div>
               ) : (
                 <div className="text-sm text-ink-3">Guest checkout — no account linked</div>
               )}
-              <div className="mt-4 grid grid-cols-2 gap-4 border-t border-line pt-4 text-sm sm:grid-cols-4">
+              <div className="mt-4 grid grid-cols-2 gap-3 border-t border-line pt-4 text-sm sm:grid-cols-4 sm:gap-4">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-ink-3">Order Total</p>
                   <p className="mt-0.5 font-semibold text-ink">AED {Number(order.total).toLocaleString()}</p>
@@ -372,12 +390,12 @@ export default function OrderDetailPage() {
         </div>
 
         {/* Status Sidebar */}
-        <div className="space-y-4">
+        <div className="w-full space-y-4 lg:w-80">
           <Card className="lg:sticky lg:top-24">
-            <CardHeader className="px-5 py-4">
+            <CardHeader className="px-4 py-3 sm:px-5 sm:py-4">
               <CardTitle className="text-sm font-semibold text-ink">Status</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 px-5 pb-5">
+            <CardContent className="space-y-4 px-4 pb-4 sm:px-5 sm:pb-5">
               <div className="flex items-center gap-2">
                 <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${statusInfo.color}`}>
                   <StatusIcon className="h-3.5 w-3.5" strokeWidth={2} />

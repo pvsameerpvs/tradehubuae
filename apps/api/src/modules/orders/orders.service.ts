@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from "@nestjs/common";
 import { DrizzleService } from "../../database/drizzle.service";
 import { orders, orderItems, products, productVariants, coupons } from "@tradehubuae/database";
-import { eq, and, count, desc, sql, SQL } from "drizzle-orm";
+import { eq, and, count, desc, gte, lte, sql, SQL } from "drizzle-orm";
 import { generateOrderNumber } from "@tradehubuae/utils";
 import { ORDER_STATUS, type OrderStatus } from "@tradehubuae/config";
 
@@ -24,12 +24,14 @@ export class OrdersService {
 
   constructor(private drizzle: DrizzleService) {}
 
-  async findAll(query: { page?: number; limit?: number; status?: string; userId?: string; search?: string }) {
-    const { page = 1, limit = 20, status, userId, search } = query;
+  async findAll(query: { page?: number; limit?: number; status?: string; userId?: string; search?: string; startDate?: string; endDate?: string }) {
+    const { page = 1, limit = 20, status, userId, search, startDate, endDate } = query;
     const conditions: SQL[] = [];
 
     if (status) conditions.push(eq(orders.status, status as "PENDING" | "CONFIRMED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "RETURNED" | "REFUNDED"));
     if (userId) conditions.push(eq(orders.userId, userId));
+    if (startDate) conditions.push(gte(orders.createdAt, new Date(startDate)));
+    if (endDate) conditions.push(lte(orders.createdAt, new Date(endDate)));
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
 

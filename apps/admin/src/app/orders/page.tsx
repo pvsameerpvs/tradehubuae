@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { api, type PaginatedResponse } from "@/lib/api";
 
@@ -11,10 +11,14 @@ interface Order {
   paymentStatus: string;
   total: string;
   currency: string;
+  contactName: string | null;
+  contactPhone: string | null;
   user: { name: string; email: string } | null;
   items: { id: string }[];
   createdAt: string;
 }
+
+const STATUSES = ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED", "REFUNDED"];
 
 const statusStyles: Record<string, string> = {
   PENDING: "bg-amber-50 text-amber-700 border-amber-200",
@@ -31,13 +35,29 @@ export default function OrdersPage() {
   const [data, setData] = useState<PaginatedResponse<Order> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [search, setSearch] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    api.get<PaginatedResponse<Order>>("/orders", { limit: 50 })
+  const fetchOrders = useCallback(() => {
+    setLoading(true);
+    setError(null);
+    const params: Record<string, string | number | boolean | undefined> = { limit: 50, page };
+    if (statusFilter) params.status = statusFilter;
+    if (search) params.search = search;
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    api.get<PaginatedResponse<Order>>("/orders", params)
       .then(setData)
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load orders"))
       .finally(() => setLoading(false));
-  }, []);
+  }, [statusFilter, search, startDate, endDate, page]);
+
+  useEffect(() => { fetchOrders(); }, [fetchOrders]);
+
+  const handleFilter = () => { setPage(1); fetchOrders(); };
 
   return (
     <div>
@@ -47,6 +67,38 @@ export default function OrdersPage() {
           <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">Manage incoming and completed orders</p>
         </div>
       </div>
+
+      {/* Filters */}
+      <div className="mb-4 flex flex-wrap items-end gap-2 sm:gap-3">
+        <div className="w-full sm:w-auto sm:min-w-[140px]">
+          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-ink-3">Status</label>
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+            className="h-10 w-full rounded-lg border border-line bg-white px-3 text-sm text-ink outline-none transition-colors focus:border-ink/30">
+            <option value="">All</option>
+            {STATUSES.map((s) => <option key={s} value={s}>{s.charAt(0) + s.slice(1).toLowerCase()}</option>)}
+          </select>
+        </div>
+        <div className="flex-1 sm:min-w-[150px]">
+          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-ink-3">From</label>
+          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
+            className="h-10 w-full rounded-lg border border-line bg-white px-3 text-sm text-ink outline-none transition-colors focus:border-ink/30" />
+        </div>
+        <div className="flex-1 sm:min-w-[150px]">
+          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-ink-3">To</label>
+          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
+            className="h-10 w-full rounded-lg border border-line bg-white px-3 text-sm text-ink outline-none transition-colors focus:border-ink/30" />
+        </div>
+        <div className="w-full sm:w-auto sm:min-w-[200px] sm:flex-1">
+          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-ink-3">Search</label>
+          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Order #, name, phone..."
+            className="h-10 w-full rounded-lg border border-line bg-white px-3 text-sm text-ink placeholder:text-ink-3 outline-none transition-colors focus:border-ink/30" />
+        </div>
+        <button onClick={handleFilter}
+          className="flex h-10 w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-brand px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
+          Filter
+        </button>
+      </div>
+
       <div className="overflow-hidden rounded-xl border border-line bg-white">
         {loading ? (
           <div className="p-6 text-sm text-ink-3">Loading...</div>
@@ -54,8 +106,8 @@ export default function OrdersPage() {
           <div className="p-6 text-sm text-sale">{error}</div>
         ) : !data?.data?.length ? (
           <div className="p-6 text-center">
-            <p className="text-sm font-medium text-ink-2">No orders yet</p>
-            <p className="mt-1 text-xs text-ink-3">Orders will appear here once customers start purchasing.</p>
+            <p className="text-sm font-medium text-ink-2">No orders found</p>
+            <p className="mt-1 text-xs text-ink-3">Try adjusting your filters.</p>
           </div>
         ) : (
           <>
@@ -69,7 +121,7 @@ export default function OrdersPage() {
                     </span>
                   </div>
                   <div className="mt-1 flex items-center gap-2 text-sm text-ink-3">
-                    <span>{order.user?.name ?? "Guest"}</span>
+                    <span>{order.user?.name || order.contactName || "Guest"}</span>
                     <span>·</span>
                     <span>AED {Number(order.total).toLocaleString()}</span>
                   </div>
@@ -103,8 +155,8 @@ export default function OrdersPage() {
                       <p className="text-sm font-medium text-ink">#{order.orderNumber}</p>
                     </td>
                     <td className="p-4">
-                      <p className="text-sm text-ink">{order.user?.name ?? "Guest"}</p>
-                      {order.user?.email && <p className="text-xs text-ink-3">{order.user.email}</p>}
+                      <p className="text-sm text-ink">{order.user?.name || order.contactName || "Guest"}</p>
+                      {(order.user?.email || order.contactPhone) && <p className="text-xs text-ink-3">{order.user?.email || order.contactPhone}</p>}
                     </td>
                     <td className="p-4 text-sm text-ink">{order.items?.length ?? 0}</td>
                     <td className="p-4 text-sm font-medium text-ink">AED {Number(order.total).toLocaleString()}</td>
@@ -120,6 +172,24 @@ export default function OrdersPage() {
                 ))}
               </tbody>
             </table>
+
+            {/* Pagination */}
+            {data.meta.totalPages > 1 && (
+              <div className="flex items-center justify-between border-t border-line px-4 py-3 text-sm">
+                <span className="text-ink-2">{data.meta.total} order{data.meta.total !== 1 ? "s" : ""}</span>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}
+                    className="rounded-lg border border-line px-3 py-1.5 text-ink transition-colors hover:bg-bg2 disabled:opacity-30">
+                    Previous
+                  </button>
+                  <span className="text-ink-2">Page {page} of {data.meta.totalPages}</span>
+                  <button onClick={() => setPage((p) => Math.min(data.meta.totalPages, p + 1))} disabled={page >= data.meta.totalPages}
+                    className="rounded-lg border border-line px-3 py-1.5 text-ink transition-colors hover:bg-bg2 disabled:opacity-30">
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

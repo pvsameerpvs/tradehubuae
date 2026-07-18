@@ -12,7 +12,7 @@ export class OrdersController {
 
   @Roles("ADMIN", "SUPER_ADMIN", "SALES_MANAGER")
   @Get()
-  async findAll(@Query() query: { page?: number; limit?: number; status?: string }) {
+  async findAll(@Query() query: { page?: number; limit?: number; status?: string; search?: string; startDate?: string; endDate?: string }) {
     return this.ordersService.findAll(query);
   }
 
