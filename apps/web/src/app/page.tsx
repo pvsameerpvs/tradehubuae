@@ -123,12 +123,9 @@ function CategoryRow({ categories }: { categories: Category[] }) {
         </Link>
       </div>
       <div className="relative">
-        <div
-          className="flex flex-nowrap gap-4 overflow-x-auto [&::-webkit-scrollbar]:hidden"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
+        <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6">
           {categories.map((cat) => (
-            <div key={cat.slug} className="min-w-[90px] flex-shrink-0 md:min-w-0 md:flex-1">
+            <div key={cat.slug}>
               <CategoryCard category={cat} />
             </div>
           ))}

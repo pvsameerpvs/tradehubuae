@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api, type PaginatedResponse } from "@/lib/api";
+import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { Button, Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@tradehubuae/ui";
 
 interface Brand {
   id: string;
@@ -21,6 +24,24 @@ export default function BrandsPage() {
   const [data, setData] = useState<PaginatedResponse<Brand> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Brand | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/brands/${deleteTarget.id}`);
+      setData((prev) => prev ? { ...prev, data: prev.data.filter((b) => b.id !== deleteTarget.id) } : prev);
+      setDeleteTarget(null);
+      toast.success("Brand deleted");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete brand");
+      setDeleteTarget(null);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     api.get<PaginatedResponse<Brand>>("/brands", { limit: 100, sort: "sortOrder", order: "asc" })
@@ -84,7 +105,10 @@ export default function BrandsPage() {
                         </>
                       )}
                     </div>
-                    <Link href={`/brands/${brand.id}`} className="mt-1 inline-block text-xs font-semibold text-brand">Edit</Link>
+                    <div className="mt-1 flex items-center gap-3">
+                      <Link href={`/brands/${brand.id}`} className="text-xs font-semibold text-brand">Edit</Link>
+                      <button onClick={() => setDeleteTarget(brand)} className="text-xs font-semibold text-sale">Delete</button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -136,9 +160,14 @@ export default function BrandsPage() {
                       </span>
                     </td>
                     <td className="p-4">
-                      <Link href={`/brands/${brand.id}`} className="text-sm font-semibold text-brand hover:underline">
-                        Edit
-                      </Link>
+                      <div className="flex items-center gap-3">
+                        <Link href={`/brands/${brand.id}`} className="text-sm font-semibold text-brand hover:underline">
+                          Edit
+                        </Link>
+                        <button onClick={() => setDeleteTarget(brand)} className="text-sm font-semibold text-sale hover:underline">
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -147,6 +176,29 @@ export default function BrandsPage() {
           </>
         )}
       </div>
+
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Brand</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <strong>{deleteTarget?.name}</strong>?
+              {deleteTarget && (
+                <span className="mt-2 block text-sm">
+                  This brand has <strong>{deleteTarget._count.products}</strong> linked product{deleteTarget._count.products !== 1 ? "s" : ""}.
+                  Products will retain their brand reference but the brand will appear inactive.
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

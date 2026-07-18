@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api, type PaginatedResponse } from "@/lib/api";
+import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { Button, Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@tradehubuae/ui";
 
 interface UseItem {
   id: string;
@@ -17,6 +20,24 @@ export default function UsesPage() {
   const [data, setData] = useState<PaginatedResponse<UseItem> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<UseItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/uses/${deleteTarget.id}`);
+      setData((prev) => prev ? { ...prev, data: prev.data.filter((u) => u.id !== deleteTarget.id) } : prev);
+      setDeleteTarget(null);
+      toast.success("Use deleted");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete use");
+      setDeleteTarget(null);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     api.get<PaginatedResponse<UseItem>>("/uses", { limit: 100, sort: "name", order: "asc" })
@@ -71,7 +92,10 @@ export default function UsesPage() {
                         <span>{item._count.products} products</span>
                       </div>
                     </div>
-                    <Link href={`/uses/${item.id}`} className="shrink-0 text-xs font-semibold text-brand">Edit</Link>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <Link href={`/uses/${item.id}`} className="text-xs font-semibold text-brand">Edit</Link>
+                      <button onClick={() => setDeleteTarget(item)} className="text-xs font-semibold text-sale">Delete</button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -104,9 +128,14 @@ export default function UsesPage() {
                     <td className="p-4 text-sm text-ink-2">/{item.slug}</td>
                     <td className="p-4 text-sm text-ink">{item._count.products}</td>
                     <td className="p-4">
-                      <Link href={`/uses/${item.id}`} className="text-sm font-semibold text-brand hover:underline">
-                        Edit
-                      </Link>
+                      <div className="flex items-center gap-3">
+                        <Link href={`/uses/${item.id}`} className="text-sm font-semibold text-brand hover:underline">
+                          Edit
+                        </Link>
+                        <button onClick={() => setDeleteTarget(item)} className="text-sm font-semibold text-sale hover:underline">
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -115,6 +144,29 @@ export default function UsesPage() {
           </>
         )}
       </div>
+
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Use</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <strong>{deleteTarget?.name}</strong>?
+              {deleteTarget && (
+                <span className="mt-2 block text-sm">
+                  This use has <strong>{deleteTarget._count.products}</strong> linked product{deleteTarget._count.products !== 1 ? "s" : ""}.
+                  The use reference will be removed from those products.
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

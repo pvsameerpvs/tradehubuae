@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api, type PaginatedResponse } from "@/lib/api";
+import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { Button, Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@tradehubuae/ui";
 
 interface Category {
   id: string;
@@ -22,6 +25,24 @@ export default function CategoriesPage() {
   const [data, setData] = useState<PaginatedResponse<Category> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/categories/${deleteTarget.id}`);
+      setData((prev) => prev ? { ...prev, data: prev.data.filter((c) => c.id !== deleteTarget.id) } : prev);
+      setDeleteTarget(null);
+      toast.success("Category deleted");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete category");
+      setDeleteTarget(null);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     api.get<PaginatedResponse<Category>>("/categories", { limit: 100, sort: "sortOrder", order: "asc" })
@@ -75,8 +96,9 @@ export default function CategoriesPage() {
                     <span>·</span>
                     <span>{cat._count.children} sub</span>
                   </div>
-                  <div className="mt-1.5">
+                  <div className="mt-1.5 flex items-center gap-3">
                     <Link href={`/categories/${cat.id}`} className="text-xs font-semibold text-brand">Edit</Link>
+                    <button onClick={() => setDeleteTarget(cat)} className="text-xs font-semibold text-sale">Delete</button>
                   </div>
                 </div>
               ))}
@@ -111,9 +133,14 @@ export default function CategoriesPage() {
                       </span>
                     </td>
                     <td className="p-4">
-                      <Link href={`/categories/${cat.id}`} className="text-sm font-semibold text-brand hover:underline">
-                        Edit
-                      </Link>
+                      <div className="flex items-center gap-3">
+                        <Link href={`/categories/${cat.id}`} className="text-sm font-semibold text-brand hover:underline">
+                          Edit
+                        </Link>
+                        <button onClick={() => setDeleteTarget(cat)} className="text-sm font-semibold text-sale hover:underline">
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -122,6 +149,30 @@ export default function CategoriesPage() {
           </>
         )}
       </div>
+
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Category</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <strong>{deleteTarget?.name}</strong>?
+              {deleteTarget && (
+                <span className="mt-2 block text-sm">
+                  This category has <strong>{deleteTarget._count.products}</strong> linked product{deleteTarget._count.products !== 1 ? "s" : ""}
+                  {deleteTarget._count.children > 0 && <> and <strong>{deleteTarget._count.children}</strong> subcategor{deleteTarget._count.children !== 1 ? "ies" : "y"}</>}.
+                  The relationship will be removed but products will not be deleted.
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
