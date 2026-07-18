@@ -77,6 +77,7 @@ export async function createOrder(data: {
   taxAmount: number;
   discountAmount: number;
   total: number;
+  couponCode?: string;
   shippingAddressId?: string;
   shippingAddress?: Record<string, unknown>;
   items: Array<{

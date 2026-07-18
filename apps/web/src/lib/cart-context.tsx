@@ -77,6 +77,7 @@ const CartContext = createContext<CartContextType>({
 });
 
 const CART_KEY = "tradehub_cart";
+const PROMO_KEY = "tradehub_promo";
 
 function normalizeItem(item: Partial<CartItem>): CartItem {
   return { ...item, price: Number(item.price ?? 0) } as CartItem;
@@ -101,10 +102,36 @@ function saveCart(items: CartItem[]) {
   }
 }
 
+function loadPromo(): ActivePromo | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(PROMO_KEY);
+    return raw ? (JSON.parse(raw) as ActivePromo) : null;
+  } catch {
+    return null;
+  }
+}
+
+function savePromo(promo: ActivePromo | null) {
+  if (typeof window === "undefined") return;
+  try {
+    if (promo) {
+      localStorage.setItem(PROMO_KEY, JSON.stringify(promo));
+    } else {
+      localStorage.removeItem(PROMO_KEY);
+    }
+  } catch {
+    /* quota exceeded, silently ignore */
+  }
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
-  const [activePromo, setActivePromo] = useState<ActivePromo | null>(null);
+  const [activePromo, setActivePromo] = useState<ActivePromo | null>(() => {
+    if (typeof window === "undefined") return null;
+    return loadPromo();
+  });
   const [promoError, setPromoError] = useState("");
   const [comboOffersList, setComboOffersList] = useState<ComboOffer[]>([]);
   const [initialized, setInitialized] = useState(false);
@@ -170,6 +197,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return newItems;
     });
     setActivePromo(null);
+    savePromo(null);
   }, [user]);
 
   const addComboToCart = useCallback((combo: ComboOffer) => {
@@ -258,7 +286,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
           { orderTotal: rawSubtotal },
         );
         if (result.valid && result.promo) {
-          setActivePromo({ code: result.promo.code, description: result.promo.description, type: result.promo.type, discount: result.promo.discount });
+          const promo: ActivePromo = { code: result.promo.code, description: result.promo.description, type: result.promo.type, discount: result.promo.discount };
+          setActivePromo(promo);
+          savePromo(promo);
           setPromoError("");
         } else {
           setActivePromo(null);
@@ -275,6 +305,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const removePromoCode = useCallback(() => {
     setActivePromo(null);
     setPromoError("");
+    savePromo(null);
   }, []);
 
   const subtotal = useMemo(

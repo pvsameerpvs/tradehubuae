@@ -42,6 +42,7 @@ export class OrdersController {
     shippingCost?: number;
     taxAmount?: number;
     discountAmount?: number;
+    couponCode?: string;
     notes?: string;
     shippingAddressId?: string;
     shippingAddress?: Record<string, unknown>;

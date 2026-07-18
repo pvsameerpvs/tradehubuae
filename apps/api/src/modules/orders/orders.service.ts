@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from "@nestjs/common";
 import { DrizzleService } from "../../database/drizzle.service";
-import { orders, orderItems, products, productVariants } from "@tradehubuae/database";
+import { orders, orderItems, products, productVariants, coupons } from "@tradehubuae/database";
 import { eq, and, count, desc, sql, SQL } from "drizzle-orm";
 import { generateOrderNumber } from "@tradehubuae/utils";
 import { ORDER_STATUS, type OrderStatus } from "@tradehubuae/config";
@@ -118,6 +118,7 @@ export class OrdersService {
     shippingCost?: number;
     taxAmount?: number;
     discountAmount?: number;
+    couponCode?: string;
     notes?: string;
     shippingAddressId?: string;
     shippingAddress?: Record<string, unknown>;
@@ -161,6 +162,7 @@ export class OrdersService {
         shippingAddress: dto.shippingAddress ?? null,
         estimatedDeliveryDate: estDelivery,
         notes: dto.notes,
+        couponCode: dto.couponCode ?? null,
       })
       .returning();
 
@@ -200,6 +202,13 @@ export class OrdersService {
           }
         }
       }
+    }
+
+    if (dto.couponCode) {
+      await this.drizzle.db
+        .update(coupons)
+        .set({ usedCount: sql`${coupons.usedCount} + 1` })
+        .where(eq(coupons.code, dto.couponCode.toUpperCase().trim()));
     }
 
     const result = await this.findById(order!.id);
