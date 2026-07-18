@@ -95,8 +95,7 @@ interface Order {
   user: OrderUser | null;
   items: OrderItem[];
   payment: unknown[];
-  shippingAddress: OrderAddress | null;
-  billingAddress: OrderAddress | null;
+  shippingAddress: Record<string, string> | null;
 }
 
 const STATUS_FLOW: Record<string, string[]> = {
@@ -179,7 +178,7 @@ export default function OrderDetailPage() {
     || (order.user ? [order.user.name, order.user.email].filter(Boolean).join(" - ") : null)
     || "N/A";
 
-  const shippingAddr = order.shippingAddress;
+  const shippingAddr = order.shippingAddress as Record<string, string> | null;
   const customerDisplay = order.user;
 
   return (
@@ -255,6 +254,12 @@ export default function OrderDetailPage() {
                     <p className="text-ink-2">{shippingAddr.city}, {shippingAddr.emirate}</p>
                     <p className="text-ink-2">{shippingAddr.country}</p>
                     <p className="flex items-center gap-1 text-ink-3"><Phone className="h-3 w-3" strokeWidth={1.75} />{shippingAddr.phone}</p>
+                  </>
+                ) : order.contactName ? (
+                  <>
+                    <p className="font-medium text-ink">{order.contactName}</p>
+                    <p className="flex items-center gap-1 text-ink-3"><Phone className="h-3 w-3" strokeWidth={1.75} />{order.contactPhone || "N/A"}</p>
+                    <p className="mt-2 text-xs text-ink-3">Manual entry during checkout</p>
                   </>
                 ) : (
                   <p className="text-ink-3">No shipping address on file</p>

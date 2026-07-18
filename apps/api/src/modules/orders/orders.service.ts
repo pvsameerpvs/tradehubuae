@@ -5,6 +5,8 @@ import { eq, and, count, desc, sql, SQL } from "drizzle-orm";
 import { generateOrderNumber } from "@tradehubuae/utils";
 import { ORDER_STATUS, type OrderStatus } from "@tradehubuae/config";
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const STATUS_FLOW: Record<string, string[]> = {
   [ORDER_STATUS.PENDING]: [ORDER_STATUS.CONFIRMED, ORDER_STATUS.CANCELLED],
   [ORDER_STATUS.CONFIRMED]: [ORDER_STATUS.PROCESSING, ORDER_STATUS.CANCELLED],
@@ -36,7 +38,6 @@ export class OrdersService {
       with: {
         items: true,
         user: { columns: { name: true, email: true, phone: true } },
-        shippingAddress: true,
       },
       orderBy: [desc(orders.createdAt)],
       offset: (page - 1) * limit,
@@ -85,8 +86,6 @@ export class OrdersService {
         },
         user: { columns: { id: true, name: true, email: true, phone: true, image: true } },
         payment: true,
-        shippingAddress: true,
-        billingAddress: true,
       },
     });
 
@@ -100,7 +99,6 @@ export class OrdersService {
       with: {
         items: true,
         user: { columns: { name: true, email: true, phone: true } },
-        shippingAddress: true,
       },
     });
 
@@ -132,89 +130,134 @@ export class OrdersService {
       image?: string;
     }>;
   }, userId?: string) {
-    const orderNumber = generateOrderNumber();
+    try {
+      if (!dto.contactName || !dto.contactPhone) {
+        throw new BadRequestException("contactName and contactPhone are required");
+      }
+      if (dto.subtotal == null || dto.total == null) {
+        throw new BadRequestException("subtotal and total are required");
+      }
+      if (isNaN(Number(dto.subtotal)) || isNaN(Number(dto.total))) {
+        throw new BadRequestException("subtotal and total must be valid numbers");
+      }
 
-    const estDelivery = new Date();
-    if (dto.shippingMethod === "express") {
-      estDelivery.setDate(estDelivery.getDate() + 2);
-    } else if (dto.shippingMethod === "next_day") {
-      estDelivery.setDate(estDelivery.getDate() + 1);
-    } else {
-      estDelivery.setDate(estDelivery.getDate() + 5);
-    }
+      if (!dto.items || dto.items.length === 0) {
+        throw new BadRequestException("At least one item is required");
+      }
 
-    const [order] = await this.drizzle.db
-      .insert(orders)
-      .values({
-        orderNumber,
-        userId,
-        status: ORDER_STATUS.PENDING,
-        subtotal: dto.subtotal.toString(),
-        shippingCost: (dto.shippingCost ?? 0).toString(),
-        taxAmount: (dto.taxAmount ?? 0).toString(),
-        discountAmount: (dto.discountAmount ?? 0).toString(),
-        total: dto.total.toString(),
-        paymentMethod: dto.paymentMethod,
-        shippingMethod: dto.shippingMethod,
-        contactName: dto.contactName,
-        contactPhone: dto.contactPhone,
-        shippingAddressId: dto.shippingAddressId ?? null,
-        shippingAddress: dto.shippingAddress ?? null,
-        estimatedDeliveryDate: estDelivery,
-        notes: dto.notes,
-        couponCode: dto.couponCode ?? null,
-      })
-      .returning();
+      for (const [i, item] of dto.items.entries()) {
+        if (!item.productId || !UUID_REGEX.test(item.productId)) {
+          throw new BadRequestException(
+            `Item ${i}: productId is not a valid UUID`,
+          );
+        }
+        if (!item.name) {
+          throw new BadRequestException(`Item ${i}: name is required`);
+        }
+        if (!item.sku) {
+          throw new BadRequestException(`Item ${i}: sku is required`);
+        }
+        if (item.sku.length > 500) {
+          throw new BadRequestException(`Item ${i}: sku is too long (max 500 chars)`);
+        }
+        if (item.name.length > 500) {
+          throw new BadRequestException(`Item ${i}: name is too long (max 500 chars)`);
+        }
+        if (!item.quantity || item.quantity < 1) {
+          throw new BadRequestException(`Item ${i}: quantity must be at least 1`);
+        }
+        if (item.unitPrice == null || item.unitPrice < 0) {
+          throw new BadRequestException(`Item ${i}: unitPrice is invalid`);
+        }
+      }
 
-    if (dto.items && dto.items.length > 0) {
-      const items = dto.items;
-      await this.drizzle.db.insert(orderItems).values(
-        items.map((item) => ({
-          orderId: order!.id,
-          productId: item.productId,
-          variantId: item.variantId,
-          name: item.name,
-          sku: item.sku,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice.toString(),
-          totalPrice: (item.unitPrice * item.quantity).toString(),
-          image: item.image,
-        })),
-      );
+      const orderNumber = generateOrderNumber();
 
-      for (const item of items) {
-        if (item.productId) {
-          await this.drizzle.db
-            .update(products)
-            .set({
-              saleCount: sql`${products.saleCount} + ${item.quantity}`,
-              stock: sql`${products.stock} - ${item.quantity}`,
-            })
-            .where(eq(products.id, item.productId));
+      const estDelivery = new Date();
+      if (dto.shippingMethod === "express") {
+        estDelivery.setDate(estDelivery.getDate() + 2);
+      } else if (dto.shippingMethod === "next_day") {
+        estDelivery.setDate(estDelivery.getDate() + 1);
+      } else {
+        estDelivery.setDate(estDelivery.getDate() + 5);
+      }
 
-          if (item.variantId) {
+      const [order] = await this.drizzle.db
+        .insert(orders)
+        .values({
+          orderNumber,
+          userId,
+          status: ORDER_STATUS.PENDING,
+          subtotal: Number(dto.subtotal).toFixed(2),
+          shippingCost: Number(dto.shippingCost ?? 0).toFixed(2),
+          taxAmount: Number(dto.taxAmount ?? 0).toFixed(2),
+          discountAmount: Number(dto.discountAmount ?? 0).toFixed(2),
+          total: Number(dto.total).toFixed(2),
+          paymentMethod: dto.paymentMethod,
+          shippingMethod: dto.shippingMethod,
+          contactName: dto.contactName,
+          contactPhone: dto.contactPhone,
+          shippingAddressId: dto.shippingAddressId ?? null,
+          shippingAddress: dto.shippingAddress ?? null,
+          estimatedDeliveryDate: estDelivery,
+          notes: dto.notes,
+          couponCode: dto.couponCode ?? null,
+        })
+        .returning();
+
+      if (dto.items && dto.items.length > 0) {
+        const items = dto.items;
+        await this.drizzle.db.insert(orderItems).values(
+          items.map((item) => ({
+            orderId: order!.id,
+            productId: item.productId,
+            variantId: item.variantId ?? null,
+            name: item.name,
+            sku: item.sku,
+            quantity: item.quantity,
+            unitPrice: Number(item.unitPrice).toFixed(2),
+            totalPrice: (Number(item.unitPrice) * Number(item.quantity)).toFixed(2),
+            image: item.image ?? null,
+          })),
+        );
+
+        for (const item of items) {
+          if (item.productId) {
             await this.drizzle.db
-              .update(productVariants)
+              .update(products)
               .set({
-                stock: sql`${productVariants.stock} - ${item.quantity}`,
+                saleCount: sql`${products.saleCount} + ${item.quantity}`,
+                stock: sql`${products.stock} - ${item.quantity}`,
               })
-              .where(eq(productVariants.id, item.variantId));
+              .where(eq(products.id, item.productId));
+
+            if (item.variantId) {
+              await this.drizzle.db
+                .update(productVariants)
+                .set({
+                  stock: sql`${productVariants.stock} - ${item.quantity}`,
+                })
+                .where(eq(productVariants.id, item.variantId));
+            }
           }
         }
       }
+
+      if (dto.couponCode) {
+        await this.drizzle.db
+          .update(coupons)
+          .set({ usedCount: sql`${coupons.usedCount} + 1` })
+          .where(eq(coupons.code, dto.couponCode.toUpperCase().trim()));
+      }
+
+      const result = await this.findById(order!.id);
+
+      this.logger.log(`Order created: ${orderNumber}`);
+      return result;
+    } catch (error) {
+      this.logger.error(`Failed to create order: ${(error as Error).message}`, (error as Error).stack);
+      throw error;
     }
-
-    if (dto.couponCode) {
-      await this.drizzle.db
-        .update(coupons)
-        .set({ usedCount: sql`${coupons.usedCount} + 1` })
-        .where(eq(coupons.code, dto.couponCode.toUpperCase().trim()));
-    }
-
-    const result = await this.findById(order!.id);
-
-    this.logger.log(`Order created: ${orderNumber}`);
-    return result;
   }
 
   async updateStatus(id: string, status: string) {

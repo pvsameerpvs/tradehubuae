@@ -9,9 +9,9 @@ interface Order {
   orderNumber: string;
   status: string;
   paymentStatus: string;
-  total: number;
+  total: string;
   currency: string;
-  customer: { name: string; email: string } | null;
+  user: { name: string; email: string } | null;
   items: { id: string }[];
   createdAt: string;
 }
@@ -33,7 +33,7 @@ export default function OrdersPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api.get<PaginatedResponse<Order>>("/orders", { limit: 50, sort: "createdAt", order: "desc" })
+    api.get<PaginatedResponse<Order>>("/orders", { limit: 50 })
       .then(setData)
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load orders"))
       .finally(() => setLoading(false));
@@ -69,7 +69,7 @@ export default function OrdersPage() {
                     </span>
                   </div>
                   <div className="mt-1 flex items-center gap-2 text-sm text-ink-3">
-                    <span>{order.customer?.name ?? "Guest"}</span>
+                    <span>{order.user?.name ?? "Guest"}</span>
                     <span>·</span>
                     <span>AED {Number(order.total).toLocaleString()}</span>
                   </div>
@@ -103,8 +103,8 @@ export default function OrdersPage() {
                       <p className="text-sm font-medium text-ink">#{order.orderNumber}</p>
                     </td>
                     <td className="p-4">
-                      <p className="text-sm text-ink">{order.customer?.name ?? "Guest"}</p>
-                      {order.customer?.email && <p className="text-xs text-ink-3">{order.customer.email}</p>}
+                      <p className="text-sm text-ink">{order.user?.name ?? "Guest"}</p>
+                      {order.user?.email && <p className="text-xs text-ink-3">{order.user.email}</p>}
                     </td>
                     <td className="p-4 text-sm text-ink">{order.items?.length ?? 0}</td>
                     <td className="p-4 text-sm font-medium text-ink">AED {Number(order.total).toLocaleString()}</td>

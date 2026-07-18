@@ -1,5 +1,3 @@
-"use server";
-
 import { api, ApiError } from "@/lib/api";
 
 export interface OrderItemData {

@@ -48,7 +48,7 @@ export const orderItems = sales.table("order_items", {
   productId: uuid("product_id").notNull().references(() => products.id, { onDelete: "restrict" }),
   variantId: uuid("variant_id").references(() => productVariants.id, { onDelete: "set null" }),
   name: varchar("name", { length: 500 }).notNull(),
-  sku: varchar("sku", { length: 100 }).notNull(),
+  sku: varchar("sku", { length: 500 }).notNull(),
   quantity: integer("quantity").notNull(),
   unitPrice: numeric("unit_price", { precision: 10, scale: 2 }).notNull(),
   totalPrice: numeric("total_price", { precision: 10, scale: 2 }).notNull(),

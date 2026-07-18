@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ShoppingCart, Banknote, Plus } from "lucide-react";
+import { ChevronLeft, ShoppingCart, Banknote, Plus, AlertCircle } from "lucide-react";
 import { UAE_EMIRATES } from "@tradehubuae/config";
 import { useCart } from "@/lib/cart-context";
 import { createOrder } from "@/lib/actions/orders";
@@ -31,6 +31,7 @@ export default function CheckoutPage() {
   const [placed, setPlaced] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
   const [placing, setPlacing] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const [savedAddresses, setSavedAddresses] = useState<AddressData[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
@@ -97,6 +98,7 @@ export default function CheckoutPage() {
   const placeOrder = async () => {
     if (!valid || !agreed || items.length === 0 || placing) return;
     setPlacing(true);
+    setErrorMsg("");
     const sa = selectedAddressId ? savedAddresses.find((a) => a.id === selectedAddressId) : null;
     try {
       const r = await createOrder({
@@ -126,8 +128,10 @@ export default function CheckoutPage() {
       sessionStorage.removeItem("th_checkout");
       setPlaced(true);
       clearCart();
-    } catch { alert("Failed to place order."); }
-    finally { setPlacing(false); }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to place order";
+      setErrorMsg(msg);
+    } finally { setPlacing(false); }
   };
 
   if (placed) {
@@ -317,6 +321,12 @@ export default function CheckoutPage() {
                   I agree to the <Link href="#" className="font-medium text-ink underline underline-offset-2">Terms</Link> and <Link href="#" className="font-medium text-ink underline underline-offset-2">Privacy Policy</Link>
                 </span>
               </label>
+              {errorMsg && (
+                <div className="mt-3 flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2.5 text-sm text-red-700">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.75} />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
               <button onClick={placeOrder} disabled={!valid || !agreed || placing} className="flex h-12 w-full items-center justify-center rounded-lg bg-brand text-base font-semibold text-white hover:bg-brand-dark transition-colors disabled:opacity-40">
                 {placing ? "Placing..." : `Place Order · AED ${grandTotal.toFixed(2)}`}
               </button>
@@ -335,6 +345,12 @@ export default function CheckoutPage() {
 
       {/* Fixed CTA (mobile) */}
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-line bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] lg:hidden">
+        {errorMsg && (
+          <div className="mb-2 flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2.5 text-sm text-red-700">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.75} />
+            <span>{errorMsg}</span>
+          </div>
+        )}
         <button onClick={placeOrder} disabled={!valid || !agreed || placing} className="flex h-12 w-full items-center justify-center rounded-lg bg-brand text-base font-semibold text-white hover:bg-brand-dark transition-colors disabled:opacity-40">
           {placing ? "Placing..." : `Place Order · AED ${grandTotal.toFixed(2)}`}
         </button>

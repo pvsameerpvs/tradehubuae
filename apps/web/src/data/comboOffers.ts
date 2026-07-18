@@ -7,7 +7,7 @@ export interface ComboOfferItem {
 }
 
 interface ApiComboOfferItem {
-  product?: { name: string; slug: string; price: number };
+  product?: { id: string; name: string; slug: string; price: number };
   quantity: number;
 }
 
@@ -53,6 +53,7 @@ function calcComboPrice(offer: ApiComboOffer): { totalOriginal: number; price: n
 
 function toComboOfferItem(item: ApiComboOfferItem): ComboOfferItem {
   return {
+    id: item.product?.id,
     name: item.product?.name ?? "Unknown",
     slug: item.product?.slug ?? "",
     price: Number(item.product?.price ?? 0),

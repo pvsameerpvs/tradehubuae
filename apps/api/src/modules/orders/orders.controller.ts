@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Body, Param, Query } from "@nestjs/common";
+import { Controller, Get, Post, Put, Body, Param, Query, Logger } from "@nestjs/common";
 import { OrdersService } from "./orders.service";
 import { Roles } from "../../common/decorators/roles.decorator";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
@@ -6,6 +6,8 @@ import { Public } from "../../common/decorators/public.decorator";
 
 @Controller("orders")
 export class OrdersController {
+  private readonly logger = new Logger(OrdersController.name);
+
   constructor(private readonly ordersService: OrdersService) {}
 
   @Roles("ADMIN", "SUPER_ADMIN", "SALES_MANAGER")
@@ -56,7 +58,13 @@ export class OrdersController {
       image?: string;
     }>;
   }, @CurrentUser("id") userId?: string) {
-    return this.ordersService.create(dto, userId);
+    this.logger.log(`Create order body: ${JSON.stringify(dto)}`);
+    try {
+      return await this.ordersService.create(dto, userId);
+    } catch (error) {
+      this.logger.error(`Create order failed: ${(error as Error).message}`, (error as Error).stack);
+      throw error;
+    }
   }
 
   @Roles("ADMIN", "SUPER_ADMIN", "SALES_MANAGER")
