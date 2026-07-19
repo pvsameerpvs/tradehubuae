@@ -77,30 +77,32 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   }, [slugs, user, initialized]);
 
   const add = useCallback((slug: string) => {
+    if (user) addToWishlist(user.id, slug).catch(() => {});
     setSlugs((prev) => {
       if (prev.includes(slug)) return prev;
-      if (user) addToWishlist(user.id, slug);
       return [...prev, slug];
     });
   }, [user]);
 
   const remove = useCallback((slug: string) => {
-    setSlugs((prev) => {
-      if (user) removeFromWishlist(user.id, slug);
-      return prev.filter((s) => s !== slug);
-    });
+    setSlugs((prev) => prev.filter((s) => s !== slug));
+    if (user) removeFromWishlist(user.id, slug).catch(() => {});
   }, [user]);
 
   const toggle = useCallback((slug: string) => {
-    setSlugs((prev) => {
-      if (prev.includes(slug)) {
-        if (user) removeFromWishlist(user.id, slug);
-        return prev.filter((s) => s !== slug);
+    setSlugs((prev) =>
+      prev.includes(slug)
+        ? prev.filter((s) => s !== slug)
+        : [...prev, slug],
+    );
+    if (user) {
+      if (slugs.includes(slug)) {
+        removeFromWishlist(user.id, slug).catch(() => {});
+      } else {
+        addToWishlist(user.id, slug).catch(() => {});
       }
-      if (user) addToWishlist(user.id, slug);
-      return [...prev, slug];
-    });
-  }, [user]);
+    }
+  }, [user, slugs]);
 
   const isWishlisted = useCallback((slug: string) => slugs.includes(slug), [slugs]);
 
