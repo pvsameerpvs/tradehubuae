@@ -40,14 +40,9 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { count } = useCart();
   const { count: wishlistCount } = useWishlist();
-
-  const handleSignOut = async () => {
-    await signOut();
-    setOpen(false);
-  };
 
   useEffect(() => {
     if (!open) return;
@@ -170,14 +165,6 @@ export function Header() {
                   <div className="fixed inset-0 z-40 md:hidden" onClick={() => setOpen(false)} />
                   <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-line bg-white px-1 py-2 shadow-panel">
                     <div className="space-y-0.5">
-                      <Link
-                        href="/search"
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-bg3"
-                        onClick={() => setOpen(false)}
-                      >
-                        <Search className="h-4 w-4 text-ink-2" strokeWidth={1.5} />
-                        Search
-                      </Link>
                       {NAV_LINKS.map((link) => {
                         const Icon = link.icon;
                         return (
@@ -204,13 +191,6 @@ export function Header() {
                           <User className="h-4 w-4 text-ink-2" strokeWidth={1.5} />
                           My Account
                         </Link>
-                        <button
-                          onClick={handleSignOut}
-                          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-bg3"
-                        >
-                          <User className="h-4 w-4 text-ink-2" strokeWidth={1.5} />
-                          Sign Out
-                        </button>
                       </>
                     ) : (
                       <Link
