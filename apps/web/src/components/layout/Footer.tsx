@@ -18,6 +18,7 @@ const footerColumns = [
       { label: "Track Order", href: "/track-order" },
       { label: "About Us", href: "/about" },
       { label: "Blog", href: "/blog" },
+      { label: "Terms & Conditions", href: "/terms" },
     ],
   },
   {

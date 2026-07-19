@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   XCircle,
   ArrowUpRight,
+  RotateCcw,
 } from "lucide-react";
 import {
   Button,
@@ -25,6 +26,8 @@ import {
   DialogDescription,
 } from "@tradehubuae/ui";
 import { useAuth } from "@/lib/supabase/provider";
+import { toast } from "sonner";
+import { ORDER_STATUS } from "@tradehubuae/config";
 import {
   orderStatusColor,
   formatStatus,
@@ -33,10 +36,20 @@ import {
 } from "@/data";
 import {
   getMyOrdersFromSupabase,
+  getMyReturns,
   updateOrderStatusFromSupabase,
 } from "@/lib/actions/orders-supabase";
+import { requestReturn } from "@/lib/actions/returns";
 
-const CANCELLABLE_STATUSES = ORDER_STATUS_FLOW.slice(0, -1);
+const CANCELLABLE_STATUSES = [ORDER_STATUS.PENDING];
+const RETURN_ELIGIBLE_STATUSES = [ORDER_STATUS.DELIVERED];
+
+const returnStatusConfig: Record<string, { label: string; color: string }> = {
+  PENDING: { label: "Return Requested", color: "bg-amber-50 text-amber-700 border-amber-200" },
+  APPROVED: { label: "Return Approved", color: "bg-blue-50 text-blue-700 border-blue-200" },
+  REJECTED: { label: "Return Rejected", color: "bg-red-50 text-red-700 border-red-200" },
+  REFUNDED: { label: "Refunded", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+};
 const PAGE_SIZE = 10;
 
 function OrderStatusTimeline({ status }: { status: string }) {
@@ -107,6 +120,82 @@ function OrderStatusTimeline({ status }: { status: string }) {
   );
 }
 
+function ReturnDialog({
+  order,
+  open,
+  onOpenChange,
+  onConfirm,
+  loading,
+}: {
+  order: any;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onConfirm: (reason: string, notes: string) => void;
+  loading: boolean;
+}) {
+  const [reason, setReason] = useState("");
+  const [notes, setNotes] = useState("");
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[420px]">
+        <DialogHeader>
+          <DialogTitle>Return Order</DialogTitle>
+          <DialogDescription>
+            Start a return for order <span className="font-semibold text-ink">{order?.orderNumber}</span>?
+            Returns are accepted within 7 days of delivery.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-ink">Reason for Return *</label>
+            <select
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="h-10 w-full rounded-lg border border-line bg-white px-3 text-sm text-ink outline-none transition-colors focus:border-ink/30"
+            >
+              <option value="">Select a reason...</option>
+              <option value="Defective or not working">Defective or not working</option>
+              <option value="Wrong item received">Wrong item received</option>
+              <option value="Item not as described">Item not as described</option>
+              <option value="Damaged in transit">Damaged in transit</option>
+              <option value="No longer needed">No longer needed</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-ink">Additional Notes</label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Provide any additional details..."
+              className="min-h-[80px] w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-3 outline-none transition-colors focus:border-ink/30"
+            />
+          </div>
+          <div className="rounded-xl border border-line/60 bg-bg2/50 px-4 py-3">
+            <p className="text-sm text-ink-2">
+              <span className="font-medium text-ink">Items:</span>{" "}
+              {order?.items?.map((i: any) => `${i.name} × ${i.quantity}`).join(", ")}
+            </p>
+            <p className="mt-1 text-sm text-ink-2">
+              <span className="font-medium text-ink">Total:</span> AED{" "}
+              {Number(order?.total || 0).toLocaleString()}
+            </p>
+          </div>
+        </div>
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+            Cancel
+          </Button>
+          <Button onClick={() => onConfirm(reason, notes)} disabled={loading || !reason}>
+            {loading ? "Submitting..." : "Submit Return Request"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function CancelDialog({
   order,
   open,
@@ -154,8 +243,10 @@ function CancelDialog({
   );
 }
 
-function OrderCard({ order, onCancel, cancelling }: any) {
+function OrderCard({ order, onCancel, cancelling, onReturn }: any) {
   const isCancellable = CANCELLABLE_STATUSES.includes(order.status);
+  const isReturnEligible = RETURN_ELIGIBLE_STATUSES.includes(order.status) && !order.returnInfo;
+  const returnInfo = order.returnInfo;
 
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-line/60 bg-white p-5 shadow-sm transition-all hover:shadow-card sm:p-6">
@@ -182,12 +273,19 @@ function OrderCard({ order, onCancel, cancelling }: any) {
               {order.items.reduce((s: number, i: any) => s + i.quantity, 0)} item(s)
             </p>
           </div>
-          <Badge
-            variant={orderStatusColor[order.status] || "default"}
-            className="shrink-0 px-3 py-1 text-xs"
-          >
-            {formatStatus(order.status)}
-          </Badge>
+          <div className="flex shrink-0 flex-col items-end gap-1.5">
+            <Badge
+              variant={orderStatusColor[order.status] || "default"}
+              className="px-3 py-1 text-xs"
+            >
+              {formatStatus(order.status)}
+            </Badge>
+            {returnInfo && (
+              <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${returnStatusConfig[returnInfo.status]?.color || "bg-bg2 text-ink-3"}`}>
+                {returnStatusConfig[returnInfo.status]?.label || returnInfo.status}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Timeline */}
@@ -243,6 +341,17 @@ function OrderCard({ order, onCancel, cancelling }: any) {
                 Cancel
               </Button>
             )}
+            {isReturnEligible && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 rounded-xl text-xs sm:text-sm"
+                onClick={() => onReturn(order)}
+              >
+                <RotateCcw className="h-3.5 w-3.5" strokeWidth={2} />
+                Return
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -257,6 +366,8 @@ export default function AccountOrders() {
   const [error, setError] = useState<string | null>(null);
   const [cancelTarget, setCancelTarget] = useState<any | null>(null);
   const [cancelling, setCancelling] = useState(false);
+  const [returnTarget, setReturnTarget] = useState<any | null>(null);
+  const [returning, setReturning] = useState(false);
   const [page, setPage] = useState(1);
 
   const loadOrders = useCallback(async () => {
@@ -264,9 +375,18 @@ export default function AccountOrders() {
     setLoading(true);
     setError(null);
     try {
-      const data = await getMyOrdersFromSupabase(user.id);
+      const [orderRows, returnRows] = await Promise.all([
+        getMyOrdersFromSupabase(user.id),
+        getMyReturns(user.id),
+      ]);
+      const returnMap: Record<string, any> = {};
+      for (const r of returnRows || []) {
+        if (!returnMap[r.order_id] || r.status !== "REJECTED") {
+          returnMap[r.order_id] = { id: r.id, status: r.status, reason: r.reason, refundAmount: r.refund_amount, createdAt: r.created_at };
+        }
+      }
       setOrders(
-        (data || []).map((o: any) => ({
+        (orderRows || []).map((o: any) => ({
           id: o.id,
           orderNumber: o.order_number,
           status: o.status,
@@ -293,6 +413,7 @@ export default function AccountOrders() {
             totalPrice: i.total_price,
             image: i.image,
           })),
+          returnInfo: returnMap[o.id] || null,
         })),
       );
     } catch {
@@ -401,6 +522,7 @@ export default function AccountOrders() {
             order={order}
             onCancel={setCancelTarget}
             cancelling={cancelling && cancelTarget?.id === order.id}
+            onReturn={setReturnTarget}
           />
         ))}
       </div>
@@ -452,6 +574,30 @@ export default function AccountOrders() {
           loading={cancelling}
         />
       )}
+
+      <ReturnDialog
+        order={returnTarget}
+        open={!!returnTarget}
+        onOpenChange={(open) => {
+          if (!open) setReturnTarget(null);
+        }}
+        onConfirm={async (reason, notes) => {
+          if (!returnTarget) return;
+          setReturning(true);
+          try {
+            await requestReturn(returnTarget.id, reason, notes || undefined);
+            setReturnTarget(null);
+            toast.success("Return request submitted successfully");
+            loadOrders();
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : "Failed to submit return";
+            toast.error(msg);
+          } finally {
+            setReturning(false);
+          }
+        }}
+        loading={returning}
+      />
     </>
   );
 }

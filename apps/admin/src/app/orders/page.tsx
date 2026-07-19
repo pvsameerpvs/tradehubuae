@@ -2,7 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { RotateCcw } from "lucide-react";
 import { api, type PaginatedResponse } from "@/lib/api";
+
+interface OrderReturnInfo {
+  id: string;
+  status: string;
+}
 
 interface Order {
   id: string;
@@ -16,6 +22,7 @@ interface Order {
   user: { name: string; email: string } | null;
   items: { id: string }[];
   createdAt: string;
+  returnInfo: OrderReturnInfo | null;
 }
 
 const STATUSES = ["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED", "REFUNDED"];
@@ -29,6 +36,20 @@ const statusStyles: Record<string, string> = {
   CANCELLED: "bg-red-50 text-red-700 border-red-200",
   RETURNED: "bg-rose-50 text-rose-700 border-rose-200",
   REFUNDED: "bg-ink-2/10 text-ink-2 border-ink-2/20",
+};
+
+const returnLabel: Record<string, string> = {
+  PENDING: "Return Requested",
+  APPROVED: "Return Approved",
+  REFUNDED: "Refunded",
+  REJECTED: "Return Rejected",
+};
+
+const returnBadgeStyle: Record<string, string> = {
+  PENDING: "bg-amber-50 text-amber-700 border-amber-200",
+  APPROVED: "bg-blue-50 text-blue-700 border-blue-200",
+  REFUNDED: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  REJECTED: "bg-red-50 text-red-700 border-red-200",
 };
 
 export default function OrdersPage() {
@@ -116,9 +137,18 @@ export default function OrdersPage() {
                 <Link key={order.id} href={`/orders/${order.id}`} className="flex flex-col px-4 py-3 transition-colors hover:bg-bg2">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-ink">#{order.orderNumber}</p>
-                    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${statusStyles[order.status] ?? "bg-bg2 text-ink-3"}`}>
-                      {order.status.charAt(0) + order.status.slice(1).toLowerCase()}
-                    </span>
+                    <div className="flex items-center gap-1">
+                      {order.returnInfo && (
+                        <span
+                          onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.location.href = `/returns/${order.returnInfo!.id}`; }}
+                          className="inline-flex cursor-pointer items-center gap-0.5 rounded-full border border-rose-200 bg-rose-50 px-1.5 py-0.5 text-[10px] font-medium text-rose-700 hover:bg-rose-100">
+                          <RotateCcw className="h-2.5 w-2.5" strokeWidth={2} />
+                        </span>
+                      )}
+                      <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${statusStyles[order.status] ?? "bg-bg2 text-ink-3"}`}>
+                        {order.status.charAt(0) + order.status.slice(1).toLowerCase()}
+                      </span>
+                    </div>
                   </div>
                   <div className="mt-1 flex items-center gap-2 text-sm text-ink-3">
                     <span>{order.user?.name || order.contactName || "Guest"}</span>
@@ -161,9 +191,21 @@ export default function OrdersPage() {
                     <td className="p-4 text-sm text-ink">{order.items?.length ?? 0}</td>
                     <td className="p-4 text-sm font-medium text-ink">AED {Number(order.total).toLocaleString()}</td>
                     <td className="p-4">
-                      <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusStyles[order.status] ?? "bg-bg2 text-ink-3"}`}>
-                        {order.status.charAt(0) + order.status.slice(1).toLowerCase()}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusStyles[order.status] ?? "bg-bg2 text-ink-3"}`}>
+                          {order.status.charAt(0) + order.status.slice(1).toLowerCase()}
+                        </span>
+                        {order.returnInfo && (
+                          <Link
+                            href={`/returns/${order.returnInfo.id}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2 py-1 text-[10px] font-medium text-rose-700 transition-colors hover:bg-rose-100"
+                          >
+                            <RotateCcw className="h-3 w-3" strokeWidth={2} />
+                            {returnLabel[order.returnInfo.status]}
+                          </Link>
+                        )}
+                      </div>
                     </td>
                     <td className="p-4 text-sm text-ink-2">
                       {new Date(order.createdAt).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })}

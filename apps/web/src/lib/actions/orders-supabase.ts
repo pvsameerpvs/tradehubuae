@@ -35,6 +35,29 @@ export async function getMyOrdersFromSupabase(userId: string) {
   }
 }
 
+export async function getMyReturns(userId: string) {
+  try {
+    const rows = await sql`
+      SELECT r.id, r.order_id, r.status, r.reason, r.refund_amount, r.created_at, r.updated_at
+      FROM sales.returns r
+      JOIN sales.orders o ON o.id = r.order_id
+      WHERE o.user_id = ${userId}
+      ORDER BY r.created_at DESC
+    `;
+    return rows || [];
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Failed to load returns";
+    throw new Error(msg);
+  }
+}
+
 export async function updateOrderStatusFromSupabase(orderId: string, status: string) {
+  if (status === "CANCELLED") {
+    const [order] = await sql`SELECT status FROM sales.orders WHERE id = ${orderId}`;
+    if (!order) throw new Error("Order not found");
+    if (order.status !== "PENDING") {
+      throw new Error("Only pending orders can be cancelled");
+    }
+  }
   await sql`UPDATE sales.orders SET status = ${status} WHERE id = ${orderId}`;
 }

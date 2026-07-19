@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import {
@@ -21,6 +22,7 @@ import {
   Mail,
   Phone,
   ShoppingBag,
+  RotateCcw,
 } from "lucide-react";
 import {
   Card,
@@ -70,6 +72,15 @@ interface OrderAddress {
   zipCode: string | null;
 }
 
+interface OrderReturnInfo {
+  id: string;
+  status: string;
+  reason: string;
+  refundAmount: string | null;
+  items: { id: string; quantity: number; name: string }[] | null;
+  createdAt: string;
+}
+
 interface Order {
   id: string;
   orderNumber: string;
@@ -96,6 +107,7 @@ interface Order {
   items: OrderItem[];
   payment: unknown[];
   shippingAddress: Record<string, string> | null;
+  returnInfo: OrderReturnInfo | null;
 }
 
 const STATUS_FLOW: Record<string, string[]> = {
@@ -235,6 +247,56 @@ export default function OrderDetailPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Return Info */}
+          {order.returnInfo && (
+            <Card className="border-rose-200 bg-rose-50/30">
+              <CardHeader className="px-5 py-4">
+                <div className="flex items-center gap-2">
+                  <RotateCcw className="h-4 w-4 text-rose-600" strokeWidth={1.75} />
+                  <CardTitle className="text-sm font-semibold text-ink">Return Info</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="px-5 pb-5">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <p className="text-sm text-ink-2">
+                      <span className="font-medium text-ink">Status:</span>{" "}
+                      <span className="font-medium capitalize text-rose-700">{order.returnInfo.status.toLowerCase()}</span>
+                    </p>
+                    <p className="text-sm text-ink-2">
+                      <span className="font-medium text-ink">Reason:</span> {order.returnInfo.reason}
+                    </p>
+                    {order.returnInfo.refundAmount && (
+                      <p className="text-sm text-ink-2">
+                        <span className="font-medium text-ink">Refund:</span> AED {Number(order.returnInfo.refundAmount).toLocaleString()}
+                      </p>
+                    )}
+                    <p className="text-sm text-ink-2">
+                      <span className="font-medium text-ink">Requested:</span>{" "}
+                      {new Date(order.returnInfo.createdAt).toLocaleDateString([], { month: "long", day: "numeric", year: "numeric" })}
+                    </p>
+                  </div>
+                  <Link
+                    href={`/returns/${order.returnInfo.id}`}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-3 py-2 text-sm font-medium text-rose-700 transition-colors hover:bg-rose-50"
+                  >
+                    <RotateCcw className="h-4 w-4" strokeWidth={1.75} />
+                    View Return Details
+                  </Link>
+                </div>
+                {order.returnInfo.items && order.returnInfo.items.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {order.returnInfo.items.map((item: any, i: number) => (
+                      <span key={i} className="inline-flex items-center rounded-md bg-white px-2 py-0.5 text-xs text-ink-2">
+                        {item.name} &times; {item.quantity}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Shipping Address + Payment */}
           <div className="flex flex-col gap-4 sm:grid sm:grid-cols-2 sm:gap-6">

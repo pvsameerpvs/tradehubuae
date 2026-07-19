@@ -22,6 +22,7 @@ import { BulkSalesModule } from "./modules/bulk-sales/bulk-sales.module";
 import { ChatModule } from "./modules/chat/chat.module";
 import { ReviewsModule } from "./modules/reviews/reviews.module";
 import { CartModule } from "./modules/cart/cart.module";
+import { ReturnsModule } from "./modules/returns/returns.module";
 import { DrizzleModule } from "./database/drizzle.module";
 
 @Module({
@@ -58,6 +59,7 @@ import { DrizzleModule } from "./database/drizzle.module";
     ChatModule,
     ReviewsModule,
     CartModule,
+    ReturnsModule,
   ],
 })
 export class AppModule {}

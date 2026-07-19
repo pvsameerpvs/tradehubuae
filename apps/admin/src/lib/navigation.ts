@@ -18,6 +18,7 @@ import {
   Shield,
   Grid3X3,
   Star,
+  RotateCcw,
 } from "lucide-react";
 
 export interface NavItem {
@@ -38,6 +39,7 @@ export const navSections: NavSection[] = [
       { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { label: "Products", href: "/products", icon: Package },
       { label: "Orders", href: "/orders", icon: ShoppingCart },
+      { label: "Returns", href: "/returns", icon: RotateCcw },
       { label: "Categories", href: "/categories", icon: FolderTree },
       { label: "Brands", href: "/brands", icon: Building },
       { label: "Customers", href: "/customers", icon: Users },
