@@ -36,6 +36,20 @@
       "when": 1744326000000,
       "tag": "0004_schema_organization",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1744390800000,
+      "tag": "0005_stock_non_negative_check",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1744477200000,
+      "tag": "0006_sku_sequences",
+      "breakpoints": true
     }
   ]
 }

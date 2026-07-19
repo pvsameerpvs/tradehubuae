@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, Logger } from "@nestjs/common";
 import { DrizzleService } from "../../database/drizzle.service";
-import { products, productImages, brands, uses, productCategories, categories, productVariants, reviews, productSpecs } from "@tradehubuae/database";
+import { products, productImages, brands, uses, productCategories, categories, productVariants, reviews, productSpecs, skuSequences } from "@tradehubuae/database";
 import { eq, and, like, or, sql, asc, desc, count } from "drizzle-orm";
 import type { CreateProductDto } from "./dto/create-product.dto";
 import type { UpdateProductDto } from "./dto/update-product.dto";
@@ -30,6 +30,40 @@ export class ProductsService {
   private readonly logger = new Logger(ProductsService.name);
 
   constructor(private drizzle: DrizzleService) {}
+
+  private async generateSequentialSku(
+    categoryId?: string,
+    brandId?: string,
+  ): Promise<string> {
+    let catName = "";
+    let brName = "";
+    if (categoryId) {
+      const [cat] = await this.drizzle.db
+        .select({ name: categories.name })
+        .from(categories)
+        .where(eq(categories.id, categoryId))
+        .limit(1);
+      if (cat) catName = cat.name;
+    }
+    if (brandId) {
+      const [br] = await this.drizzle.db
+        .select({ name: brands.name })
+        .from(brands)
+        .where(eq(brands.id, brandId))
+        .limit(1);
+      if (br) brName = br.name;
+    }
+    const prefix = generateSKU(catName, brName, 0).slice(0, -6);
+    const [row] = await this.drizzle.db
+      .insert(skuSequences)
+      .values({ prefix, lastNum: 1 })
+      .onConflictDoUpdate({
+        target: skuSequences.prefix,
+        set: { lastNum: sql`${skuSequences.lastNum} + 1` },
+      })
+      .returning();
+    return generateSKU(catName, brName, row!.lastNum);
+  }
 
   async findAll(query: QueryProductDto) {
     const { page = 1, limit = 20, sort = "createdAt", order = "desc", q, category, brand, use, minPrice, maxPrice, condition, inStock, isActive } = query;
@@ -162,7 +196,9 @@ export class ProductsService {
       ? `${slug}-${Date.now().toString(36)}`
       : slug;
 
-    const sku = dto.sku ?? generateSKU(dto.categoryId ?? "", dto.brandId ?? "", Date.now());
+    const sku =
+      dto.sku ??
+      (await this.generateSequentialSku(dto.categoryId, dto.brandId));
 
     const [product] = await this.drizzle.db
       .insert(products)
@@ -172,7 +208,7 @@ export class ProductsService {
         description: dto.description,
         shortDescription: dto.shortDescription,
         sku,
-        barcode: dto.barcode,
+        barcode: dto.barcode ?? sku,
         condition: dto.condition as "New" | "Like New" | "Excellent" | "Good" | "Fair",
         price: dto.price.toString(),
         compareAtPrice: dto.compareAtPrice?.toString(),
