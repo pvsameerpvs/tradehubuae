@@ -9,10 +9,10 @@ import {
   RefreshCw,
   ChevronLeft,
   ChevronRight as ChevronRightIcon,
+  ChevronDown,
   Clock,
   CheckCircle2,
   XCircle,
-  ArrowUpRight,
   RotateCcw,
 } from "lucide-react";
 import {
@@ -50,7 +50,7 @@ const returnStatusConfig: Record<string, { label: string; color: string }> = {
   REJECTED: { label: "Return Rejected", color: "bg-red-50 text-red-700 border-red-200" },
   REFUNDED: { label: "Refunded", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
 };
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 7;
 
 function OrderStatusTimeline({ status }: { status: string }) {
   if (ORDER_TERMINAL_STATUSES.includes(status as any)) {
@@ -244,117 +244,122 @@ function CancelDialog({
 }
 
 function OrderCard({ order, onCancel, cancelling, onReturn }: any) {
+  const [expanded, setExpanded] = useState(false);
   const isCancellable = CANCELLABLE_STATUSES.includes(order.status);
   const isReturnEligible = RETURN_ELIGIBLE_STATUSES.includes(order.status) && !order.returnInfo;
   const returnInfo = order.returnInfo;
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-line/60 bg-white p-5 shadow-sm transition-all hover:shadow-card sm:p-6">
-      <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-brand/[0.02]" />
-
-      <div className="relative">
-        {/* Header */}
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <Link
-              href={`/track-order?order=${encodeURIComponent(order.orderNumber)}`}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink transition-colors hover:text-brand sm:text-base"
-            >
-              {order.orderNumber}
-              <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2} />
-            </Link>
-            <p className="mt-0.5 text-xs text-ink-2 sm:text-sm">
-              {new Date(order.createdAt).toLocaleDateString("en-AE", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              })}{" "}
-              &middot;{" "}
-              {order.items.reduce((s: number, i: any) => s + i.quantity, 0)} item(s)
-            </p>
-          </div>
-          <div className="flex shrink-0 flex-col items-end gap-1.5">
-            <Badge
-              variant={orderStatusColor[order.status] || "default"}
-              className="px-3 py-1 text-xs"
-            >
-              {formatStatus(order.status)}
-            </Badge>
-            {returnInfo && (
-              <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${returnStatusConfig[returnInfo.status]?.color || "bg-bg2 text-ink-3"}`}>
-                {returnStatusConfig[returnInfo.status]?.label || returnInfo.status}
-              </span>
-            )}
-          </div>
+    <div className="group rounded-2xl border border-line/60 bg-white shadow-sm transition-all hover:shadow-card">
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left sm:px-6 sm:py-5"
+      >
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-1.5">
+          <span className="truncate text-sm font-semibold text-ink sm:text-base">
+            {order.orderNumber}
+          </span>
+          <p className="text-xs text-ink-2 sm:text-sm">
+            {new Date(order.createdAt).toLocaleDateString("en-AE", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
+          </p>
+          <span className="text-xs text-ink-3">
+            {order.items.reduce((s: number, i: any) => s + i.quantity, 0)} item(s)
+          </span>
+          <span className="text-sm font-semibold text-ink">
+            AED {Number(order.total).toLocaleString()}
+          </span>
         </div>
-
-        {/* Timeline */}
-        <div className="mt-5">
-          <OrderStatusTimeline status={order.status} />
-        </div>
-
-        {/* Items */}
-        <div className="mt-4 flex flex-wrap gap-1.5">
-          {order.items.map((item: any, i: number) => (
-            <span
-              key={i}
-              className="inline-flex items-center rounded-lg bg-bg2/80 px-2.5 py-1 text-xs font-medium text-ink-2"
-            >
-              {item.name} &times; {item.quantity}
+        <div className="flex shrink-0 items-center gap-2">
+          <Badge
+            variant={orderStatusColor[order.status] || "default"}
+            className="px-3 py-1 text-xs"
+          >
+            {formatStatus(order.status)}
+          </Badge>
+          {returnInfo && (
+            <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${returnStatusConfig[returnInfo.status]?.color || "bg-bg2 text-ink-3"}`}>
+              {returnStatusConfig[returnInfo.status]?.label || returnInfo.status}
             </span>
-          ))}
+          )}
+          <ChevronDown
+            className={`h-4 w-4 text-ink-3 transition-transform duration-200 ${
+              expanded ? "rotate-180" : ""
+            }`}
+            strokeWidth={2}
+          />
         </div>
+      </button>
 
-        <hr className="my-4 border-line/60" />
+      {expanded && (
+        <div className="border-t border-line/60 px-5 pb-5 pt-4 sm:px-6 sm:pb-6">
+          <OrderStatusTimeline status={order.status} />
 
-        {/* Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-ink-3">
-              Total
-            </p>
-            <p className="text-base font-bold text-ink sm:text-lg">
-              AED {Number(order.total).toLocaleString()}
-            </p>
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {order.items.map((item: any, i: number) => (
+              <span
+                key={i}
+                className="inline-flex items-center rounded-lg bg-bg2/80 px-2.5 py-1 text-xs font-medium text-ink-2"
+              >
+                {item.name} &times; {item.quantity}
+              </span>
+            ))}
           </div>
-          <div className="flex items-center gap-2">
-            <Link
-              href={`/track-order?order=${encodeURIComponent(order.orderNumber)}`}
-            >
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5 rounded-xl text-xs sm:text-sm"
+
+          <hr className="my-4 border-line/60" />
+
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-ink-3">
+                Total
+              </p>
+              <p className="text-base font-bold text-ink sm:text-lg">
+                AED {Number(order.total).toLocaleString()}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/track-order?order=${encodeURIComponent(order.orderNumber)}`}
               >
-                View Details
-                <ChevronRight className="h-3.5 w-3.5" strokeWidth={2} />
-              </Button>
-            </Link>
-            {isCancellable && (
-              <Button
-                variant="destructive"
-                size="sm"
-                className="rounded-xl text-xs sm:text-sm"
-                onClick={() => onCancel(order)}
-                disabled={cancelling}
-              >
-                Cancel
-              </Button>
-            )}
-            {isReturnEligible && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5 rounded-xl text-xs sm:text-sm"
-                onClick={() => onReturn(order)}
-              >
-                <RotateCcw className="h-3.5 w-3.5" strokeWidth={2} />
-                Return
-              </Button>
-            )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 rounded-xl text-xs sm:text-sm"
+                >
+                  View Details
+                  <ChevronRight className="h-3.5 w-3.5" strokeWidth={2} />
+                </Button>
+              </Link>
+              {isCancellable && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="rounded-xl text-xs sm:text-sm"
+                  onClick={() => onCancel(order)}
+                  disabled={cancelling}
+                >
+                  Cancel
+                </Button>
+              )}
+              {isReturnEligible && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 rounded-xl text-xs sm:text-sm"
+                  onClick={() => onReturn(order)}
+                >
+                  <RotateCcw className="h-3.5 w-3.5" strokeWidth={2} />
+                  Return
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
