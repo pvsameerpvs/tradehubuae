@@ -51,7 +51,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (initialized) return;
     if (user) {
-      getWishlist().then((serverSlugs) => {
+      getWishlist(user.id).then((serverSlugs) => {
         if (serverSlugs.length > 0) {
           setSlugs(serverSlugs);
         } else {
@@ -79,14 +79,14 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const add = useCallback((slug: string) => {
     setSlugs((prev) => {
       if (prev.includes(slug)) return prev;
-      if (user) addToWishlist(slug);
+      if (user) addToWishlist(user.id, slug);
       return [...prev, slug];
     });
   }, [user]);
 
   const remove = useCallback((slug: string) => {
     setSlugs((prev) => {
-      if (user) removeFromWishlist(slug);
+      if (user) removeFromWishlist(user.id, slug);
       return prev.filter((s) => s !== slug);
     });
   }, [user]);
@@ -94,10 +94,10 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const toggle = useCallback((slug: string) => {
     setSlugs((prev) => {
       if (prev.includes(slug)) {
-        if (user) removeFromWishlist(slug);
+        if (user) removeFromWishlist(user.id, slug);
         return prev.filter((s) => s !== slug);
       }
-      if (user) addToWishlist(slug);
+      if (user) addToWishlist(user.id, slug);
       return [...prev, slug];
     });
   }, [user]);

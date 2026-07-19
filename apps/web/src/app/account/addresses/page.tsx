@@ -1,124 +1,80 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { MapPin, Plus } from "lucide-react";
-import { Button } from "@tradehubuae/ui";
-import {
-  getAddresses,
-  createAddress,
-  updateAddress,
-  deleteAddress,
-  setDefaultAddress,
-  type AddressData,
-  type CreateAddressInput,
-  type UpdateAddressInput,
-} from "@/lib/actions/addresses";
+import { MapPin, Plus, AlertCircle } from "lucide-react";
+import { Button, Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@tradehubuae/ui";
+import { useAuth } from "@/lib/supabase/provider";
+import { createClient } from "@/lib/supabase/client";
 import { AddressCard } from "@/components/shared/AddressCard";
 import { AddressForm } from "@/components/shared/AddressForm";
 
+function toCamel(a: any) {
+  return { id: a.id, firstName: a.first_name, lastName: a.last_name, phone: a.phone, addressLine1: a.address_line1, addressLine2: a.address_line2, city: a.city, emirate: a.emirate, country: a.country, zipCode: a.zip_code, isDefault: a.is_default, createdAt: a.created_at, updatedAt: a.updated_at };
+}
+
+function toSnake(d: any) {
+  return { first_name: d.firstName, last_name: d.lastName, phone: d.phone, address_line1: d.addressLine1, address_line2: d.addressLine2 || null, city: d.city, emirate: d.emirate, country: d.country || "UAE", zip_code: d.zipCode || null, is_default: d.isDefault || false };
+}
+
 export default function AccountAddresses() {
-  const [addresses, setAddresses] = useState<AddressData[]>([]);
+  const { user } = useAuth();
+  const sb = createClient();
+  const [addresses, setAddresses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [addressFormOpen, setAddressFormOpen] = useState(false);
-  const [editingAddress, setEditingAddress] = useState<AddressData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [addressFormOpen, setAddressFormOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<any | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
-    getAddresses()
-      .then(setAddresses)
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load addresses"))
-      .finally(() => setLoading(false));
-  }, []);
+  const fetchAddresses = useCallback(async () => {
+    if (!user) return;
+    setLoading(true); setError(null);
+    const { data, error: err } = await sb.from("addresses").select("*").eq("user_id", user.id).order("is_default", { ascending: false }).order("created_at", { ascending: false });
+    if (err) setError(err.message); else setAddresses((data || []).map(toCamel));
+    setLoading(false);
+  }, [user]);
 
-  const handleSaveAddress = useCallback(async (data: CreateAddressInput | UpdateAddressInput) => {
+  useEffect(() => { fetchAddresses(); }, [fetchAddresses]);
+
+  const handleSave = useCallback(async (data: any) => {
+    if (!user) return;
     if (editingAddress) {
-      const updated = await updateAddress(editingAddress.id, data);
-      setAddresses((prev) => prev.map((a) => (a.id === editingAddress.id ? updated : a)));
+      const { error: err } = await sb.from("addresses").update(toSnake(data)).eq("id", editingAddress.id);
+      if (err) { setError(err.message); return; }
     } else {
-      const created = await createAddress(data as CreateAddressInput);
-      setAddresses((prev) => [...prev, created]);
+      const { data: inserted, error: err } = await sb.from("addresses").insert({ ...toSnake(data), user_id: user.id }).select().single();
+      if (err) { setError(err.message); return; }
+      if (inserted) setAddresses((prev) => [...prev, toCamel(inserted)]);
     }
     setEditingAddress(null);
-  }, [editingAddress]);
+    fetchAddresses();
+  }, [editingAddress, user]);
 
-  const handleDeleteAddress = useCallback(async (id: string) => {
-    await deleteAddress(id);
-    setAddresses((prev) => prev.filter((a) => a.id !== id));
-  }, []);
+  const handleDelete = useCallback(async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const { error: err } = await sb.from("addresses").delete().eq("id", deleteTarget.id);
+    if (err) setError(err.message); else { setDeleteTarget(null); fetchAddresses(); }
+    setDeleting(false);
+  }, [deleteTarget]);
 
   const handleSetDefault = useCallback(async (id: string) => {
-    await setDefaultAddress(id);
-    setAddresses((prev) => prev.map((a) => ({ ...a, isDefault: a.id === id })));
-  }, []);
+    await sb.from("addresses").update({ is_default: false }).eq("user_id", user?.id);
+    const { error: err } = await sb.from("addresses").update({ is_default: true }).eq("id", id);
+    if (err) setError(err.message); else fetchAddresses();
+  }, [user]);
 
-  const openEditAddress = useCallback((addr: AddressData) => {
-    setEditingAddress(addr);
-    setAddressFormOpen(true);
-  }, []);
-
-  const openAddAddress = useCallback(() => {
-    setEditingAddress(null);
-    setAddressFormOpen(true);
-  }, []);
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-sm font-semibold text-ink sm:text-base">Saved Addresses</h2>
-          <p className="mt-0.5 text-sm text-ink-2">{addresses.length} address(es) on file</p>
-        </div>
-        <Button size="sm" className="h-9 text-xs sm:h-10 sm:text-sm" onClick={openAddAddress}>
-          <Plus className="mr-1 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          Add New
-        </Button>
-      </div>
-
-      {error && <div className="rounded-lg border border-sale/30 bg-sale/5 px-4 py-3 text-sm text-sale">{error}</div>}
-
-      {loading ? (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {[1, 2].map((i) => (
-            <div key={i} className="h-28 animate-pulse rounded-xl bg-bg3 sm:h-32" />
-          ))}
-        </div>
-      ) : addresses.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-xl border border-line bg-white px-6 py-14 text-center shadow-sm">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-bg2">
-            <MapPin className="h-7 w-7 text-ink-3" strokeWidth={1} />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-ink sm:text-base">No addresses saved</p>
-            <p className="mt-1 text-xs text-ink-2 sm:text-sm">Add an address for faster checkout</p>
-          </div>
-          <Button onClick={openAddAddress}>
-            <Plus className="mr-1.5 h-4 w-4" />
-            Add Address
-          </Button>
-        </div>
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {addresses.map((addr) => (
-            <AddressCard
-              key={addr.id}
-              address={addr}
-              onEdit={openEditAddress}
-              onDelete={handleDeleteAddress}
-              onSetDefault={handleSetDefault}
-            />
-          ))}
-        </div>
-      )}
-
-      <AddressForm
-        open={addressFormOpen}
-        onOpenChange={(open) => {
-          setAddressFormOpen(open);
-          if (!open) setEditingAddress(null);
-        }}
-        address={editingAddress}
-        onSave={handleSaveAddress}
-      />
+  return <div className="space-y-4">
+    <div className="flex items-center justify-between">
+      <div><h2 className="text-sm font-semibold text-ink sm:text-base">Saved Addresses</h2><p className="mt-0.5 text-sm text-ink-2">{addresses.length} address(es) on file</p></div>
+      <Button size="sm" className="h-9 text-xs sm:h-10 sm:text-sm" onClick={() => { setEditingAddress(null); setAddressFormOpen(true); }}><Plus className="mr-1 h-3.5 w-3.5 sm:h-4 sm:w-4" />Add New</Button>
     </div>
-  );
+    {error && <div className="flex items-center gap-2 rounded-lg border border-sale/30 bg-sale/5 px-4 py-3 text-sm text-sale"><AlertCircle className="h-4 w-4 shrink-0" strokeWidth={1.5} />{error}<Button variant="ghost" size="sm" className="ml-auto h-7 text-xs" onClick={() => setError(null)}>Dismiss</Button></div>}
+    {loading ? <div className="grid gap-3 sm:grid-cols-2">{[1, 2].map((i) => <div key={i} className="animate-pulse rounded-xl border border-line bg-white p-4 sm:p-5"><div className="flex items-start justify-between"><div className="space-y-2"><div className="h-4 w-28 rounded bg-bg2" /><div className="h-3 w-36 rounded bg-bg2" /><div className="h-3 w-24 rounded bg-bg2" /></div><div className="h-4 w-12 rounded bg-bg2" /></div><div className="mt-4 flex gap-2"><div className="h-7 w-14 rounded bg-bg2" /><div className="h-7 w-14 rounded bg-bg2" /></div></div>)}</div>
+     : addresses.length === 0 ? <div className="flex flex-col items-center gap-4 rounded-xl border border-line bg-white px-6 py-14 text-center shadow-sm"><div className="flex h-14 w-14 items-center justify-center rounded-full bg-bg2"><MapPin className="h-7 w-7 text-ink-3" strokeWidth={1} /></div><div><p className="text-sm font-medium text-ink sm:text-base">No addresses saved</p><p className="mt-1 text-xs text-ink-2 sm:text-sm">Add a delivery address for faster checkout</p></div><Button onClick={() => { setEditingAddress(null); setAddressFormOpen(true); }}><Plus className="mr-1.5 h-4 w-4" />Add Address</Button></div>
+     : <div className="grid gap-3 sm:grid-cols-2">{addresses.map((addr) => <AddressCard key={addr.id} address={addr} onEdit={(a) => { setEditingAddress(a); setAddressFormOpen(true); }} onDelete={(id) => { const a = addresses.find((x) => x.id === id); if (a) setDeleteTarget(a); }} onSetDefault={handleSetDefault} />)}</div>}
+    <AddressForm open={addressFormOpen} onOpenChange={(open) => { setAddressFormOpen(open); if (!open) setEditingAddress(null); }} address={editingAddress} onSave={handleSave} />
+    <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}><DialogContent className="sm:max-w-[380px]"><DialogHeader><DialogTitle>Delete Address</DialogTitle><DialogDescription>Are you sure you want to delete this address? This action cannot be undone.</DialogDescription></DialogHeader>{deleteTarget && <div className="rounded-lg border border-line bg-bg2/50 px-4 py-3 text-sm text-ink-2">{deleteTarget.firstName} {deleteTarget.lastName} — {deleteTarget.addressLine1}, {deleteTarget.city}</div>}<DialogFooter className="gap-2 sm:gap-0"><Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</Button><Button variant="destructive" onClick={handleDelete} disabled={deleting}>{deleting ? "Deleting..." : "Delete"}</Button></DialogFooter></DialogContent></Dialog>
+  </div>;
 }

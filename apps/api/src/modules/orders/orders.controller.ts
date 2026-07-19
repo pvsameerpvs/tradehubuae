@@ -33,6 +33,7 @@ export class OrdersController {
     return this.ordersService.findById(id);
   }
 
+  @Public()
   @Post()
   async create(@Body() dto: {
     subtotal: number;
@@ -45,6 +46,7 @@ export class OrdersController {
     taxAmount?: number;
     discountAmount?: number;
     couponCode?: string;
+    userId?: string;
     notes?: string;
     shippingAddressId?: string;
     shippingAddress?: Record<string, unknown>;

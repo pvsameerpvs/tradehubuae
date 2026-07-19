@@ -98,7 +98,4 @@ export function validateEmail(email: string): boolean {
   return emailRegex.test(email);
 }
 
-export function validatePhone(phone: string): boolean {
-  const phoneRegex = /^(\+971|00971|0)?5[0-9]{8}$/;
-  return phoneRegex.test(phone);
-}
+export { phoneSchema } from "@tradehubuae/validation";

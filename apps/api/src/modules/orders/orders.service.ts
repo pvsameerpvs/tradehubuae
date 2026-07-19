@@ -119,6 +119,7 @@ export class OrdersService {
     taxAmount?: number;
     discountAmount?: number;
     couponCode?: string;
+    userId?: string;
     notes?: string;
     shippingAddressId?: string;
     shippingAddress?: Record<string, unknown>;
@@ -133,6 +134,7 @@ export class OrdersService {
     }>;
   }, userId?: string) {
     try {
+      const effectiveUserId = userId || dto.userId || null;
       if (!dto.contactName || !dto.contactPhone) {
         throw new BadRequestException("contactName and contactPhone are required");
       }
@@ -188,7 +190,7 @@ export class OrdersService {
         .insert(orders)
         .values({
           orderNumber,
-          userId,
+          userId: effectiveUserId,
           status: ORDER_STATUS.PENDING,
           subtotal: Number(dto.subtotal).toFixed(2),
           shippingCost: Number(dto.shippingCost ?? 0).toFixed(2),

@@ -7,13 +7,9 @@ import { ChevronLeft, ShoppingCart, Banknote, Plus, AlertCircle } from "lucide-r
 import { UAE_EMIRATES } from "@tradehubuae/config";
 import { useCart } from "@/lib/cart-context";
 import { createOrder } from "@/lib/actions/orders";
-import {
-  getAddresses,
-  createAddress,
-  type AddressData,
-  type CreateAddressInput,
-} from "@/lib/actions/addresses";
+import { type AddressData } from "@/lib/actions/addresses";
 import { useAuth } from "@/lib/supabase/provider";
+import { createClient } from "@/lib/supabase/client";
 import { AddressCard } from "@/components/shared/AddressCard";
 import { AddressForm } from "@/components/shared/AddressForm";
 
@@ -55,18 +51,24 @@ export default function CheckoutPage() {
         if (p.saved) setSelectedAddressId(p.saved);
         restored.current = true;
       }
-    } catch {}
+    } catch { /* ignore invalid sessionStorage */ }
     if (!restored.current && user?.name) setName(user.name);
-    getAddresses()
-      .then((data) => {
-        setSavedAddresses(data);
+    const sb = createClient();
+    sb.from("addresses").select("*").eq("user_id", user?.id).order("is_default", { ascending: false }).then(({ data }: any) => {
+      if (data) {
+        const mapped = data.map((a: any) => ({
+          id: a.id, firstName: a.first_name, lastName: a.last_name, phone: a.phone,
+          addressLine1: a.address_line1, addressLine2: a.address_line2, city: a.city,
+          emirate: a.emirate, country: a.country, zipCode: a.zip_code, isDefault: a.is_default,
+          createdAt: a.created_at, updatedAt: a.updated_at,
+        }));
+        setSavedAddresses(mapped);
         if (!restored.current) {
-          const d = data.find((a) => a.isDefault) || data[0];
+          const d = mapped.find((a: any) => a.isDefault) || mapped[0];
           if (d) selectAddress(d);
         }
-      })
-      .catch(() => {})
-      .finally(() => setAddressesLoading(false));
+      }
+    }).then(() => setAddressesLoading(false));
   }, [user]);
 
   useEffect(() => {
@@ -75,7 +77,21 @@ export default function CheckoutPage() {
     }));
   });
 
-  function selectAddress(addr: AddressData) {
+  function formatPhone(value: string): string {
+  const digits = value.replace(/\D/g, "");
+  if (digits.startsWith("971") && digits.length >= 11) {
+    return `+971 ${digits.slice(3, 5)} ${digits.slice(5, 8)} ${digits.slice(8, 12)}`;
+  }
+  if (digits.startsWith("05") && digits.length === 11) {
+    return `+971 ${digits.slice(2, 4)} ${digits.slice(4, 7)} ${digits.slice(7, 11)}`;
+  }
+  if (digits.startsWith("5") && digits.length === 9) {
+    return `+971 ${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5, 9)}`;
+  }
+  return value;
+}
+
+function selectAddress(addr: AddressData) {
     setSelectedAddressId(addr.id);
     setName(`${addr.firstName} ${addr.lastName}`);
     setPhone(addr.phone);
@@ -102,6 +118,7 @@ export default function CheckoutPage() {
     const sa = selectedAddressId ? savedAddresses.find((a) => a.id === selectedAddressId) : null;
     try {
       const r = await createOrder({
+        userId: user?.id,
         contactName: name,
         contactPhone: phone,
         paymentMethod: "cod",
@@ -126,6 +143,20 @@ export default function CheckoutPage() {
       });
       setOrderNumber(r.orderNumber);
       sessionStorage.removeItem("th_checkout");
+
+      // Auto-save phone to profile
+      const sb2 = createClient();
+      sb2.from("users").update({ phone }).eq("id", user?.id).then();
+
+      // Auto-save new address (if not from saved addresses)
+      if (!sa && user) {
+        sb2.from("addresses").insert({
+          user_id: user.id, first_name: name.split(" ")[0] || name,
+          last_name: name.split(" ").slice(1).join(" ") || name, phone,
+          address_line1: street, address_line2: apt || null, city, emirate, country: "UAE",
+        }).then();
+      }
+
       setPlaced(true);
       clearCart();
     } catch (e) {
@@ -234,7 +265,12 @@ export default function CheckoutPage() {
                 </div>
                 <div>
                   <label className="text-[10px] font-bold uppercase tracking-[0.04em] text-ink-2">Phone</label>
-                  <input value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1.5 flex h-12 w-full rounded-lg border border-line bg-white px-4 text-base text-ink placeholder:text-ink-3 outline-none transition-colors focus:border-ink/30 focus:ring-2 focus:ring-ink/10" placeholder="+971 50 XXX XXXX" type="tel" />
+                  <input value={phone} onChange={(e) => {
+                    const raw = e.target.value;
+                    const digits = raw.replace(/\D/g, "");
+                    if (digits.length >= 12) return;
+                    setPhone(formatPhone(raw));
+                  }} className="mt-1.5 flex h-12 w-full rounded-lg border border-line bg-white px-4 text-base text-ink placeholder:text-ink-3 outline-none transition-colors focus:border-ink/30 focus:ring-2 focus:ring-ink/10" placeholder="+971 50 XXX XXXX" type="tel" />
                 </div>
               </div>
               <div>
@@ -357,9 +393,19 @@ export default function CheckoutPage() {
       </div>
 
       <AddressForm open={addressFormOpen} onOpenChange={setAddressFormOpen} onSave={async (data) => {
-        const c = await createAddress(data as CreateAddressInput);
-        setSavedAddresses((prev) => [...prev, c]);
-        selectAddress(c);
+        const sb3 = createClient();
+        const { data: inserted } = await sb3.from("addresses").insert({
+          user_id: user?.id, first_name: (data as any).firstName, last_name: (data as any).lastName,
+          phone: (data as any).phone, address_line1: (data as any).addressLine1,
+          address_line2: (data as any).addressLine2 || null, city: (data as any).city,
+          emirate: (data as any).emirate, country: (data as any).country || "UAE",
+          zip_code: (data as any).zipCode || null, is_default: (data as any).isDefault || false,
+        }).select().single();
+        if (inserted) {
+          const c = { id: (inserted as any).id, firstName: (inserted as any).first_name, lastName: (inserted as any).last_name, phone: (inserted as any).phone, addressLine1: (inserted as any).address_line1, addressLine2: (inserted as any).address_line2, city: (inserted as any).city, emirate: (inserted as any).emirate, country: (inserted as any).country, zipCode: (inserted as any).zip_code, isDefault: (inserted as any).is_default, createdAt: (inserted as any).created_at, updatedAt: (inserted as any).updated_at };
+          setSavedAddresses((prev) => [...prev, c]);
+          selectAddress(c);
+        }
         setAddressFormOpen(false);
       }} />
     </div>
