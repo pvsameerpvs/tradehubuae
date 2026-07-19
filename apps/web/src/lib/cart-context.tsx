@@ -174,6 +174,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items]);
 
   const addItem = useCallback((product: Product) => {
+    if (product.stock !== undefined && product.stock <= 0) return;
     setItems((prev) => {
       const existing = prev.find((item) => item.slug === product.slug);
       const maxStock = product.stock ?? 99;

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger } from "@nestjs/common";
+import { Injectable, NotFoundException, BadRequestException, Logger } from "@nestjs/common";
 import { DrizzleService } from "../../database/drizzle.service";
 import { stock, stockHistory, stockTransfers, stockTransferItems } from "@tradehubuae/database";
 import { eq, and, lte, sql } from "drizzle-orm";
@@ -46,6 +46,13 @@ export class InventoryService {
       .limit(1);
 
     if (!stockRecord) throw new NotFoundException("Stock record not found");
+
+    const newQuantity = stockRecord.quantity + quantity;
+    if (newQuantity < 0) {
+      throw new BadRequestException(
+        `Insufficient stock: adjustment of ${quantity} would set quantity to ${newQuantity}. Current: ${stockRecord.quantity}.`,
+      );
+    }
 
     const [updated] = await this.drizzle.db
       .update(stock)

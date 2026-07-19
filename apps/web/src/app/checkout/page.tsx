@@ -7,6 +7,8 @@ import { ChevronLeft, ShoppingCart, Banknote, Plus, AlertCircle } from "lucide-r
 import { UAE_EMIRATES } from "@tradehubuae/config";
 import { useCart } from "@/lib/cart-context";
 import { createOrder } from "@/lib/actions/orders";
+import { fetchProducts } from "@/data";
+import type { Product } from "@/data";
 import { type AddressData } from "@/lib/actions/addresses";
 import { useAuth } from "@/lib/supabase/provider";
 import { createClient } from "@/lib/supabase/client";
@@ -113,6 +115,21 @@ function selectAddress(addr: AddressData) {
 
   const placeOrder = async () => {
     if (!valid || !agreed || items.length === 0 || placing) return;
+    setErrorMsg("");
+
+    const slugs = items.map((i) => i.slug);
+    const fresh = await fetchProducts({ limit: 50 }).catch(() => null);
+    if (fresh) {
+      const freshMap = new Map<string, Product>();
+      fresh.products.forEach((p) => freshMap.set(p.slug, p));
+      for (const item of items) {
+        const live = freshMap.get(item.slug);
+        if (live && (live.stock ?? 0) <= 0) {
+          setErrorMsg(`${live.name} is now out of stock. Please remove it from your cart to continue.`);
+          return;
+        }
+      }
+    }
     setPlacing(true);
     setErrorMsg("");
     const sa = selectedAddressId ? savedAddresses.find((a) => a.id === selectedAddressId) : null;

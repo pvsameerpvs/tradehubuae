@@ -227,21 +227,37 @@ export class OrdersService {
 
         for (const item of items) {
           if (item.productId) {
-            await this.drizzle.db
+            const [updatedProduct] = await this.drizzle.db
               .update(products)
               .set({
                 saleCount: sql`${products.saleCount} + ${item.quantity}`,
                 stock: sql`${products.stock} - ${item.quantity}`,
               })
-              .where(eq(products.id, item.productId));
+              .where(and(
+                eq(products.id, item.productId),
+                gte(products.stock, item.quantity),
+              ))
+              .returning({ id: products.id });
+
+            if (!updatedProduct) {
+              throw new BadRequestException(`Insufficient stock for "${item.name}". Only ${item.quantity < 0 ? "0" : "less than requested"} available.`);
+            }
 
             if (item.variantId) {
-              await this.drizzle.db
+              const [updatedVariant] = await this.drizzle.db
                 .update(productVariants)
                 .set({
                   stock: sql`${productVariants.stock} - ${item.quantity}`,
                 })
-                .where(eq(productVariants.id, item.variantId));
+                .where(and(
+                  eq(productVariants.id, item.variantId),
+                  gte(productVariants.stock, item.quantity),
+                ))
+                .returning({ id: productVariants.id });
+
+              if (!updatedVariant) {
+                throw new BadRequestException(`Insufficient variant stock for "${item.name}".`);
+              }
             }
           }
         }

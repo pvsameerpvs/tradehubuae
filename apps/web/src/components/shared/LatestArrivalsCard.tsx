@@ -16,10 +16,12 @@ export function LatestArrivalsCard({ product }: { product: Product }) {
   const { isWishlisted, toggle } = useWishlist();
   const [imgError, setImgError] = useState(false);
   const wishlisted = isWishlisted(product.slug);
+  const outOfStock = product.stock === undefined || product.stock === 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (outOfStock) return;
     addItem(product);
     if (imageRef.current) flyToCart(imageRef.current, product.image);
   };
@@ -43,6 +45,25 @@ export function LatestArrivalsCard({ product }: { product: Product }) {
           )}
           <div className="absolute inset-0 transition-transform duration-200 group-hover:scale-105" />
 
+          {!outOfStock && product.stock !== undefined && product.stock <= 3 && (
+            <div className="absolute left-2 top-2 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-amber-600 shadow-chip backdrop-blur-sm">
+              Only {product.stock} left
+            </div>
+          )}
+          {outOfStock && (
+            <div className="absolute left-2 top-2 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-sale shadow-chip backdrop-blur-sm">
+              Out of stock
+            </div>
+          )}
+
+          {outOfStock && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+              <span className="rounded-full bg-white px-4 py-2 text-sm font-bold text-sale shadow-lg">
+                Out of stock
+              </span>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={handleToggleWishlist}
@@ -60,10 +81,11 @@ export function LatestArrivalsCard({ product }: { product: Product }) {
           <button
             type="button"
             onClick={handleAddToCart}
+            disabled={outOfStock}
             aria-label="Add to cart"
-            className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-white/80 opacity-100 backdrop-blur-sm transition-all duration-200 md:opacity-0 md:group-hover:opacity-100 hover:bg-white hover:scale-110"
+            className={`absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm transition-all duration-200 md:opacity-0 md:group-hover:opacity-100 hover:scale-110 ${outOfStock ? "bg-bg2 text-ink-3 cursor-not-allowed" : "bg-white/80 hover:bg-white"}`}
           >
-            <ShoppingCart className="h-[18px] w-[18px] text-ink" strokeWidth={2} />
+            <ShoppingCart className={`h-[18px] w-[18px] ${outOfStock ? "text-ink-3" : "text-ink"}`} strokeWidth={2} />
           </button>
         </div>
         <CardContent className="px-4 pb-4 pt-3">
@@ -73,6 +95,12 @@ export function LatestArrivalsCard({ product }: { product: Product }) {
           <p className="mt-0.5 text-[14px] font-semibold leading-[18px] text-brand">
             AED {product.price.toLocaleString()}
           </p>
+          {!outOfStock && product.stock !== undefined && product.stock <= 3 && (
+            <p className="mt-0.5 text-[11px] text-amber-600">Only {product.stock} left</p>
+          )}
+          {outOfStock && (
+            <p className="mt-0.5 text-[11px] text-sale">Out of stock</p>
+          )}
         </CardContent>
       </Card>
     </Link>

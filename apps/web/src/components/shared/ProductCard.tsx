@@ -57,6 +57,14 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
         )}
 
+        {outOfStock && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+            <span className="rounded-full bg-white px-4 py-2 text-sm font-bold text-sale shadow-lg">
+              Out of stock
+            </span>
+          </div>
+        )}
+
         <button
           type="button"
           onClick={handleToggleWishlist}
