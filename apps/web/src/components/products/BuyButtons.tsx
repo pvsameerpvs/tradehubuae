@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { ShoppingCart, Minus, Plus, AlertTriangle, LogIn } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
@@ -8,6 +9,7 @@ import { useCartFly } from "@/lib/cart-fly-context";
 import { Button } from "@tradehubuae/ui";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { useAuth } from "@/lib/supabase/provider";
+import { getBulkDiscountPercent } from "@/data/bulkPricing";
 import type { Product } from "@/data";
 
 function QtySelector({ qty, onChange, compact, max, disabled: outOfStock }: { qty: number; onChange: (d: number) => void; compact?: boolean; max?: number; disabled?: boolean }) {
@@ -43,16 +45,7 @@ function QtySelector({ qty, onChange, compact, max, disabled: outOfStock }: { qt
   );
 }
 
-function AnimatedPrice({ amount, label }: { amount: number; label?: string }) {
-  return (
-    <div className="text-right">
-      {label && <p className="text-xs text-ink-2">{label}</p>}
-      <p className="text-lg font-bold text-ink">
-        AED {amount.toLocaleString()}
-      </p>
-    </div>
-  );
-}
+let nextPopId = 0;
 
 export function BuyButtons({ product }: { product: Product }) {
   const router = useRouter();
@@ -66,6 +59,26 @@ export function BuyButtons({ product }: { product: Product }) {
   const [qty, setQty] = useState(outOfStock ? 0 : 1);
   const [showAuth, setShowAuth] = useState(false);
   const [pendingAction, setPendingAction] = useState<"cart" | "buy" | null>(null);
+
+  const [pops, setPops] = useState<{ id: number; percent: number }[]>([]);
+  const prevBulkPct = useRef(0);
+  const bulkTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  const bulkDiscountPct = getBulkDiscountPercent(qty, product.slug);
+
+  useEffect(() => {
+    if (outOfStock) return;
+    if (bulkDiscountPct > prevBulkPct.current) {
+      const id = nextPopId++;
+      setPops((prev) => [...prev, { id, percent: bulkDiscountPct }]);
+      clearTimeout(bulkTimer.current);
+      bulkTimer.current = setTimeout(() => {
+        setPops((prev) => prev.filter((p) => p.id !== id));
+      }, 2100);
+    }
+    prevBulkPct.current = bulkDiscountPct;
+    return () => clearTimeout(bulkTimer.current);
+  }, [qty, bulkDiscountPct, outOfStock]);
 
   const handleQtyChange = (delta: number) => {
     setQty((prev) => Math.max(outOfStock ? 0 : 1, Math.min(maxStock, prev + delta)));
@@ -134,7 +147,19 @@ export function BuyButtons({ product }: { product: Product }) {
               <span className="text-[10px] text-ink-3">Max</span>
             )}
           </div>
-          <AnimatedPrice amount={outOfStock ? 0 : totalPrice} label="Total" />
+          <div className="text-right">
+            <p className="text-xs text-ink-2">Total</p>
+            <div className="flex items-center gap-2 justify-end">
+              <p className="text-lg font-bold text-ink">
+                AED {totalPrice.toLocaleString()}
+              </p>
+              {bulkDiscountPct > 0 && (
+                <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-bold text-brand animate-in fade-in zoom-in-75 duration-200">
+                  -{bulkDiscountPct}%
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="hidden gap-2 md:flex">
@@ -150,12 +175,38 @@ export function BuyButtons({ product }: { product: Product }) {
 
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-line bg-white px-4 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] md:hidden">
         <div className="flex items-center justify-between gap-2">
-          <AnimatedPrice amount={outOfStock ? 0 : totalPrice} label="Total" />
+          <div className="text-left">
+            <p className="text-xs text-ink-2">Total</p>
+            <div className="flex items-center gap-2">
+              <p className="text-lg font-bold text-ink">
+                AED {totalPrice.toLocaleString()}
+              </p>
+              {bulkDiscountPct > 0 && (
+                <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-bold text-brand animate-in fade-in zoom-in-75 duration-200">
+                  -{bulkDiscountPct}%
+                </span>
+              )}
+            </div>
+          </div>
           <Button size="lg" onClick={handleBuyNow} className="min-w-[100px] transition-all duration-150 active:scale-[0.98]" disabled={outOfStock}>
             {outOfStock ? "Out of Stock" : "Buy now"}
           </Button>
         </div>
       </div>
+
+      {typeof document !== "undefined" && pops.length > 0 && createPortal(
+        <div className="pointer-events-none fixed inset-0 z-[9999] flex items-center justify-center">
+          {pops.map((p) => (
+            <span
+              key={p.id}
+              className="animate-bulk-pop text-5xl font-extrabold text-brand drop-shadow-xl"
+            >
+              {p.percent}% OFF
+            </span>
+          ))}
+        </div>,
+        document.body,
+      )}
 
       {/* AUTH MODAL */}
       {showAuth && (

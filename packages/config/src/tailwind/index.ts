@@ -118,6 +118,13 @@ export const tailwindConfig: Partial<Config> = {
           from: { transform: "scale(0.95)", opacity: "0" },
           to: { transform: "scale(1)", opacity: "1" },
         },
+        "bulk-pop": {
+          "0%": { transform: "scale(0.3)", opacity: "0" },
+          "18%": { transform: "scale(1.3)", opacity: "1" },
+          "30%": { transform: "scale(1)", opacity: "1" },
+          "65%": { transform: "scale(1)", opacity: "1" },
+          "100%": { transform: "scale(0.3)", opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -129,6 +136,7 @@ export const tailwindConfig: Partial<Config> = {
         "slide-in-from-left": "slide-in-from-left 0.3s ease-out",
         "slide-in-from-right": "slide-in-from-right 0.3s ease-out",
         "scale-in": "scale-in 0.2s ease-out",
+        "bulk-pop": "bulk-pop 2s ease-out forwards",
       },
     },
   },
