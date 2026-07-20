@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  trustHostHeader: true,
   transpilePackages: [
     "@tradehubuae/ui",
     "@tradehubuae/auth",
