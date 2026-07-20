@@ -23,6 +23,7 @@ import {
   Phone,
   ShoppingBag,
   RotateCcw,
+  Printer,
 } from "lucide-react";
 import {
   Card,
@@ -38,6 +39,7 @@ import {
   DialogFooter,
   Badge,
 } from "@tradehubuae/ui";
+import JsBarcode from "jsbarcode";
 
 interface OrderItem {
   id: string;
@@ -175,6 +177,115 @@ export default function OrderDetailPage() {
       setUpdating(false);
     }
   };
+
+  const handlePrintOrder = useCallback(() => {
+    if (!order) return;
+
+    const temp = document.createElement("div");
+    temp.style.cssText = "position:absolute;left:-9999px;top:0";
+    document.body.appendChild(temp);
+
+    const itemsBarcodes = order.items.map((item) => {
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      temp.appendChild(svg);
+      JsBarcode(svg, item.sku, {
+        format: "CODE128", width: 0.15, height: 6,
+        displayValue: false, margin: 0,
+      });
+      const bw = parseInt(svg.getAttribute("width") || "30", 10);
+      const bh = parseInt(svg.getAttribute("height") || "6", 10);
+      const content = new XMLSerializer().serializeToString(svg);
+      temp.removeChild(svg);
+      return { sku: item.sku, bw, bh, content, name: item.product?.name || item.name, qty: item.quantity, price: Number(item.unitPrice).toFixed(2) };
+    });
+
+    document.body.removeChild(temp);
+
+    const subRows = itemsBarcodes.map((it, i) => `
+      <tr>
+        <td style="padding:3px 0;font-size:8px;color:#aaa;text-align:center;width:16px">${i + 1}</td>
+        <td style="padding:3px 0;font-size:8px;color:#555;width:80px">${it.sku}</td>
+        <td style="padding:3px 0;font-size:9px;color:#111">${it.name}</td>
+        <td style="padding:3px 0;font-size:8px;text-align:center;width:22px">${it.qty}</td>
+        <td style="padding:3px 0;text-align:right;font-size:8px;white-space:nowrap;width:56px">${it.price}</td>
+      </tr>
+      <tr><td colspan="5" style="padding:0 0 3px 16px"><svg xmlns="http://www.w3.org/2000/svg" width="${it.bw}" height="${it.bh}" viewBox="0 0 ${it.bw} ${it.bh}">${it.content.replace(/<svg[^>]*>|<\/svg>/g, "")}</svg></td></tr>
+    `).join("");
+
+    const addr = order.shippingAddress as Record<string, string> | null;
+    const name = addr ? `${addr.firstName ?? ""} ${addr.lastName ?? ""}`.trim() : order.contactName ?? "";
+    const phone = addr ? addr.phone ?? "" : order.contactPhone ?? "";
+    const addr1 = addr ? addr.addressLine1 : "";
+    const addr2 = addr ? (addr.addressLine2 ? addr.addressLine2 + "<br>" : "") : "";
+    const city = addr ? `${addr.city ?? ""}, ${addr.emirate ?? ""}` : "";
+    const country = addr ? addr.country ?? "" : "";
+
+    const blob = new Blob([`<!DOCTYPE html><html><head>
+<title>Order #${order.orderNumber}</title>
+<style>
+@page{margin:3mm}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:9px;color:#222;line-height:1.35;padding:2mm}
+table{width:100%;border-collapse:collapse}
+td{vertical-align:middle}
+.label{font-size:6px;font-weight:600;color:#bbb;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.val{font-size:9px;color:#111;line-height:1.5}
+hr{border:none;border-top:1px solid #e5e5e5;margin:5px 0}
+@media print{.no-print{display:none}}
+</style>
+</head><body>
+
+<div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:5px">
+  <div><span style="font-size:15px;font-weight:800;letter-spacing:1.5px">tradehubuae</span><br><span style="font-size:7px;color:#bbb;letter-spacing:.5px">PACKING SLIP</span></div>
+  <div style="text-align:right;font-size:10px;font-weight:600">${order.orderNumber}<br><span style="font-size:7px;color:#999;font-weight:400">${new Date(order.createdAt).toLocaleDateString([],{month:"short",day:"numeric",year:"numeric"})}</span></div>
+</div>
+
+<hr>
+
+<div style="display:flex;gap:10px">
+  <div style="flex:1">
+    <div class="label">Ship To</div>
+    <div class="val"><b>${name}</b><br>${phone}<br>${addr1}<br>${addr2}${city}<br>${country}</div>
+  </div>
+  ${order.notes ? `<div style="flex:1">
+    <div class="label">Notes</div>
+    <div class="val" style="font-style:italic;color:#666">${order.notes}</div>
+  </div>` : ""}
+</div>
+
+<hr>
+
+<table>
+<thead><tr>
+<td style="font-size:6px;color:#bbb;font-weight:600;text-transform:uppercase;letter-spacing:.3px;padding:2px 0;width:16px">#</td>
+<td style="font-size:6px;color:#bbb;font-weight:600;text-transform:uppercase;letter-spacing:.3px;padding:2px 0;width:80px">SKU</td>
+<td style="font-size:6px;color:#bbb;font-weight:600;text-transform:uppercase;letter-spacing:.3px;padding:2px 0">Item</td>
+<td style="font-size:6px;color:#bbb;font-weight:600;text-transform:uppercase;letter-spacing:.3px;padding:2px 0;text-align:center;width:22px">Qty</td>
+<td style="font-size:6px;color:#bbb;font-weight:600;text-transform:uppercase;letter-spacing:.3px;padding:2px 0;text-align:right;width:56px">Price</td>
+</tr></thead>
+<tbody>${subRows}</tbody>
+</table>
+
+<hr style="margin-top:2px">
+
+<div style="text-align:right;font-size:8px;color:#555">
+<div>Subtotal <span style="margin-left:8px">${Number(order.subtotal).toFixed(2)}</span></div>
+<div>Shipping <span style="margin-left:8px">${Number(order.shippingCost).toFixed(2)}</span></div>
+${Number(order.discountAmount) > 0 ? `<div style="color:#c00">Discount <span style="margin-left:8px">-${Number(order.discountAmount).toFixed(2)}</span></div>` : ""}
+<div style="font-size:11px;font-weight:700;color:#000;margin-top:2px;padding-top:2px;border-top:1px solid #ddd">AED ${Number(order.total).toFixed(2)}</div>
+</div>
+
+<div style="text-align:center;font-size:6px;color:#ddd;margin-top:6px">${order.orderNumber} · tradehubuae</div>
+
+<div class="no-print" style="text-align:center;margin-top:10px">
+  <button onclick="window.print()" style="padding:8px 32px;font-size:14px;cursor:pointer;border:none;background:#111;color:#fff;border-radius:6px;font-weight:500">Print</button>
+  <p style="margin-top:6px;font-size:12px;color:#888">Click Print to generate the packing slip</p>
+</div>
+
+</body></html>`], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+  }, [order]);
 
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-ink-3" /></div>;
   if (error) return <div className="rounded-lg border border-sale/30 bg-sale/5 px-4 py-3 text-sm text-sale">{error}</div>;
@@ -509,6 +620,17 @@ export default function OrderDetailPage() {
                   <p className="mt-0.5 text-sm font-medium text-ink">{order.trackingNumber}</p>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="px-4 py-3 sm:px-5 sm:py-4">
+              <CardTitle className="text-sm font-semibold text-ink">Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4 sm:px-5 sm:pb-5">
+              <Button variant="outline" className="w-full" onClick={handlePrintOrder}>
+                <Printer className="mr-2 h-4 w-4" /> Print Order
+              </Button>
             </CardContent>
           </Card>
         </div>
