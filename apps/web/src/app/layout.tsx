@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { organizationSchema } from "@tradehubuae/seo";
@@ -37,6 +37,22 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  icons: {
+    icon: { url: "/favicon.ico", type: "image/x-icon" },
+    apple: "/icons/icon-192.png",
+  },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "TradeHub UAE",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0056D2",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
