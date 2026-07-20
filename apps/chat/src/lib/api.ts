@@ -13,7 +13,7 @@ export class ApiError extends Error {
 function getToken(): string | null {
   if (typeof document === "undefined") return null;
   const match = document.cookie.match(/(?:^|;\s*)auth_token=([^;]*)/);
-  return match ? match[1] : null;
+  return match ? (match[1] ?? null) : null;
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {

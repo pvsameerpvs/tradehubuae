@@ -65,7 +65,7 @@ export function BarcodeLabel({
       <html><head><title>Barcode - ${sku}</title>
       <style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh}@media print{@page{margin:0}body{margin:0}}</style>
       </head><body>${svg}
-      <script>window.onload=function(){window.print();window.close()};<\/script>
+      <script>window.onload=function(){window.print();window.close()};</script>
       </body></html>
     `);
     pw.document.close();

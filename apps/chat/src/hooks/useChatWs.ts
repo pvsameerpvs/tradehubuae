@@ -16,7 +16,7 @@ function getToken(): string | null {
     }
     const stored = localStorage.getItem("token") || localStorage.getItem("sb-token");
     if (stored) return stored;
-  } catch {}
+  } catch { /* ignore token error */ }
   return null;
 }
 

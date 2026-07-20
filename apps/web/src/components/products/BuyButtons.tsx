@@ -62,7 +62,7 @@ export function BuyButtons({ product }: { product: Product }) {
 
   const [pops, setPops] = useState<{ id: number; percent: number }[]>([]);
   const prevBulkPct = useRef(0);
-  const bulkTimer = useRef<ReturnType<typeof setTimeout>>();
+  const bulkTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const bulkDiscountPct = getBulkDiscountPercent(qty, product.slug);
 
@@ -71,13 +71,13 @@ export function BuyButtons({ product }: { product: Product }) {
     if (bulkDiscountPct > prevBulkPct.current) {
       const id = nextPopId++;
       setPops((prev) => [...prev, { id, percent: bulkDiscountPct }]);
-      clearTimeout(bulkTimer.current);
+      if (bulkTimer.current) clearTimeout(bulkTimer.current);
       bulkTimer.current = setTimeout(() => {
         setPops((prev) => prev.filter((p) => p.id !== id));
       }, 2100);
     }
     prevBulkPct.current = bulkDiscountPct;
-    return () => clearTimeout(bulkTimer.current);
+    return () => { if (bulkTimer.current) clearTimeout(bulkTimer.current); };
   }, [qty, bulkDiscountPct, outOfStock]);
 
   const handleQtyChange = (delta: number) => {

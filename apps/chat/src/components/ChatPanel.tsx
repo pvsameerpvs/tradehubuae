@@ -43,7 +43,7 @@ export function ChatPanel({ sessionId }: ChatPanelProps) {
       useChatStore.getState().addMessage(sessionId, optimistic);
       try {
         await api.messages.send(sessionId, content);
-      } catch {}
+      } catch { /* ignore send error */ }
     },
     [sessionId]
   );
