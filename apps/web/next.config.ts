@@ -2,7 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  trustHostHeader: true,
   transpilePackages: [
     "@tradehubuae/ui",
     "@tradehubuae/auth",
@@ -12,6 +11,7 @@ const nextConfig: NextConfig = {
     "@tradehubuae/utils",
     "@tradehubuae/validation",
     "@tradehubuae/logger",
+    "@tradehubuae/chat",
   ],
   images: {
     remotePatterns: [

@@ -104,6 +104,7 @@ export function LiveChatWidget() {
   const [showPhoneForm, setShowPhoneForm] = useState(false);
   const [phoneInput, setPhoneInput] = useState(getStoredPhone());
   const [started, setStarted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [session, setSession] = useState<ChatSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -123,6 +124,8 @@ export function LiveChatWidget() {
   useEffect(() => {
     if (!open || !user) return;
 
+    setError(null);
+
     const phone = getStoredPhone();
     const asked = hasPhoneBeenAsked();
     if (!asked || !phone) {
@@ -133,6 +136,14 @@ export function LiveChatWidget() {
 
     startChat();
   }, [open, user]);
+
+  useEffect(() => {
+    if (started || !open) return;
+    const timer = setTimeout(() => {
+      setError("Chat service is taking longer than expected. Please try again later.");
+    }, 15000);
+    return () => clearTimeout(timer);
+  }, [open, started]);
 
   const startChat = useCallback(async (phone?: string) => {
     if (!user) return;
@@ -154,7 +165,9 @@ export function LiveChatWidget() {
             return;
           }
         }
-      } catch { /* fall through */ }
+      } catch (err) {
+        console.error("[Chat] Failed to fetch existing session:", err);
+      }
     }
 
     try {
@@ -173,7 +186,9 @@ export function LiveChatWidget() {
           return;
         }
       }
-    } catch { /* fall through */ }
+    } catch (err) {
+      console.error("[Chat] Failed to list sessions:", err);
+    }
 
     if (existingId && typeof window !== "undefined") {
       localStorage.removeItem("th_session_id");
@@ -184,6 +199,10 @@ export function LiveChatWidget() {
         setSession(s);
         setStarted(true);
         apiGetMessages(s.id).then(setMessages);
+      })
+      .catch((err) => {
+        console.error("[Chat] Failed to create session:", err);
+        setError("Failed to connect to chat service. Please try again later.");
       });
     clearProductContext();
   }, [user]);
@@ -348,6 +367,17 @@ export function LiveChatWidget() {
                   Skip — I'll chat now
                 </button>
               </div>
+            </div>
+          ) : error ? (
+            /* ERROR */
+            <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
+              <p className="text-sm text-red-500 mb-3">{error}</p>
+              <button
+                onClick={() => { setError(null); startChat(); }}
+                className="text-xs text-ink-3 underline underline-offset-2 hover:text-ink-2 transition-colors"
+              >
+                Try again
+              </button>
             </div>
           ) : !started ? (
             /* LOADING */
