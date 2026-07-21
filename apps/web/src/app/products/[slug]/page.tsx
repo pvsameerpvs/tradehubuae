@@ -92,9 +92,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <div className="mt-6 space-y-6">
             <div>
               <h2 className="text-base font-semibold text-ink">Description</h2>
-              <p className="mt-1.5 text-sm leading-6 text-ink-2">
-                Experience unparalleled performance with the {productName}. Perfect for professionals, creators, and power users who demand the best. This expertly crafted machine delivers exceptional speed, stunning visuals, and all-day battery life. Every unit undergoes rigorous testing to ensure it meets the highest standards of quality and reliability.
-              </p>
+              {product.description ? (
+                <p className="mt-1.5 text-sm leading-6 text-ink-2">{product.description}</p>
+              ) : (
+                <p className="mt-1.5 text-sm leading-6 text-ink-3 italic">No description provided</p>
+              )}
             </div>
 
             <div>

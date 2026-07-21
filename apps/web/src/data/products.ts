@@ -4,6 +4,7 @@ import type { ProductData } from "@/lib/actions/products";
 export interface Product {
   id: string;
   name: string;
+  description?: string;
   price: number;
   originalPrice?: number;
   categoryName: string;
@@ -35,6 +36,7 @@ function toProduct(data: ProductData): Product {
   return {
     id: data.id,
     name: data.name,
+    description: data.description,
     price: data.price,
     originalPrice: data.originalPrice,
     categoryName: data.category?.name ?? "",
