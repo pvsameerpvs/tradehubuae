@@ -16,7 +16,7 @@ export interface CategoryData {
 
 export async function getCategories(): Promise<CategoryData[]> {
   try {
-    const res = await api.get<{ data: CategoryData[] }>("/categories");
+    const res = await api.get<{ data: CategoryData[] }>("/categories", { isActive: true });
     return res.data ?? [];
   } catch (e) {
     console.error("[getCategories] Failed:", e);

@@ -46,6 +46,7 @@ async function request<T>(endpoint: string, options: FetchOptions = {}): Promise
   }
 
   const res = await fetch(url, {
+    cache: "no-store",
     headers: { "Content-Type": "application/json", ...getAuthHeaders(), ...fetchOpts.headers },
     ...fetchOpts,
   });

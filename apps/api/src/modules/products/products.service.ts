@@ -140,7 +140,7 @@ export class ProductsService {
 
   async findBySlug(slug: string) {
     const [product] = await this.drizzle.db.query.products.findMany({
-      where: eq(products.slug, slug),
+      where: and(eq(products.slug, slug), eq(products.isActive, true)),
       with: {
         images: { orderBy: (images, { asc }) => [asc(images.sortOrder)] },
         brand: true,

@@ -14,7 +14,7 @@ export interface BrandData {
 
 export async function getBrands(): Promise<BrandData[]> {
   try {
-    const res = await api.get<{ data: BrandData[] }>("/brands");
+    const res = await api.get<{ data: BrandData[] }>("/brands", { isActive: true });
     return res.data ?? [];
   } catch (e) {
     console.error("[getBrands] Failed:", e);
