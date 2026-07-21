@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import type { Metadata } from "next";
 import { fetchBrands } from "@/data";
 import { BrandCard } from "@/components/shared/BrandCard";

@@ -79,7 +79,7 @@ function toComboOffer(offer: ApiComboOffer): ComboOffer {
 
 export async function fetchComboOffers(): Promise<ComboOffer[]> {
   try {
-    const res = await fetch(`${API_BASE}/combo-offers/active`, { next: { revalidate: 60 } });
+    const res = await fetch(`${API_BASE}/combo-offers/active`, { cache: "no-store" });
     if (!res.ok) return [];
     const data: ApiComboOffer[] = await res.json();
     return data.map(toComboOffer);

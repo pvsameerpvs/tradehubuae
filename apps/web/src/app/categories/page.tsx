@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import type { Metadata } from "next";
 import { fetchCategoryTree } from "@/data";
 import { CategoryCard } from "@/components/shared/CategoryCard";

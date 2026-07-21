@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { HeroSection, ProductRow, ProductRowScroll, DiscoveryGrid, LatestArrivalsRow, OfferSection } from "@/components/home";
 import { LiveChatWidget } from "@/components/chat/LiveChatWidget";
 import { fetchProducts, fetchCategoryTree } from "@/data";
