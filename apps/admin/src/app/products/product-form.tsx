@@ -552,7 +552,7 @@ export function ProductForm({ id }: { id?: string }) {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="New">New</SelectItem>
-                        <SelectItem value="Like_New">
+                        <SelectItem value="Like New">
                           Like New
                         </SelectItem>
                         <SelectItem value="Excellent">
