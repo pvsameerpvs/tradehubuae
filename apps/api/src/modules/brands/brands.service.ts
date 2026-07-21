@@ -161,9 +161,8 @@ export class BrandsService {
   async remove(id: string) {
     await this.findById(id);
     await this.drizzle.db
-      .update(brands)
-      .set({ isActive: false })
+      .delete(brands)
       .where(eq(brands.id, id));
-    this.logger.log(`Brand soft-deleted: ${id}`);
+    this.logger.log(`Brand deleted: ${id}`);
   }
 }

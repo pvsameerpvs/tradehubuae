@@ -192,7 +192,7 @@ export function ProductForm({ id }: { id?: string }) {
         setUses(us.data);
       })
       .catch(() => {
-        /* TODO: show error toast */
+        toast.error("Failed to load categories, brands, or uses");
       });
   }, []);
 
@@ -220,7 +220,7 @@ export function ProductForm({ id }: { id?: string }) {
         setImages(p.images?.filter((img) => img?.url).map((img) => img.url) ?? []);
       })
       .catch(() => {
-        /* TODO: show error toast */
+        toast.error("Failed to load product data");
       })
       .finally(() => setFetching(false));
   }, [id, reset]);

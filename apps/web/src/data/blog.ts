@@ -25,7 +25,8 @@ export async function fetchBlogPosts(): Promise<BlogPost[]> {
       category: p.category,
       slug: p.slug,
     }));
-  } catch {
+  } catch (e) {
+    console.error("[fetchBlogPosts] Failed:", e);
     return [];
   }
 }

@@ -40,7 +40,8 @@ export async function fetchCategories(): Promise<Category[]> {
   try {
     const cats = await getCategories();
     return cats.map(toCategory);
-  } catch {
+  } catch (e) {
+    console.error("[fetchCategories] Failed:", e);
     return [];
   }
 }
@@ -49,7 +50,8 @@ export async function fetchCategoryTree(): Promise<CategoryTree[]> {
   try {
     const tree = await getCategoryTree();
     return tree.map(transformTreeNode);
-  } catch {
+  } catch (e) {
+    console.error("[fetchCategoryTree] Failed:", e);
     return [];
   }
 }

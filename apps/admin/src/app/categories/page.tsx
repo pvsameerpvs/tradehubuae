@@ -160,7 +160,7 @@ export default function CategoriesPage() {
                 <span className="mt-2 block text-sm">
                   This category has <strong>{deleteTarget._count.products}</strong> linked product{deleteTarget._count.products !== 1 ? "s" : ""}
                   {deleteTarget._count.children > 0 && <> and <strong>{deleteTarget._count.children}</strong> subcategor{deleteTarget._count.children !== 1 ? "ies" : "y"}</>}.
-                  The relationship will be removed but products will not be deleted.
+                  This action cannot be undone.
                 </span>
               )}
             </DialogDescription>

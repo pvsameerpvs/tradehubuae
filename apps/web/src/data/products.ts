@@ -69,7 +69,8 @@ export async function fetchProducts(params?: {
       total: res.meta.total,
       totalPages: res.meta.totalPages,
     };
-  } catch {
+  } catch (e) {
+    console.error("[fetchProducts] Failed:", e);
     return { products: [], total: 0, totalPages: 0 };
   }
 }
@@ -78,7 +79,8 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
   try {
     const data = await getProductBySlug(slug);
     return data ? toProduct(data) : null;
-  } catch {
+  } catch (e) {
+    console.error(`[fetchProductBySlug] Failed for ${slug}:`, e);
     return null;
   }
 }
@@ -90,7 +92,8 @@ export async function searchProducts(
   try {
     const results = await searchProductsApi(query, params);
     return results.map(toProduct);
-  } catch {
+  } catch (e) {
+    console.error("[searchProducts] Failed:", e);
     return [];
   }
 }
@@ -105,7 +108,8 @@ export async function fetchWishlistItems(slugs: string[]): Promise<Product[]> {
     const res = await getProducts({ limit: 50 });
     const slugSet = new Set(slugs);
     return res.data.filter((p) => slugSet.has(p.slug)).map(toProduct);
-  } catch {
+  } catch (e) {
+    console.error("[fetchWishlistItems] Failed:", e);
     return [];
   }
 }

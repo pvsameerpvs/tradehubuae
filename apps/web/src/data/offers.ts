@@ -48,7 +48,8 @@ export async function fetchOffers(): Promise<Offer[]> {
   try {
     const combos = await fetchComboOffers();
     return combos.map(toOffer);
-  } catch {
+  } catch (e) {
+    console.error("[fetchOffers] Failed:", e);
     return [];
   }
 }

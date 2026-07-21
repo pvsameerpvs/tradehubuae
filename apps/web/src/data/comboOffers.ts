@@ -83,7 +83,8 @@ export async function fetchComboOffers(): Promise<ComboOffer[]> {
     if (!res.ok) return [];
     const data: ApiComboOffer[] = await res.json();
     return data.map(toComboOffer);
-  } catch {
+  } catch (e) {
+    console.error("[fetchComboOffers] Failed:", e);
     return [];
   }
 }

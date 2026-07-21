@@ -68,7 +68,7 @@ export async function deleteProduct(id: string): Promise<{ success: boolean; mes
 
 export async function getProductById(id: string): Promise<ProductData | null> {
   try {
-    return await api.get<ProductData>(`/products/${encodeURIComponent(id)}/edit`);
+    return await api.get<ProductData>(`/products/${encodeURIComponent(id)}`);
   } catch {
     return null;
   }

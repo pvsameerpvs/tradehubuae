@@ -16,7 +16,8 @@ export async function getBrands(): Promise<BrandData[]> {
   try {
     const res = await api.get<{ data: BrandData[] }>("/brands");
     return res.data ?? [];
-  } catch {
+  } catch (e) {
+    console.error("[getBrands] Failed:", e);
     return [];
   }
 }
@@ -24,7 +25,8 @@ export async function getBrands(): Promise<BrandData[]> {
 export async function getBrandById(id: string): Promise<BrandData | null> {
   try {
     return await api.get<BrandData>(`/brands/${id}`);
-  } catch {
+  } catch (e) {
+    console.error(`[getBrandById] Failed for ${id}:`, e);
     return null;
   }
 }

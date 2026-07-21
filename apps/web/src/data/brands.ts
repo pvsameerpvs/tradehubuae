@@ -17,7 +17,8 @@ export async function fetchBrands(): Promise<Brand[]> {
       description: b.description ?? "",
       image: b.logo,
     }));
-  } catch {
+  } catch (e) {
+    console.error("[fetchBrands] Failed:", e);
     return [];
   }
 }

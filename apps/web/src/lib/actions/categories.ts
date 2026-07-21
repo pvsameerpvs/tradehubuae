@@ -18,7 +18,8 @@ export async function getCategories(): Promise<CategoryData[]> {
   try {
     const res = await api.get<{ data: CategoryData[] }>("/categories");
     return res.data ?? [];
-  } catch {
+  } catch (e) {
+    console.error("[getCategories] Failed:", e);
     return [];
   }
 }
@@ -26,7 +27,8 @@ export async function getCategories(): Promise<CategoryData[]> {
 export async function getCategoryTree(): Promise<CategoryData[]> {
   try {
     return await api.get<CategoryData[]>("/categories/tree");
-  } catch {
+  } catch (e) {
+    console.error("[getCategoryTree] Failed:", e);
     return [];
   }
 }
@@ -34,7 +36,8 @@ export async function getCategoryTree(): Promise<CategoryData[]> {
 export async function getCategoryById(id: string): Promise<CategoryData | null> {
   try {
     return await api.get<CategoryData>(`/categories/${id}`);
-  } catch {
+  } catch (e) {
+    console.error(`[getCategoryById] Failed for ${id}:`, e);
     return null;
   }
 }

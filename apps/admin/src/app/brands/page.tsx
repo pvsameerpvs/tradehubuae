@@ -186,7 +186,7 @@ export default function BrandsPage() {
               {deleteTarget && (
                 <span className="mt-2 block text-sm">
                   This brand has <strong>{deleteTarget._count.products}</strong> linked product{deleteTarget._count.products !== 1 ? "s" : ""}.
-                  Products will retain their brand reference but the brand will appear inactive.
+                  The brand reference on products will be removed. This action cannot be undone.
                 </span>
               )}
             </DialogDescription>

@@ -6,18 +6,23 @@ const sql = postgres(process.env.DATABASE_URL!);
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
 export async function requestReturn(orderId: string, reason: string, notes?: string) {
-  const res = await fetch(`${API_BASE}/returns/${orderId}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ reason, notes }),
-  });
+  try {
+    const res = await fetch(`${API_BASE}/returns/${orderId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason, notes }),
+    });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: "Failed to request return" }));
-    throw new Error(err.message ?? "Failed to request return");
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ message: "Failed to request return" }));
+      throw new Error(err.message ?? "Failed to request return");
+    }
+
+    return res.json();
+  } catch (e) {
+    console.error("[requestReturn] Failed:", e);
+    throw e;
   }
-
-  return res.json();
 }
 
 export async function checkReturnEligibility(orderId: string) {

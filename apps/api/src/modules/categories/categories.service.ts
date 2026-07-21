@@ -188,9 +188,8 @@ export class CategoriesService {
   async remove(id: string) {
     await this.findById(id);
     await this.drizzle.db
-      .update(categories)
-      .set({ isActive: false })
+      .delete(categories)
       .where(eq(categories.id, id));
-    this.logger.log(`Category soft-deleted: ${id}`);
+    this.logger.log(`Category deleted: ${id}`);
   }
 }

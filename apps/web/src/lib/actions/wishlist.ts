@@ -17,7 +17,8 @@ export async function getWishlist(userId: string): Promise<string[]> {
       SELECT product_id FROM sales.wishlist_items WHERE user_id = ${userId} ORDER BY created_at DESC
     `;
     return rows.map((r: any) => r.product_id);
-  } catch {
+  } catch (e) {
+    console.error("[getWishlist] Failed:", e);
     return [];
   }
 }
@@ -29,7 +30,8 @@ export async function addToWishlist(userId: string, productId: string): Promise<
       ON CONFLICT (user_id, product_id) DO NOTHING
     `;
     return true;
-  } catch {
+  } catch (e) {
+    console.error("[addToWishlist] Failed:", e);
     return false;
   }
 }
@@ -40,7 +42,8 @@ export async function removeFromWishlist(userId: string, productId: string): Pro
       DELETE FROM sales.wishlist_items WHERE user_id = ${userId} AND product_id = ${productId}
     `;
     return true;
-  } catch {
+  } catch (e) {
+    console.error("[removeFromWishlist] Failed:", e);
     return false;
   }
 }

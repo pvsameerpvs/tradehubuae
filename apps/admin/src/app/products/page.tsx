@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api, type PaginatedResponse } from "@/lib/api";
+import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { Button, Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@tradehubuae/ui";
 
 interface ProductImage {
   id: string;
@@ -32,6 +35,24 @@ export default function ProductsPage() {
   const [data, setData] = useState<PaginatedResponse<Product> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/products/${deleteTarget.id}`);
+      setData((prev) => prev ? { ...prev, data: prev.data.filter((p) => p.id !== deleteTarget.id) } : prev);
+      setDeleteTarget(null);
+      toast.success("Product deleted");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete product");
+      setDeleteTarget(null);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     api.get<PaginatedResponse<Product>>("/products", { limit: 50, sort: "createdAt", order: "desc" })
@@ -87,17 +108,20 @@ export default function ProductsPage() {
                       <span>AED {Number(product.price).toLocaleString()}</span>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                      product.isActive ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
-                    }`}>
-                      {product.isActive ? "Active" : "Inactive"}
-                    </span>
-                    <span className="text-xs text-brand">Edit</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                        product.isActive ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
+                      }`}>
+                        {product.isActive ? "Active" : "Inactive"}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-brand">Edit</span>
+                        <button onClick={(e) => { e.preventDefault(); setDeleteTarget(product); }} className="text-xs font-semibold text-sale">Delete</button>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             {/* Desktop table */}
             <table className="hidden sm:table w-full">
               <thead>
@@ -142,9 +166,14 @@ export default function ProductsPage() {
                       </span>
                     </td>
                     <td className="p-4">
-                      <Link href={`/products/${product.id}`} className="text-sm font-semibold text-brand hover:underline">
-                        Edit
-                      </Link>
+                      <div className="flex items-center gap-3">
+                        <Link href={`/products/${product.id}`} className="text-sm font-semibold text-brand hover:underline">
+                          Edit
+                        </Link>
+                        <button onClick={() => setDeleteTarget(product)} className="text-sm font-semibold text-sale hover:underline">
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -153,6 +182,22 @@ export default function ProductsPage() {
           </>
         )}
       </div>
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Product</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <strong>{deleteTarget?.name}</strong>? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

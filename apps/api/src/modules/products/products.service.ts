@@ -332,10 +332,9 @@ export class ProductsService {
   async remove(id: string) {
     await this.findById(id);
     await this.drizzle.db
-      .update(products)
-      .set({ isActive: false })
+      .delete(products)
       .where(eq(products.id, id));
-    this.logger.log(`Product soft-deleted: ${id}`);
+    this.logger.log(`Product deleted: ${id}`);
   }
 
   async searchFullText(query: string, limit: number = 20) {
