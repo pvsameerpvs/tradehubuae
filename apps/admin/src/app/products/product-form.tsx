@@ -247,7 +247,7 @@ export function ProductForm({ id }: { id?: string }) {
         categoryId: data.categoryId || undefined,
         brandId: data.brandId || undefined,
         useId: data.useId || undefined,
-        specs: specs.filter((s) => s.value.trim()),
+        specs: specs.filter((s) => s.value.trim()).map(({ label, value }) => ({ label, value })),
         images: images.filter(Boolean),
         stock: data.stock ?? 0,
         isActive: data.isActive,

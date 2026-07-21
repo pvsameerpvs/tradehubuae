@@ -33,8 +33,9 @@ export class CreateProductDto {
   @IsUUID()
   useId?: string;
 
+  @IsOptional()
   @IsEnum(["New", "Like New", "Excellent", "Good", "Fair"])
-  condition!: string;
+  condition?: string;
 
   @IsNumber()
   @Min(0)
