@@ -1,4 +1,13 @@
-import { IsString, IsNumber, IsBoolean, IsOptional, IsEnum, Min, Max, IsUUID, IsArray } from "class-validator";
+import { IsString, IsNumber, IsBoolean, IsOptional, IsEnum, Min, IsUUID, IsArray, ValidateNested } from "class-validator";
+import { Type } from "class-transformer";
+
+export class ProductSpecDto {
+  @IsString()
+  label!: string;
+
+  @IsString()
+  value!: string;
+}
 
 export class CreateProductDto {
   @IsString()
@@ -63,7 +72,10 @@ export class CreateProductDto {
   isFeatured?: boolean;
 
   @IsOptional()
-  specs?: { label: string; value: string }[];
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductSpecDto)
+  specs?: ProductSpecDto[];
 
   @IsOptional()
   @IsArray()

@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsOptional, IsArray, IsNumber, Min } from "class-validator";
+import { IsString, IsEmail, IsOptional, IsArray, IsNumber, Min, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 
 class BulkRequestItemDto {
@@ -34,6 +34,7 @@ export class CreateBulkSaleDto {
 
   @IsOptional()
   @IsArray()
+  @ValidateNested({ each: true })
   @Type(() => BulkRequestItemDto)
   items?: BulkRequestItemDto[];
 }

@@ -77,7 +77,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   }, [slugs, user, initialized]);
 
   const add = useCallback((slug: string) => {
-    if (user) addToWishlist(user.id, slug).catch(() => {});
+    if (user) addToWishlist(user.id, slug).catch((err) => console.error("[Wishlist] Sync failed:", err));
     setSlugs((prev) => {
       if (prev.includes(slug)) return prev;
       return [...prev, slug];
@@ -86,7 +86,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
   const remove = useCallback((slug: string) => {
     setSlugs((prev) => prev.filter((s) => s !== slug));
-    if (user) removeFromWishlist(user.id, slug).catch(() => {});
+    if (user) removeFromWishlist(user.id, slug).catch((err) => console.error("[Wishlist] Sync failed:", err));
   }, [user]);
 
   const toggle = useCallback((slug: string) => {
@@ -97,9 +97,9 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     );
     if (user) {
       if (slugs.includes(slug)) {
-        removeFromWishlist(user.id, slug).catch(() => {});
+        removeFromWishlist(user.id, slug).catch((err) => console.error("[Wishlist] Sync failed:", err));
       } else {
-        addToWishlist(user.id, slug).catch(() => {});
+        addToWishlist(user.id, slug).catch((err) => console.error("[Wishlist] Sync failed:", err));
       }
     }
   }, [user, slugs]);

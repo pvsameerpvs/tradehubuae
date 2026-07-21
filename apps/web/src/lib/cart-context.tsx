@@ -256,7 +256,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const maxStock = getAvailableStock(slug);
     setItems((prev) => {
       if (user) {
-        api.put(`/cart/${encodeURIComponent(slug)}`, { quantity: Math.min(quantity, maxStock) }).catch(() => {});
+        api.put(`/cart/${encodeURIComponent(slug)}`, { quantity: Math.min(quantity, maxStock) }).catch((err) => console.error("[Cart] Sync failed:", err));
       }
       return prev.map((item) =>
         item.slug === slug
