@@ -3,11 +3,10 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Share2, Truck, RotateCcw, CheckCircle2, ShieldCheck, MapPin, Gift, TrendingDown, ChevronRight } from "lucide-react";
+import { Share2, RotateCcw, CheckCircle2, ShieldCheck, Gift } from "lucide-react";
 import { WishlistButton } from "@/components/products/WishlistButton";
 import { ChatProductButton } from "@/components/chat/ChatProductButton";
 import { fetchProductBySlug, fetchProducts, fetchComboOffers } from "@/data";
-import { defaultBulkTiers } from "@/data/bulkPricing";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { ProductRow } from "@/components/home";
 import { BuyButtons } from "@/components/products/BuyButtons";
@@ -145,9 +144,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </div>
               {product.stock !== undefined && product.stock > 0 && (
                 <p className="mt-0.5 text-[11px] text-ink-2">
-                  {product.stock >= 10
-                    ? "Bulk quantity available — volume pricing eligible"
-                    : product.stock === 1
+                  {product.stock === 1
                       ? "Last item in stock"
                       : `${product.stock} units ready to ship`}
                 </p>
@@ -170,68 +167,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             <div className="mt-3 space-y-1.5 border-t border-line pt-3 text-xs text-ink-2">
               <div className="flex items-center gap-2">
-                <Truck className="h-3.5 w-3.5 text-ink" strokeWidth={1.75} />
-                Free delivery by Thu, Jul 16
-              </div>
-              <div className="flex items-center gap-2">
                 <RotateCcw className="h-3.5 w-3.5 text-ink" strokeWidth={1.75} />
-                14-day returns
+                7-day returns
               </div>
-            </div>
-
-            <div className="mt-3 rounded-lg bg-bg2 px-3 py-2 text-center">
-              <p className="text-[11px] text-ink-2">
-                4 interest-free payments of <span className="font-semibold text-ink">AED {(product.price / 4).toLocaleString()}</span>
-              </p>
             </div>
 
             <div className="mt-3">
               <BuyButtons product={product} />
             </div>
-
-            {product.stock !== undefined && product.stock >= 10 ? (
-              <div className="mt-3 rounded-xl border-2 border-brand/30 bg-brand/[0.03] p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand/10">
-                    <TrendingDown className="h-4 w-4 text-brand" strokeWidth={1.75} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-ink">Bulk quantity available</p>
-                    <p className="text-[11px] text-ink-2">{product.stock} units in stock · Volume pricing eligible</p>
-                  </div>
-                </div>
-                <div className="flex gap-1.5">
-                  {defaultBulkTiers.slice(0, 4).map((tier) => (
-                    <div key={tier.minQty} className="flex-1 rounded-lg bg-white px-2 py-1.5 text-center border border-line">
-                      <p className="text-[11px] font-semibold text-ink">{tier.minQty}{tier.maxQty ? `–${tier.maxQty}` : "+"}</p>
-                      <p className="text-[10px] text-brand font-semibold">{tier.discountPercent}% off</p>
-                    </div>
-                  ))}
-                </div>
-                <Link
-                  href="/bulk-sales"
-                  className="mt-3 flex items-center justify-center gap-1 rounded-lg border border-ink py-2 text-xs font-semibold text-ink transition-colors hover:bg-bg3"
-                >
-                  Learn about bulk pricing
-                  <ChevronRight className="h-3.5 w-3.5" strokeWidth={2} />
-                </Link>
-              </div>
-            ) : (
-              <div className="mt-3 rounded-xl border border-line p-3">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <TrendingDown className="h-3.5 w-3.5 text-brand" strokeWidth={1.75} />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.04em] text-ink-2">Bulk pricing</span>
-                </div>
-                <div className="flex gap-1.5">
-                  {defaultBulkTiers.slice(0, 4).map((tier) => (
-                    <div key={tier.minQty} className="flex-1 rounded-lg bg-bg2 px-2 py-1.5 text-center">
-                      <p className="text-[11px] font-semibold text-ink">{tier.minQty}{tier.maxQty ? `–${tier.maxQty}` : "+"}</p>
-                      <p className="text-[10px] text-brand font-semibold">{tier.discountPercent}% off</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           <div className="mt-4">
@@ -282,29 +225,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
       </div>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 md:mt-10 md:grid-cols-3">
-        <div className="flex items-start gap-3">
-          <Truck className="mt-0.5 h-4 w-4 flex-shrink-0 text-ink" strokeWidth={1.75} />
-          <div>
-            <p className="text-xs font-semibold text-ink">Free shipping</p>
-            <p className="text-xs text-ink-2">On orders over 500 AED</p>
-          </div>
-        </div>
-        <div className="flex items-start gap-3">
-          <RotateCcw className="mt-0.5 h-4 w-4 flex-shrink-0 text-ink" strokeWidth={1.75} />
-          <div>
-            <p className="text-xs font-semibold text-ink">Easy returns</p>
-            <p className="text-xs text-ink-2">14-day return policy</p>
-          </div>
-        </div>
-        <div className="flex items-start gap-3">
-          <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-ink" strokeWidth={1.75} />
-          <div>
-            <p className="text-xs font-semibold text-ink">Dubai showroom</p>
-            <p className="text-xs text-ink-2">Visit us in Silicon Oasis</p>
-          </div>
-        </div>
-      </div>
+      
 
       {relatedProducts.length > 0 && (
         <div className="mt-12 border-t border-line pt-12">
