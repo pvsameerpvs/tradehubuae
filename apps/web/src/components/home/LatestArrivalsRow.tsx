@@ -43,7 +43,7 @@ export function LatestArrivalsRow({ products }: { products: Product[] }) {
         </button>
         <div
           ref={scrollRef}
-          className="-mx-6 flex gap-4 overflow-x-auto px-6 md:-mx-10 md:px-10 lg:-mx-20 lg:px-20 [&::-webkit-scrollbar]:hidden"
+          className="grid grid-cols-2 gap-4 md:flex md:overflow-x-auto md:gap-4 md:-mx-10 md:px-10 lg:-mx-20 lg:px-20 [&::-webkit-scrollbar]:hidden"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {products.map((product) => (

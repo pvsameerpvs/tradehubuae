@@ -33,7 +33,7 @@ export function LatestArrivalsCard({ product }: { product: Product }) {
   };
 
   return (
-    <Link href={`/products/${product.slug}`} className="group block w-[300px] flex-shrink-0 sm:w-[340px]">
+    <Link href={`/products/${product.slug}`} className="group block w-full md:w-[300px] md:flex-shrink-0 lg:w-[340px]">
       <Card className="overflow-hidden rounded-xl border-0 bg-white shadow-none transition-shadow duration-200 group-hover:shadow-card">
         <div ref={imageRef} className="relative aspect-square overflow-hidden bg-bg2">
           {!imgError && product.image ? (

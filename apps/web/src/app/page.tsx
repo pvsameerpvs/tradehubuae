@@ -63,7 +63,7 @@ export default async function HomePage() {
         <div className="space-y-16 pb-16">
           <CategoryRow categories={flatCats} />
 
-          <LatestArrivalsRow products={all.slice(0, 7)} />
+          <LatestArrivalsRow products={all.slice(0, 6)} />
           <OfferSection />
 
           {rootCats.map((root) => {
