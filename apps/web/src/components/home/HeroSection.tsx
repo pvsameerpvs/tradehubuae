@@ -60,7 +60,7 @@ export function HeroSection() {
           Find your next laptop in the UAE
         </h1>
         <p className="px-4 text-sm leading-[18px] text-white/70 sm:px-0 sm:text-white/80">
-          New, certified refurbished, and like-new — from top brands
+          Quality second-hand & pre-owned — from top brands
         </p>
       </div>
 

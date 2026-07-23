@@ -22,8 +22,8 @@ export const metadata: Metadata = {
     template: "%s | TradeHub UAE",
     default: "TradeHub UAE - Premium IT Equipment & Electronics in UAE",
   },
-  description: "UAE's Premier Destination for IT Equipment. New & Refurbished Laptops, Desktop PCs, Gaming PCs, Components, Accessories & Networking Products. Best Prices in Dubai, Abu Dhabi & UAE.",
-  keywords: ["IT equipment UAE", "laptops Dubai", "gaming PCs UAE", "computer parts Dubai", "refurbished laptops UAE"],
+  description: "UAE's Premier Destination for IT Equipment. Quality Second-Hand Laptops, Desktop PCs, Gaming PCs, Components, Accessories & Networking Products. Best Prices in Dubai, Abu Dhabi & UAE.",
+  keywords: ["IT equipment UAE", "laptops Dubai", "gaming PCs UAE", "computer parts Dubai", "second-hand laptops UAE"],
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://tradehubuae.com"),
   openGraph: {
     type: "website",

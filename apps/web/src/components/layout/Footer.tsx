@@ -48,7 +48,7 @@ export function Footer() {
               />
             </Link>
             <p className="text-sm leading-relaxed text-white/60">
-              Your trusted source for premium IT equipment in the United Arab Emirates. New & refurbished laptops, desktops, gaming PCs, and networking solutions.
+              Your trusted source for premium IT equipment in the United Arab Emirates. Quality second-hand laptops, desktops, gaming PCs, and networking solutions.
             </p>
           </div>
           {footerColumns.map((column) => (

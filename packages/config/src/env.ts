@@ -32,7 +32,7 @@ export const env = {
   SITE_NAME: process.env.SITE_NAME ?? "TradeHub UAE",
   SITE_DESCRIPTION:
     process.env.SITE_DESCRIPTION ??
-    "UAE's Premier Destination for IT Equipment - New & Refurbished Laptops, PCs, Components",
+    "UAE's Premier Destination for IT Equipment - Quality Second-Hand Laptops, PCs, Components",
   SITE_URL: process.env.SITE_URL ?? "https://tradehubuae.com",
   BULL_PREFIX: process.env.BULL_PREFIX ?? "tradehub",
   BULL_DEFAULT_JOBS: Number(process.env.BULL_DEFAULT_JOBS ?? 5),

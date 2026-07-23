@@ -17,7 +17,7 @@ export default function AboutPage() {
         <div className="prose prose-gray max-w-none">
           <p className="text-lg text-ink-2">
             TradeHub UAE is Dubai&apos;s premier destination for IT equipment. We specialize in providing
-            high-quality new and refurbished laptops, desktop PCs, gaming systems, components, and
+            high-quality second-hand laptops, desktop PCs, gaming systems, components, and
             networking solutions to customers across the United Arab Emirates.
           </p>
           <p className="mt-4 text-ink-2">
