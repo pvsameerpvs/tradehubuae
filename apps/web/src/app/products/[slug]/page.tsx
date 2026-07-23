@@ -3,9 +3,10 @@ export const dynamic = 'force-dynamic';
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Share2, RotateCcw, CheckCircle2, ShieldCheck, Gift } from "lucide-react";
+import { RotateCcw, CheckCircle2, ShieldCheck, Gift } from "lucide-react";
+import { ShareButton } from "@/components/shared/ShareButton";
 import { WishlistButton } from "@/components/products/WishlistButton";
-import { ChatProductButton } from "@/components/chat/ChatProductButton";
+
 import { fetchProductBySlug, fetchProducts, fetchComboOffers } from "@/data";
 import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { ProductRow } from "@/components/home";
@@ -66,10 +67,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           {productName}
         </h1>
         <div className="flex items-center gap-0.5 flex-shrink-0">
-          <ChatProductButton product={product} variant="icon" />
-          <button type="button" aria-label="Share" className="flex h-9 w-9 items-center justify-center rounded-lg text-ink transition-colors hover:bg-bg3">
-            <Share2 className="h-4 w-4" strokeWidth={1.75} />
-          </button>
+          <ShareButton title={productName} />
           <WishlistButton slug={product.slug} />
         </div>
       </div>
