@@ -100,8 +100,18 @@ export default function CustomerDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-ink-3" />
+      <div className="space-y-6">
+        <div className="h-4 w-16 animate-pulse rounded bg-bg2" />
+        <div className="h-32 animate-pulse rounded-xl bg-bg2" />
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <div className="h-64 animate-pulse rounded-xl bg-bg2" />
+          </div>
+          <div className="space-y-4">
+            <div className="h-40 animate-pulse rounded-xl bg-bg2" />
+            <div className="h-32 animate-pulse rounded-xl bg-bg2" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -118,7 +128,15 @@ export default function CustomerDetailPage() {
     );
   }
 
-  if (!customer) return null;
+  if (!customer) return (
+    <div className="flex flex-col items-center gap-3 py-20 text-center">
+      <User className="h-10 w-10 text-ink-3" strokeWidth={1.75} />
+      <p className="text-sm font-medium text-ink-2">Customer not found</p>
+      <button onClick={() => router.back()} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark">
+        Go Back
+      </button>
+    </div>
+  );
 
   return (
     <div className="space-y-6">

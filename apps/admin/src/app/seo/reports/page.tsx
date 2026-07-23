@@ -81,6 +81,10 @@ export default function SeoReportsPage() {
       if (statsRes.status === "fulfilled") setSeoStats(statsRes.value);
       if (overviewRes.status === "fulfilled") setOverview(overviewRes.value);
       if (productsRes.status === "fulfilled") setTopProducts(productsRes.value);
+      const failedCount = [seoRes, statsRes, overviewRes, productsRes].filter((r) => r.status === "rejected").length;
+      if (failedCount > 0) {
+        console.warn(`${failedCount} SEO report endpoint(s) failed`);
+      }
     } finally {
       setLoading(false);
     }

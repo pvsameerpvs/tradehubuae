@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import { ArrowLeft, Shield, Mail, Calendar } from "lucide-react";
+import { ArrowLeft, Shield, Mail, Calendar, User as UserIcon } from "lucide-react";
 import { Card, CardContent } from "@tradehubuae/ui";
 import { Button } from "@tradehubuae/ui";
 
@@ -40,9 +40,31 @@ export default function UserDetailPage() {
       .finally(() => setLoading(false));
   }, [params.id]);
 
-  if (loading) return <p className="text-sm text-ink-2">Loading user...</p>;
-  if (error) return <p className="text-sm text-sale">{error}</p>;
-  if (!user) return <p className="text-sm text-ink-2">User not found</p>;
+  if (loading) return (
+    <div className="space-y-6">
+      <div className="h-4 w-16 animate-pulse rounded bg-bg2" />
+      <div className="h-40 animate-pulse rounded-xl bg-bg2" />
+      <div className="h-32 animate-pulse rounded-xl bg-bg2" />
+    </div>
+  );
+  if (error) return (
+    <div className="flex flex-col items-center gap-3 py-20 text-center">
+      <Shield className="h-10 w-10 text-sale" strokeWidth={1.75} />
+      <p className="text-sm text-sale">{error}</p>
+      <button onClick={() => router.back()} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark">
+        Go Back
+      </button>
+    </div>
+  );
+  if (!user) return (
+    <div className="flex flex-col items-center gap-3 py-20 text-center">
+      <UserIcon className="h-10 w-10 text-ink-3" strokeWidth={1.75} />
+      <p className="text-sm font-medium text-ink-2">User not found</p>
+      <button onClick={() => router.back()} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark">
+        Go Back
+      </button>
+    </div>
+  );
 
   const initials = user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 

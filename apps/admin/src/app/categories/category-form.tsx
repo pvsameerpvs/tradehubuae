@@ -122,7 +122,19 @@ export function CategoryForm({ id }: { id?: string }) {
     }
   };
 
-  if (fetching) return <p className="text-sm text-ink-2">Loading...</p>;
+  if (fetching) return (
+    <div className="max-w-lg space-y-5">
+      <div className="space-y-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="space-y-1.5">
+            <div className="h-4 w-20 animate-pulse rounded bg-bg2" />
+            <div className="h-10 w-full animate-pulse rounded-lg bg-bg2" />
+          </div>
+        ))}
+      </div>
+      <div className="h-10 w-24 animate-pulse rounded-lg bg-bg2" />
+    </div>
+  );
 
   return (
     <Form {...form}>

@@ -121,7 +121,26 @@ export default function ReturnDetailPage() {
     }
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-ink-3" /></div>;
+  if (loading) return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="h-8 w-8 animate-pulse rounded-lg bg-bg2" />
+        <div className="space-y-1">
+          <div className="h-6 w-64 animate-pulse rounded bg-bg2" />
+          <div className="h-4 w-40 animate-pulse rounded bg-bg2" />
+        </div>
+      </div>
+      <div className="flex flex-col gap-6 lg:flex-row">
+        <div className="flex-1 space-y-6">
+          <div className="h-32 animate-pulse rounded-xl bg-bg2" />
+          <div className="h-48 animate-pulse rounded-xl bg-bg2" />
+        </div>
+        <div className="w-full space-y-4 lg:w-80">
+          <div className="h-64 animate-pulse rounded-xl bg-bg2" />
+        </div>
+      </div>
+    </div>
+  );
   if (error) return <div className="rounded-lg border border-sale/30 bg-sale/5 px-4 py-3 text-sm text-sale">{error}</div>;
   if (!ret) return <p className="text-sm text-ink-2">Return not found</p>;
 

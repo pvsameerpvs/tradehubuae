@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import { ArrowLeft, Mail, Phone, Building2, User, MessageSquare, Package } from "lucide-react";
+import { ArrowLeft, Mail, Phone, Building2, User, MessageSquare, Package, AlertTriangle } from "lucide-react";
 import { Card, CardContent } from "@tradehubuae/ui";
 import { Button } from "@tradehubuae/ui";
 
@@ -68,9 +68,37 @@ export default function BulkSaleDetailPage() {
     }
   };
 
-  if (loading) return <p className="text-sm text-ink-2">Loading request...</p>;
-  if (error) return <p className="text-sm text-sale">{error}</p>;
-  if (!request) return <p className="text-sm text-ink-2">Request not found</p>;
+  if (loading) return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="h-8 w-8 animate-pulse rounded-lg bg-bg2" />
+        <div className="space-y-1">
+          <div className="h-6 w-64 animate-pulse rounded bg-bg2" />
+          <div className="h-4 w-40 animate-pulse rounded bg-bg2" />
+        </div>
+      </div>
+      <div className="h-40 animate-pulse rounded-xl bg-bg2" />
+      <div className="h-48 animate-pulse rounded-xl bg-bg2" />
+    </div>
+  );
+  if (error) return (
+    <div className="flex flex-col items-center gap-3 py-20 text-center">
+      <AlertTriangle className="h-10 w-10 text-sale" strokeWidth={1.75} />
+      <p className="text-sm text-sale">{error}</p>
+      <button onClick={() => router.back()} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark">
+        Go Back
+      </button>
+    </div>
+  );
+  if (!request) return (
+    <div className="flex flex-col items-center gap-3 py-20 text-center">
+      <Package className="h-10 w-10 text-ink-3" strokeWidth={1.75} />
+      <p className="text-sm font-medium text-ink-2">Request not found</p>
+      <button onClick={() => router.back()} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark">
+        Go Back
+      </button>
+    </div>
+  );
 
   return (
     <div className="space-y-6">

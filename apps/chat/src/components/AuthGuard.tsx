@@ -31,10 +31,21 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (loading && !PUBLIC_ROUTES.includes(pathname)) {
     return (
-      <div className="flex h-dvh items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-brand border-t-transparent" />
-          <span className="text-sm text-ink-2">Verifying session...</span>
+      <div className="flex h-dvh flex-col p-4">
+        <div className="flex items-center gap-3 border-b border-line pb-4">
+          <div className="h-10 w-10 animate-pulse rounded-lg bg-bg2" />
+          <div className="h-5 w-32 animate-pulse rounded bg-bg2" />
+        </div>
+        <div className="mt-8 flex-1 space-y-4">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex items-center gap-3 p-3">
+              <div className="h-10 w-10 animate-pulse rounded-full bg-bg2" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-3/4 animate-pulse rounded bg-bg2" />
+                <div className="h-3 w-1/2 animate-pulse rounded bg-bg2" />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );

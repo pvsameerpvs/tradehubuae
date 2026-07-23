@@ -273,8 +273,19 @@ export function ProductForm({ id }: { id?: string }) {
 
   if (fetching) {
     return (
-      <div className="flex h-48 items-center justify-center">
-        <p className="text-sm text-ink-2">Loading product...</p>
+      <div className="space-y-6">
+        <div className="space-y-4">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="space-y-1.5">
+              <div className="h-4 w-24 animate-pulse rounded bg-bg2" />
+              <div className="h-10 w-full animate-pulse rounded-lg bg-bg2" />
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="h-10 animate-pulse rounded-lg bg-bg2" />
+          <div className="h-10 animate-pulse rounded-lg bg-bg2" />
+        </div>
       </div>
     );
   }

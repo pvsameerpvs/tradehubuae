@@ -193,8 +193,16 @@ function OrderedCustomersTab() {
   return (
     <div className="space-y-4">
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-ink-3" />
+        <div className="space-y-4 py-10">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="flex items-center gap-4 rounded-xl border border-line p-4">
+              <div className="h-12 w-12 animate-pulse rounded-full bg-bg2" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-1/3 animate-pulse rounded bg-bg2" />
+                <div className="h-3 w-1/4 animate-pulse rounded bg-bg2" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : error ? (
         <div className="rounded-lg border border-sale/30 bg-sale/5 px-4 py-3 text-sm text-sale">{error}</div>
@@ -467,8 +475,23 @@ function AllUsersTab() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-ink-3" />
+      <div className="space-y-4 py-10">
+        <div className="flex items-center gap-3 rounded-xl border border-line p-4">
+          <div className="h-10 w-10 animate-pulse rounded-full bg-bg2" />
+          <div className="flex-1 space-y-2">
+            <div className="h-4 w-1/3 animate-pulse rounded bg-bg2" />
+            <div className="h-3 w-1/4 animate-pulse rounded bg-bg2" />
+          </div>
+        </div>
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="flex items-center gap-4 rounded-xl border border-line p-4">
+            <div className="h-12 w-12 animate-pulse rounded-full bg-bg2" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 w-1/2 animate-pulse rounded bg-bg2" />
+              <div className="h-3 w-1/3 animate-pulse rounded bg-bg2" />
+            </div>
+          </div>
+        ))}
       </div>
     );
   }

@@ -49,7 +49,23 @@ export default function EditUserPage() {
     }
   };
 
-  if (loading) return <p className="text-sm text-ink-2">Loading user...</p>;
+  if (loading) return (
+    <div className="max-w-lg space-y-6">
+      <div className="h-4 w-16 animate-pulse rounded bg-bg2" />
+      <div className="space-y-2">
+        <div className="h-6 w-48 animate-pulse rounded bg-bg2" />
+        <div className="h-4 w-32 animate-pulse rounded bg-bg2" />
+      </div>
+      <div className="space-y-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="space-y-1">
+            <div className="h-4 w-20 animate-pulse rounded bg-bg2" />
+            <div className="h-10 w-full animate-pulse rounded-lg bg-bg2" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="max-w-lg space-y-6">

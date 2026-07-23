@@ -70,6 +70,10 @@ export default function DashboardPage() {
         ).length;
 
         if (failedCount > 0) setHasErrors(true);
+        if (failedCount === 4) {
+          setHasErrors(true);
+          return;
+        }
 
         setRecentProducts(products.slice(0, 5));
         setStats({
@@ -81,8 +85,10 @@ export default function DashboardPage() {
         });
         if (seoRes.status === "fulfilled") setSeoStats(seoRes.value);
         if (trendRes.status === "fulfilled") setTrendData(trendRes.value);
-      } catch {
+      } catch (err) {
         setStats(null);
+        setHasErrors(true);
+        console.error("Dashboard load failed:", err);
       } finally {
         setLoading(false);
       }
@@ -170,7 +176,7 @@ export default function DashboardPage() {
                   {seoStats ? `${seoStats.coverage}%` : "—"}
                 </p>
                 <p className="mt-0.5 text-xs text-ink-3">
-                  {seoStats ? `${seoStats.optimizedCount}/${seoStats.totalProducts} products` : "Loading..."}
+                  {seoStats ? `${seoStats.optimizedCount}/${seoStats.totalProducts} products` : "\u2014"}
                 </p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand/5">

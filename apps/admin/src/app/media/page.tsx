@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ImageIcon, Trash2, Loader2 } from "lucide-react";
+import { ImageIcon, Trash2 } from "lucide-react";
 import { ImageUpload } from "@/components/ImageUpload";
 import { toast } from "sonner";
 import {
@@ -72,9 +72,10 @@ export default function MediaPage() {
       </div>
       <div className="overflow-hidden rounded-xl border border-line bg-white">
         {loading ? (
-          <div className="flex items-center justify-center gap-2 p-6">
-            <Loader2 className="h-5 w-5 animate-spin text-ink-3" strokeWidth={2} />
-            <span className="text-sm text-ink-2">Loading media...</span>
+          <div className="grid grid-cols-3 gap-3 p-4 sm:grid-cols-4 sm:gap-4 sm:p-6 md:grid-cols-5 lg:grid-cols-6">
+            {[...Array(12)].map((_, i) => (
+              <div key={i} className="aspect-square animate-pulse rounded-lg bg-bg2" />
+            ))}
           </div>
         ) : error ? (
           <div className="p-6 text-center">

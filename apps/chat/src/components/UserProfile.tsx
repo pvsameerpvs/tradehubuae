@@ -42,10 +42,29 @@ export function UserProfile({ userId }: UserProfileProps) {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-brand border-t-transparent" />
-          <span className="text-sm text-ink-3">Loading profile...</span>
+      <div className="flex h-full flex-col">
+        <div className="flex items-center gap-3 border-b border-line px-4 py-3">
+          <div className="h-10 w-10 animate-pulse rounded-lg bg-bg2" />
+          <div className="h-5 w-32 animate-pulse rounded bg-bg2" />
+        </div>
+        <div className="flex flex-col items-center px-4 py-8">
+          <div className="h-20 w-20 animate-pulse rounded-full bg-bg2" />
+          <div className="mt-3 h-5 w-32 animate-pulse rounded bg-bg2" />
+          <div className="mt-1 h-4 w-20 animate-pulse rounded bg-bg2" />
+        </div>
+        <div className="space-y-4 px-4">
+          <div className="h-4 w-16 animate-pulse rounded bg-bg2" />
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-4 w-full animate-pulse rounded bg-bg2" />
+            ))}
+          </div>
+        </div>
+        <div className="mt-6 space-y-3 px-4">
+          <div className="h-4 w-24 animate-pulse rounded bg-bg2" />
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="h-24 animate-pulse rounded-xl bg-bg2" />
+          ))}
         </div>
       </div>
     );

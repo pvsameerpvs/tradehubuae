@@ -110,6 +110,10 @@ export default function AnalyticsPage() {
       if (searchRes.status === "fulfilled") setSearchTerms(searchRes.value);
       if (devicesRes.status === "fulfilled") setDevices(devicesRes.value);
       if (seoRes.status === "fulfilled") setSeoStats(seoRes.value);
+      const failedCount = [overviewRes, productsRes, searchRes, devicesRes, seoRes].filter((r) => r.status === "rejected").length;
+      if (failedCount > 0) {
+        console.warn(`${failedCount} analytics endpoint(s) failed`);
+      }
     } finally {
       setLoading(false);
     }

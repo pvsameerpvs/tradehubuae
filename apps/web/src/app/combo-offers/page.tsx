@@ -28,6 +28,19 @@ export default function ComboOffersPage() {
           </h1>
           <p className="mt-1 text-sm text-ink-2">Loading offers...</p>
         </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="animate-pulse rounded-xl border border-line bg-white">
+              <div className="aspect-[4/3] rounded-t-xl bg-bg2" />
+              <div className="space-y-3 p-5">
+                <div className="h-5 w-3/4 rounded bg-bg2" />
+                <div className="h-4 w-full rounded bg-bg2" />
+                <div className="h-4 w-1/2 rounded bg-bg2" />
+                <div className="h-12 w-full rounded-lg bg-bg2" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

@@ -316,7 +316,17 @@ export default function InventoryPage() {
         </div>
         <div className="border-t border-line px-0 pb-0">
           {loading ? (
-            <div className="p-5 text-sm text-ink-3">Loading...</div>
+            <div className="space-y-3 p-5">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <div className="h-10 w-10 animate-pulse rounded-lg bg-bg2" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-3/4 animate-pulse rounded bg-bg2" />
+                    <div className="h-3 w-1/2 animate-pulse rounded bg-bg2" />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : !filtered.length ? (
             <div className="p-5 text-center text-sm text-ink-3">
               <p>No products match your filters.</p>

@@ -91,7 +91,17 @@ export default function ReturnsPage() {
 
       <div className="overflow-hidden rounded-xl border border-line bg-white">
         {loading ? (
-          <div className="p-6 text-sm text-ink-3">Loading...</div>
+          <div className="space-y-4 p-6">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <div className="h-10 w-10 animate-pulse rounded-lg bg-bg2" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-3/4 animate-pulse rounded bg-bg2" />
+                  <div className="h-3 w-1/2 animate-pulse rounded bg-bg2" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : error ? (
           <div className="p-6 text-sm text-sale">{error}</div>
         ) : !data?.data?.length ? (
