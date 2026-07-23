@@ -8,7 +8,7 @@ import { CartProvider } from "@/lib/cart-context";
 import { CartFlyProvider } from "@/lib/cart-fly-context";
 import { WishlistProvider } from "@/lib/wishlist-context";
 import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
+import { FooterWrapper } from "@/components/layout/FooterWrapper";
 import { Toaster } from "@/components/shared/Toaster";
 
 const inter = Inter({
@@ -75,7 +75,7 @@ export default function RootLayout({
               <CartFlyProvider>
                 <Header />
                 <main className="flex-1">{children}</main>
-                <Footer />
+                <FooterWrapper />
                 <Toaster />
               </CartFlyProvider>
             </CartProvider>
