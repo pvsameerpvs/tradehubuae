@@ -185,16 +185,21 @@ function selectAddress(addr: AddressData) {
   if (placed) {
     return (
       <div className="mx-auto flex min-h-dvh max-w-sm flex-col items-center justify-center px-6 py-16 text-center">
-        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-brand/10">
-          <ShoppingCart className="h-8 w-8 text-brand" strokeWidth={1.5} />
+        <img src="/delivery-complite.gif" alt="Order placed" className="mb-6 h-40 w-40 object-contain" />
+        <h1 className="text-2xl font-bold text-ink">Order Placed! 🎉</h1>
+        <p className="mt-2 text-sm text-ink-2">Your order has been confirmed and is being processed.</p>
+        <div className="mt-6 w-full rounded-2xl border border-line bg-bg2/50 px-5 py-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-ink-3">Order Number</p>
+          <p className="mt-1 text-lg font-bold text-ink">#{orderNumber}</p>
         </div>
-        <h1 className="text-xl font-semibold text-ink">Order Placed!</h1>
-        <p className="mt-2 text-sm text-ink-2">Your order is confirmed.</p>
-        <p className="mt-1 text-lg font-semibold text-ink">#{orderNumber}</p>
-        <p className="mt-5 text-sm text-ink-2">Pay when you receive your order.</p>
-        <div className="mt-8 w-full space-y-3">
-          <button onClick={() => router.push("/account/orders")} className="flex h-12 w-full items-center justify-center rounded-lg bg-brand text-base font-semibold text-white hover:bg-brand-dark transition-colors">View Orders</button>
-          <button onClick={() => router.push("/")} className="flex h-12 w-full items-center justify-center rounded-lg border border-ink text-base font-semibold text-ink hover:bg-bg3 transition-colors">Continue Shopping</button>
+        <div className="mt-4 w-full rounded-2xl border border-line bg-bg2/50 px-5 py-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-ink-3">Payment</p>
+          <p className="mt-1 text-sm font-semibold text-ink">Cash on Delivery</p>
+          <p className="text-xs text-ink-3">Pay when you receive your order</p>
+        </div>
+        <div className="mt-10 w-full space-y-3">
+          <button onClick={() => router.push("/account/orders")} className="flex h-12 w-full items-center justify-center rounded-xl bg-brand text-base font-semibold text-white shadow-sm transition-all hover:bg-brand-dark active:scale-[0.98]">View My Orders</button>
+          <button onClick={() => router.push("/")} className="flex h-12 w-full items-center justify-center rounded-xl border border-line text-base font-semibold text-ink transition-all hover:bg-bg3 active:scale-[0.98]">Continue Shopping</button>
         </div>
       </div>
     );
@@ -213,6 +218,20 @@ function selectAddress(addr: AddressData) {
 
   return (
     <div className="mx-auto min-h-dvh max-w-[1120px] px-4 pb-36 pt-4 sm:px-6">
+      {/* Placing overlay */}
+      {placing && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm">
+          <img src="/loading-aniamted.gif" alt="" className="h-44 w-44 object-contain" />
+          <h2 className="mt-6 text-xl font-semibold text-ink">Placing your order...</h2>
+          <p className="mt-1.5 text-sm text-ink-2">Please wait while we process your order securely.</p>
+          <div className="mt-8 w-64 rounded-2xl border border-line bg-bg2/50 px-6 py-4 text-center">
+            <p className="text-xs font-medium uppercase tracking-wider text-ink-3">Order Total</p>
+            <p className="mt-1 text-2xl font-bold text-ink">AED {grandTotal.toFixed(2)}</p>
+            <p className="mt-0.5 text-xs text-ink-3">{items.length} item(s) · Cash on Delivery</p>
+          </div>
+        </div>
+      )}
+
       {/* Top bar */}
       <div className="mb-6 flex items-center gap-3">
         <button onClick={() => router.back()} className="flex h-10 w-10 items-center justify-center rounded-lg text-ink-2 hover:bg-bg3 transition-colors" aria-label="Back">
@@ -380,8 +399,8 @@ function selectAddress(addr: AddressData) {
                   <span>{errorMsg}</span>
                 </div>
               )}
-              <button onClick={placeOrder} disabled={!valid || !agreed || placing} className="flex h-12 w-full items-center justify-center rounded-lg bg-brand text-base font-semibold text-white hover:bg-brand-dark transition-colors disabled:opacity-40">
-                {placing ? "Placing..." : `Place Order · AED ${grandTotal.toFixed(2)}`}
+              <button onClick={placeOrder} disabled={!valid || !agreed || placing} className="flex h-12 w-full items-center justify-center rounded-lg bg-brand text-base font-semibold text-white transition-all hover:bg-brand-dark active:scale-[0.98] disabled:opacity-40">
+                Place Order · AED {grandTotal.toFixed(2)}
               </button>
             </div>
           </div>
@@ -404,8 +423,8 @@ function selectAddress(addr: AddressData) {
             <span>{errorMsg}</span>
           </div>
         )}
-        <button onClick={placeOrder} disabled={!valid || !agreed || placing} className="flex h-12 w-full items-center justify-center rounded-lg bg-brand text-base font-semibold text-white hover:bg-brand-dark transition-colors disabled:opacity-40">
-          {placing ? "Placing..." : `Place Order · AED ${grandTotal.toFixed(2)}`}
+        <button onClick={placeOrder} disabled={!valid || !agreed || placing} className="flex h-12 w-full items-center justify-center rounded-lg bg-brand text-base font-semibold text-white transition-all hover:bg-brand-dark active:scale-[0.98] disabled:opacity-40">
+          Place Order · AED {grandTotal.toFixed(2)}
         </button>
       </div>
 
